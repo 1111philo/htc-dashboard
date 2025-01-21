@@ -1,4 +1,4 @@
-# Overview
+## Overview
 
 **General Goal:** Predict stability and articulate how services are being used now.
 
@@ -8,8 +8,6 @@
 - Resource Management: Sign info linking up with services used 
 - Notification System: Notifying someone when someone signs in.
 - Trend Analysis: Use of services and their effect on stability goals.
-
-# UX
 
 ## Users:
 ### Admin
@@ -55,10 +53,25 @@
 **Donors**
 - Donor views HTC impact report and gets excited to see detailed data around how folks reached stability.
 
-# Technical Specs
+## Roles
+- @bbertucc PM: Delivering Amazing by Friday.
+- @BaronWolfenstein Data Vis: Creating a trend analysis with future data to inspire continue use of the app.
+- @ebertucc Full Stack Dev: Building the from the DB structuring to the frontend.
+- @mikesamm: Figuring out UX around showering.
 
+## Technical Specs
+Data Structure (DRAFT):
+- Guests
+- Notifications
+- Services
+- Visits
 
-
+## Deliverables
+Wednesday, 1/22-
+- @BaronWolfenstein: Generating some early sample data.
+- @ebertucc: Stubbed out version of the stack.
+- @mikesamm: Deeper input on showering.
+- @bbertucc: UX sample.
 
 ## Additional Links
 Information available here: https://philosophers.notion.site/htc-dashboard
