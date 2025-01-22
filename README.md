@@ -59,19 +59,5 @@
 - @ebertucc Full Stack Dev: Building the from the DB structuring to the frontend.
 - @mikesamm and Ian Painter: UX dev.
 
-## Technical Specs
-Data Structure (DRAFT):
-- Guests
-- Notifications
-- Services
-- Visits
-
-## Deliverables
-Wednesday, 1/22-
-- @BaronWolfenstein: Generating some early sample data.
-- @ebertucc: Stubbed out version of the stack.
-- @mikesamm: Deeper input on showering.
-- @bbertucc: UX sample.
-
 ## Additional Links
 Information available here: https://philosophers.notion.site/htc-dashboard
