@@ -57,7 +57,7 @@
 - @bbertucc PM: Delivering Amazing by Friday.
 - @BaronWolfenstein Data Vis: Creating a trend analysis with future data to inspire continue use of the app.
 - @ebertucc Full Stack Dev: Building the from the DB structuring to the frontend.
-- @mikesamm: Figuring out UX around showering.
+- @mikesamm and Ian Painter: UX dev.
 
 ## Technical Specs
 Data Structure (DRAFT):
