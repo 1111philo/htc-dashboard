@@ -57,7 +57,7 @@
 - @bbertucc PM: Delivering Amazing by Friday.
 - @BaronWolfenstein Data Vis: Creating a trend analysis with future data to inspire continue use of the app.
 - @ebertucc Full Stack Dev: Building the from the DB structuring to the frontend.
-- @mikesamm and Ian Painter: UX dev.
+- @mikesamm and @its-all-waves: UX dev.
 
 ## Additional Links
 Information available here: https://philosophers.notion.site/htc-dashboard
