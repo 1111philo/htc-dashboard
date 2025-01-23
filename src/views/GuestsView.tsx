@@ -7,6 +7,7 @@ const GuestsView = () => {
       Table (with sort options):
         fields: UID, First, Last, Has Active Notifications
     */}
+    <h1>Guests</h1>
   </>)
 }
 

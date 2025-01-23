@@ -12,6 +12,7 @@ const VisitsView = () => {
         search / filter
         fields: time requested, guest name w/ ID, Services requested
     */}
+    <h1>Visits</h1>
   </>)
 }
 

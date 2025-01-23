@@ -20,6 +20,7 @@ const NewVisitView = () => {
 
       Button: Log Visit - creates new visit (ACTIVE only after at least one service is added)
     */}
+    <h1>New Visit</h1>
   </>)
 }
 

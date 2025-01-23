@@ -8,6 +8,7 @@ const UsersView = () => {
       Table
         fields: Name(?), email, role
     */}
+    <h1>Users</h1>
   </>)
 }
 
