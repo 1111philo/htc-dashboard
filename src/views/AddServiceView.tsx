@@ -9,6 +9,7 @@ const AddServiceView = () => {
         Service Quota field
       Button: Save Changes
     */}
+    <h1>Add Service</h1>
   </>)
 }
 

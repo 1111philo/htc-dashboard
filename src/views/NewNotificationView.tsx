@@ -10,6 +10,7 @@ const NewNotificationView = () => {
         Message (optional) field
       Button: Create Notification - creates notification associated with guest
     */}
+    <h1>New Notification</h1>
   </>)
 }
 
