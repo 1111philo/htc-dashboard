@@ -1,7 +1,18 @@
 import React from 'react'
 
 const VisitsView = () => {
-  return (<></>)
+  return (<>
+    {/*
+      Title: Visits
+      Chart:
+        arrows to click thru months
+        Button: Export Data (CSV)
+        chart with default past month view
+      Table: Queue
+        search / filter
+        fields: time requested, guest name w/ ID, Services requested
+    */}
+  </>)
 }
 
 export default VisitsView
