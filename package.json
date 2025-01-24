@@ -1,5 +1,5 @@
 {
-  "name": "htc-frontend",
+  "name": "apolis-app",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,10 +7,15 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start:prod": "vite dev --mode production",
+    "start:staging": "vite dev --mode staging",
+    "build:prod": "vite build --mode production && aws s3 --profile apolis sync --delete ./dist s3://apolis-web && aws --profile apolis cloudfront create-invalidation --distribution-id E261GIL5FUBKTG --paths \"/*\" > /dev/null",
+    "build:staging": "vite build --mode staging && aws s3 --profile apolis sync --delete ./dist s3://apolis-web-staging && aws --profile apolis cloudfront create-invalidation --distribution-id E188H7YFAZPPIV --paths \"/*\" > /dev/null"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
+    "aws-amplify": "^6.12.1",
     "bootstrap": "^5.3.3",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.8",
