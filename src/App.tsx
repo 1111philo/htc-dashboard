@@ -1,11 +1,11 @@
-import React from 'react';
-import { Amplify } from 'aws-amplify';
-import * as Auth from 'aws-amplify/auth';
+import React from "react";
+import { Amplify } from "aws-amplify";
+import * as Auth from "aws-amplify/auth";
 
-import 'bootstrap/dist/css/bootstrap.css';
-import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-import { NavLink as RouterNavLink, Outlet } from 'react-router';
-import { Container, Nav, NavDropdown } from 'react-bootstrap';
+import "bootstrap/dist/css/bootstrap.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import { NavLink as RouterNavLink, Outlet } from "react-router";
+import { Container, Nav, NavDropdown } from "react-bootstrap";
 
 Amplify.configure(
   {
@@ -30,13 +30,13 @@ Amplify.configure(
     API: {
       REST: {
         headers: async ({ apiName }) =>
-          apiName === 'auth'
+          apiName === "auth"
             ? {
                 Authorization: `Bearer ${(
                   await Auth.fetchAuthSession()
                 ).tokens?.idToken?.toString()}`,
               }
-            : { 'X-Api-Key': '1' },
+            : { "X-Api-Key": "1" },
       },
     },
   }
@@ -45,8 +45,8 @@ Amplify.configure(
 export default function App() {
   return (
     <>
-      <Header />
-      <Container>
+      <Container className="mt-4">
+        <Header />
         <main>
           <Outlet />
         </main>
@@ -58,41 +58,43 @@ export default function App() {
 
 function Header() {
   return (
-    <Nav variant='pills'>
-      <Nav.Item>
-        <Nav.Link as={RouterNavLink} to='/new-notification' eventKey='2'>
-          New Notification
-        </Nav.Link>
-      </Nav.Item>
-      <Nav.Item>
-        <Nav.Link as={RouterNavLink} to='/new-visit' eventKey='3'>
-          New Visit
-        </Nav.Link>
-      </Nav.Item>
-      <Nav.Item>
-        <Nav.Link as={RouterNavLink} to='/visits' eventKey='4'>
-          Visits
-        </Nav.Link>
-      </Nav.Item>
-      <NavDropdown title='Services'>
-        <NavDropdown.Item as={RouterNavLink} to='/add-service' eventKey='5.1'>
-          Create Service
-        </NavDropdown.Item>
-        <NavDropdown.Divider />
-        <NavDropdown.Item as={RouterNavLink} to='/TODO' eventKey='5.2'>
-          Shower
-        </NavDropdown.Item>
-      </NavDropdown>
-      <Nav.Item>
-        <Nav.Link as={RouterNavLink} to='/guests' eventKey='6'>
-          Guests
-        </Nav.Link>
-      </Nav.Item>
-      <Nav.Item>
-        <Nav.Link as={RouterNavLink} to='/users' eventKey='7'>
-          Users
-        </Nav.Link>
-      </Nav.Item>
-    </Nav>
+    <div className="d-flex justify-content-center">
+      <Nav variant="tabs" className="mb-4 m-auto">
+        <Nav.Item>
+          <Nav.Link as={RouterNavLink} to="/new-notification" eventKey="2">
+            New Notification
+          </Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link as={RouterNavLink} to="/new-visit" eventKey="3">
+            New Visit
+          </Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link as={RouterNavLink} to="/visits" eventKey="4">
+            Visits
+          </Nav.Link>
+        </Nav.Item>
+        <NavDropdown title="Services">
+          <NavDropdown.Item as={RouterNavLink} to="/add-service" eventKey="5.1">
+            Create Service
+          </NavDropdown.Item>
+          <NavDropdown.Divider />
+          <NavDropdown.Item as={RouterNavLink} to="/TODO" eventKey="5.2">
+            Shower
+          </NavDropdown.Item>
+        </NavDropdown>
+        <Nav.Item>
+          <Nav.Link as={RouterNavLink} to="/guests" eventKey="6">
+            Guests
+          </Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link as={RouterNavLink} to="/users" eventKey="7">
+            Users
+          </Nav.Link>
+        </Nav.Item>
+      </Nav>
+    </div>
   );
 }
