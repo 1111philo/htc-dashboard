@@ -10,6 +10,7 @@ const LoginView = () => {
       Link: Forgot password
       Button: Log In
     */}
+    <h1>Login</h1>
   </>)
 }
 

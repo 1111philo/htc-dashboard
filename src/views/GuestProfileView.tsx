@@ -1,6 +1,9 @@
 import React from 'react'
+import { useParams } from 'react-router'
 
 const GuestProfileView = () => {
+  const { guestId } = useParams()
+
   return (<>
     {/*
       Title: Guest ID
@@ -18,6 +21,7 @@ const GuestProfileView = () => {
       Table: Past Visits
         fields:
     */}
+    <h1>Guest Profile (id={guestId})</h1>
   </>)
 }
 

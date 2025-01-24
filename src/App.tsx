@@ -37,20 +37,11 @@ function Header() {
         </Nav.Link>
       </Nav.Item>
       <NavDropdown title="Services">
-        <NavDropdown.Item eventKey="5.4">Create Service</NavDropdown.Item>
+        <NavDropdown.Item as={RouterNavLink} to="/add-service" eventKey="5.1">Create Service</NavDropdown.Item>
         <NavDropdown.Divider />
-        <NavDropdown.Item
-          /* eventKey="5.1" */ as={RouterNavLink}
-          to="TODO"
-          eventKey="5.1"
-        >
-          {/* <Nav.Link as={RouterNavLink} to="TODO" eventKey="5.1">
-            Shower
-          </Nav.Link> */}
+        <NavDropdown.Item as={RouterNavLink} to="/TODO" eventKey="5.2">
           Shower
         </NavDropdown.Item>
-        <NavDropdown.Item eventKey="5.2">Another action</NavDropdown.Item>
-        <NavDropdown.Item eventKey="5.3">Something else here</NavDropdown.Item>
       </NavDropdown>
       <Nav.Item>
         <Nav.Link as={RouterNavLink} to="/guests" eventKey="6">
@@ -65,28 +56,3 @@ function Header() {
     </Nav>
   );
 }
-
-// function Header() {
-//   return (
-//     <Nav id="main-nav">
-//       <NavLink to="/" className={({ isActive }) => (isActive ? "active" : "")}>
-//         Home
-//       </NavLink>
-//       <NavLink
-//         to="/new-notification"
-//         className={({ isActive }) => (isActive ? "active" : "")}
-//       >
-//         New Notification
-//       </NavLink>
-//       <NavLink to="/new-visit">New Visit</NavLink>
-//       <NavLink to="/visits">Visits</NavLink>
-//       {/* TODO: change to container of NavLinks; fetch current services and render them dynamically inside the container */}
-//       <div>
-//         <span>Services</span>
-//         <NavLink to="TODO">Services</NavLink>
-//       </div>
-//       <NavLink to="/guests">Guests</NavLink>
-//       <NavLink to="/users">Users</NavLink>
-//     </Nav>
-//   );
-// }

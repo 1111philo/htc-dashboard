@@ -12,6 +12,7 @@ const ServiceView = () => {
         search / filter
         fields: time requested, guest name w/ ID, Button: Move to Queue
     */}
+    <h1>A service! Which one could it be?</h1>
   </>)
 }
 
