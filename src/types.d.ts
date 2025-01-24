@@ -1,3 +1,8 @@
+/** App-wide types */
+
+// DB TYPES -- Keep updated
+// TODO: where is the source of truth?
+
 interface Guest {
   total_guests: number;
   guest_id: number;
@@ -26,4 +31,11 @@ interface GuestService {
   queued_at: string;
   slotted_at: string;
   completed_at: string;
+}
+
+// END DB TYPES
+
+interface ReactSelectOption {
+  value: string;
+  label: string;
 }
