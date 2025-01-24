@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "typeRoots": [
+      "./src/types.d.ts"
+    ],
+    "baseUrl": ".",
+    "jsx": "react-jsx",
+    "lib": ["ES6", "DOM"],
+  }
+}
