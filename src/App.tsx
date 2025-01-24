@@ -1,9 +1,46 @@
 import React from 'react';
+import { Amplify } from 'aws-amplify';
+import * as Auth from 'aws-amplify/auth';
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import { NavLink as RouterNavLink, Outlet } from 'react-router';
 import { Container, Nav, NavDropdown } from 'react-bootstrap';
+
+Amplify.configure(
+  {
+    Auth: {
+      Cognito: {
+        userPoolId: import.meta.env.VITE_USERPOOLID,
+        userPoolClientId: import.meta.env.VITE_USERPOOLWEBCLIENTID,
+      },
+    },
+    API: {
+      REST: {
+        public: {
+          endpoint: `${import.meta.env.VITE_API_URL}/public`,
+        },
+        auth: {
+          endpoint: `${import.meta.env.VITE_API_URL}/auth`,
+        },
+      },
+    },
+  },
+  {
+    API: {
+      REST: {
+        headers: async ({ apiName }) =>
+          apiName === 'auth'
+            ? {
+                Authorization: `Bearer ${(
+                  await Auth.fetchAuthSession()
+                ).tokens?.idToken?.toString()}`,
+              }
+            : { 'X-Api-Key': '1' },
+      },
+    },
+  }
+);
 
 export default function App() {
   return (
