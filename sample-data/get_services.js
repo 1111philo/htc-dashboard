@@ -1,4 +1,4 @@
-[
+export const services = [
   {
     "service_id": 1,
     "service_name": "Shower",
