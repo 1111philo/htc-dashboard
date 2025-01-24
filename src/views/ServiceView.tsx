@@ -2,7 +2,8 @@ import React, { useState } from "react";
 
 import { Button, Modal, Form, Table } from "react-bootstrap";
 
-import { guests } from "../../sample-data/get_guests";
+// import { guests } from "../../sample-data/get_guests";
+import guests from "../../sample-data/get_guests.json";
 
 const ServiceView = ({ service }) => {
   const [showEditModal, setShowEditModal] = useState(false);
@@ -11,13 +12,11 @@ const ServiceView = ({ service }) => {
 
   const handleMoveToQueue = () => {};
 
-  const handleMoveToActive = () => {
-    // if not slot tracking: check if number of active guests is less than service.quota
-  };
+  const handleMoveToActive = () => {};
 
   return (
     <>
-      <h1>Service Name</h1>
+      <h1>{ service.name }s</h1>
       <Button onClick={() => setShowEditModal(true)}>Edit Service</Button>
       <Modal show={showEditModal}>
         <Modal.Header closeButton>
@@ -41,7 +40,7 @@ const ServiceView = ({ service }) => {
           <Button variant="primary">Save changes</Button>
         </Modal.Footer>
       </Modal>
-      {true /* service.quota */ ? (
+      {service.quota ? (
         <>
           <h2>Slots</h2>
           <Table responsive={true}>
@@ -54,57 +53,40 @@ const ServiceView = ({ service }) => {
               </tr>
             </thead>
             <tbody>
-              {/* Every row (iteration: where services[i].service_name matches === shower, services.quota num of times) */}
               {
-                // if guest has an active service
-                //    render with guest info
-                // else
-                //    render with placeholders
-                // service.quota - quests.length
+                // for every slot, check if there is a guest with a `service.slot_occupied` matching slot number
+                Array.from({ length: service.quota }).map((_, slotIndex) => {
+                  const guest = guests.find(({ services }) =>
+                    services.some(service => service.slot_occupied === slotIndex + 1)
+                  );
 
-                guests.map(
-                  (
-                    { guest_id, first_name, last_name, services },
-                    guestIndex
-                  ) => {
-                    const nameAndID =
-                      first_name + " " + last_name + ` (${guest_id})`;
-                    const activeServices = services.filter(
-                      (service) => service.status === "Active"
+                  if (guest) {
+                    const { guest_id, first_name, last_name, services } = guest;
+                    const nameAndID = `${first_name} ${last_name} (${guest_id})`;
+
+                    return (
+                      <tr key={slotIndex}>
+                        <td>{slotIndex + 1}</td>
+                        <td>{nameAndID}</td>
+                        <td>Occupied</td>
+                        <td>
+                          <Button onClick={handleMoveToCompleted}>Move to Completed</Button>
+                          <Button onClick={handleMoveToQueue}>Move to Queue</Button>
+                        </td>
+                      </tr>
                     );
-                    return activeServices.map((activeService, serviceIndex) => {
-                      return (
-                        <tr key={serviceIndex}>
-                          <td>{guestIndex + 1}</td>
-                          <td>{nameAndID}</td>
-                          <td>Occupied</td>
-                          <td>
-                            <Button onClick={handleMoveToCompleted}>
-                              Move to Completed
-                            </Button>
-                            <Button onClick={handleMoveToQueue}>
-                              Move to Queue
-                            </Button>
-                          </td>
-                        </tr>
-                      );
-                    });
+                  } else {
+                    return (
+                      <tr key={slotIndex}>
+                        <td>{slotIndex + 1}</td>
+                        <td>Empty</td>
+                        <td>Available</td>
+                        <td></td>
+                      </tr>
+                    );
                   }
-                )
+                })
               }
-              {Array.from({ length: 10 }).map((_, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td>Guest Name (ID)</td>
-                  <td>Status</td>
-                  <td>
-                    <Button onClick={handleMoveToCompleted}>
-                      Move to Completed
-                    </Button>
-                    <Button onClick={handleMoveToQueue}>Move to Queue</Button>
-                  </td>
-                </tr>
-              ))}
             </tbody>
           </Table>
         </>
@@ -132,7 +114,7 @@ const ServiceView = ({ service }) => {
                   <td>{queuedService.queued_at}</td>
                   <td>{nameAndID}</td>
                   <td>
-                    {true /* service.quota */ ? (
+                    {service.quota? (
                       <Form.Select aria-label="Select which slot to assign">
                         <option>Assign Slot</option>
                         {Array.from({ length: 10 }).map((_, i) => {

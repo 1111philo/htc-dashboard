@@ -80,7 +80,7 @@ function Header() {
             Create Service
           </NavDropdown.Item>
           <NavDropdown.Divider />
-          <NavDropdown.Item as={RouterNavLink} to="/TODO" eventKey="5.2">
+          <NavDropdown.Item as={RouterNavLink} to="/shower" eventKey="5.2">
             Shower
           </NavDropdown.Item>
         </NavDropdown>
