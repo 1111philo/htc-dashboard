@@ -117,16 +117,6 @@ export default function NewVisitView() {
             onChange={(newVal) => setSelectedGuestOpt(newVal)}
           />
         </Form.Group>
-
-        {/* TODO: waiting for answer on whether Sign In Guest and Log Visit buttons should be one in the same (and stick with latter)
-        <Button
-          variant="primary"
-          type="submit"
-          onClick={() => setShowVisitDetails(true)}
-          disabled={selectedGuestOpt === null}
-        >
-          Sign In Guest
-        </Button> */}
       </Form>
     );
 
