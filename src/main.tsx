@@ -1,22 +1,18 @@
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
 import "./index.css";
-import App from "./App.tsx";
+import App from "./App";
 import { Route, Routes } from "react-router-dom";
 
-// MOVE ME WHEN THESE ROUTES ARE MOVED TO OWN FILES
-import { useParams } from "react-router";
-
-import NewVisitView from "./views/NewVisitView.tsx"
-import NewNotificationView from "./views/NewNotificationView.tsx";
-import VisitsView from "./views/VisitsView.tsx"
-import AddServiceView from "./views/AddServiceView.tsx"
-import ServiceView from "./views/ServiceView.tsx"
-import GuestsView from "./views/GuestsView.tsx"
-import GuestProfileView from "./views/GuestProfileView.tsx"
-import UsersView from "./views/UsersView.tsx"
-import UserProfileView from "./views/UserProfileView.tsx";
-
+import NewVisitView from "./views/NewVisitView"
+import NewNotificationView from "./views/NewNotificationView";
+import VisitsView from "./views/VisitsView"
+import AddServiceView from "./views/AddServiceView"
+import ServiceView from "./views/ServiceView"
+import GuestsView from "./views/GuestsView"
+import GuestProfileView from "./views/GuestProfileView"
+import UsersView from "./views/UsersView"
+import UserProfileView from "./views/UserProfileView";
 
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
@@ -28,7 +24,7 @@ createRoot(document.getElementById("root")).render(
         <Route path="/visits" element={<VisitsView />} />
         <Route path="/add-service" element={<AddServiceView />} />
         <Route path="/services/:serviceId" element={<ServiceView />} />
-        <Route path="/shower" element={<ServiceView service={{ name: "Shower", quota: 10 }}/>} />
+        {/* TEMP FOR DEV -> */} <Route path="/shower" element={<ServiceView service={{ name: "Shower", quota: 10 }}/>} />
         <Route path="/guests" element={<GuestsView />} />
         <Route path="/guests/:guestId" element={<GuestProfileView />} />
         <Route path="/users" element={<UsersView />} />
