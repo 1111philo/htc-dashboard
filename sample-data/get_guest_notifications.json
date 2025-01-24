@@ -6,5 +6,87 @@
     "status": "Archived",
     "created_at": "2025-01-23 20:39:36",
     "updated_at": "2025-01-23 20:59:11"
+  },
+  {
+    "notification_id": 2,
+    "guest_id": 3,
+    "message": "Your reservation has been confirmed",
+    "status": "Active",
+    "created_at": "2025-01-23 21:15:22",
+    "updated_at": "2025-01-23 21:15:22"
+  },
+
+  
+  {
+    "notification_id": 3,
+    "guest_id": 2,
+    "message": "Payment processed successfully",
+    "status": "Active",
+    "created_at": "2025-01-23 21:30:45",
+    "updated_at": "2025-01-23 21:45:12"
+  },
+  {
+    "notification_id": 4,
+    "guest_id": 5,
+    "message": "Welcome to our platform!",
+    "status": "Active",
+    "created_at": "2025-01-23 22:00:00",
+    "updated_at": "2025-01-23 22:10:33"
+  },
+  {
+    "notification_id": 5,
+    "guest_id": 4,
+    "message": "Your account settings have been updated",
+    "status": "Active",
+    "created_at": "2025-01-23 22:15:18",
+    "updated_at": "2025-01-23 22:15:18"
+  },
+  {
+    "notification_id": 6,
+    "guest_id": 1,
+    "message": "New feature announcement: Mobile check-in",
+    "status": "Archived",
+    "created_at": "2025-01-23 22:30:00",
+    "updated_at": "2025-01-23 22:45:21"
+  },
+  {
+    "notification_id": 7,
+    "guest_id": 6,
+    "message": "Your feedback has been received",
+    "status": "Active",
+    "created_at": "2025-01-23 23:00:15",
+    "updated_at": "2025-01-23 23:00:15"
+  },
+  {
+    "notification_id": 8,
+    "guest_id": 3,
+    "message": "Upcoming maintenance notification",
+    "status": "Active",
+    "created_at": "2025-01-23 23:15:30",
+    "updated_at": "2025-01-23 23:20:11"
+  },
+  {
+    "notification_id": 9,
+    "guest_id": 2,
+    "message": "Special offer available",
+    "status": "Active",
+    "created_at": "2025-01-23 23:30:45",
+    "updated_at": "2025-01-23 23:30:45"
+  },
+  {
+    "notification_id": 10,
+    "guest_id": 4,
+    "message": "Security alert: New device login",
+    "status": "Archived",
+    "created_at": "2025-01-23 23:45:00",
+    "updated_at": "2025-01-23 23:50:22"
+  },
+  {
+    "notification_id": 11,
+    "guest_id": 5,
+    "message": "Document verification required",
+    "status": "Active",
+    "created_at": "2025-01-23 23:59:59",
+    "updated_at": "2025-01-23 23:59:59"
   }
 ]
