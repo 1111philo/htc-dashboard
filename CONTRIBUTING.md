@@ -1,11 +1,16 @@
 # Contributing
 
-## Run the App
-Assuming you're already a contributor, clone this repo and `cd` into it.
+### Submit Changes
+Make a new branch for your changes and submit a PR to merge into the [staging](https://github.com/1111philo/apolis-app/tree/staging) branch. 
 
-### Backend
-See the [api repo](https://github.com/1111philo/apolis-api)
+### Install Dependencies
+- `pnpm i`
 
-### Frontend
-- From the repo root, `cd frontend && pnpm i` to install dependencies
-- `pnpm run dev` to run the dev server
+### Run Locally In Staging (Dev) Mode
+- `pnpm start:staging` (matches the environment of apolis.dev, the staging).
+
+### Live Staging
+The staging url is [apolis.dev](https://apolis.dev). Deployment to this url is triggered upon merge to the [staging](https://github.com/1111philo/apolis-app/tree/staging) branch.
+
+### Production
+The production url is [apolis.app](https://apolis.app). Deployment to this url is triggered upon merge to the main branch.
