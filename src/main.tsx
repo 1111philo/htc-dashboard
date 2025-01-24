@@ -28,7 +28,7 @@ createRoot(document.getElementById("root")).render(
         <Route path="/visits" element={<VisitsView />} />
         <Route path="/add-service" element={<AddServiceView />} />
         <Route path="/services/:serviceId" element={<ServiceView />} />
-        <Route path="/shower" element={<ServiceView />} />
+        <Route path="/shower" element={<ServiceView service={{ name: "Shower", quota: 10 }}/>} />
         <Route path="/guests" element={<GuestsView />} />
         <Route path="/guests/:guestId" element={<GuestProfileView />} />
         <Route path="/users" element={<UsersView />} />
