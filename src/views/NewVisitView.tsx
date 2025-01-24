@@ -2,13 +2,11 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import Select from "react-select";
 
-// MOCK DATA
 import mockGuests from "../../sample-data/get_guests.json";
 import mockServices from "../../sample-data/get_services.json";
 
 export default function NewVisitView() {
   const [showAddNewGuest, setShowAddNewGuest] = useState(false);
-  const [showVisitDetails, setShowVisitDetails] = useState(false);
   const [selectedGuestOpt, setSelectedGuestOpt] = useState<ReactSelectOption>(null);
   const [selectedServicesOpt, setSelectedServicesOpt] = useState<ReactSelectOption[]>([]); // array bc this Select is set to multi
 
