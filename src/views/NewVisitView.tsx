@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useEffect, useState } from "react";
 import { Button, Form, Modal, Table } from "react-bootstrap";
-import Select, { Option } from "react-select";
+import Select from "react-select";
 
 // MOCK DATA
 import mockGuests from "../../sample-data/get_guests.json";
@@ -9,18 +9,19 @@ import mockServices from "../../sample-data/get_services.json";
 export default function NewVisitView() {
   const [showAddNewGuest, setShowAddNewGuest] = useState(false);
   const [showVisitDetails, setShowVisitDetails] = useState(false);
-  const [selectedGuestOpt, setSelectedGuestOpt] = useState<Option>(null);
-  const [selectedServicesOpt, setSelectedServicesOpt] = useState<Option[]>([]); // array bc this Select is set to multi
-  const [notifications, setNotifications] = useState<GuestNotification[]>([]);
+  const [selectedGuestOpt, setSelectedGuestOpt] = useState<ReactSelectOption>(null);
+  const [selectedServicesOpt, setSelectedServicesOpt] = useState<ReactSelectOption[]>([]); // array bc this Select is set to multi
+
   const [guests, setGuests] = useState<Guest[]>(mockGuests);
+  const [notifications, setNotifications] = useState<GuestNotification[]>([]);
   const [services, setServices] = useState<GuestService[]>(mockServices);
 
   // derive guest's notifications from selected guest
   useEffect(() => {
     if (selectedGuestOpt) {
-      const guest = guests.find((g) => g.guest_id === selectedGuestOpt.value);
+      const guest = guests.find((g) => g.guest_id === parseInt(selectedGuestOpt.value));
       setNotifications(
-        JSON.parse(guest.notifications).filter(
+        JSON.parse(guest.notifications as string).filter(
           (n: GuestNotification) => n.status === "Active"
         )
       );

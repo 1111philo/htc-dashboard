@@ -6,5 +6,7 @@
     "baseUrl": ".",
     "jsx": "react-jsx",
     "lib": ["ES6", "DOM"],
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
   }
 }
