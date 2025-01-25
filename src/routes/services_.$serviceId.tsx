@@ -2,16 +2,20 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button, Modal, Form, Table } from "react-bootstrap";
 
-import guests from "../../sample-data/get_guests.json";
+import mockGuests from "../../sample-data/get_guests.json";
 import mockServices from "../../sample-data/get_services.json";
 
 export const Route = createFileRoute("/services_/$serviceId")({
   component: ServiceView,
+  loader: ({ params: { serviceId }}) => {
+    // fetch service by ID
+    return mockServices.find(({ service_id }) => service_id === parseInt(serviceId))
+  }
 });
 
-function ServiceView(/* { service } */) {
-  // TEMP so the component isn't broken
-  const service = mockServices[0];
+function ServiceView() {
+
+  const service = Route.useLoaderData()
 
   const [showEditModal, setShowEditModal] = useState(false);
 
@@ -23,7 +27,7 @@ function ServiceView(/* { service } */) {
 
   return (
     <>
-      <h1>{service.service_name}s</h1>
+      <h1>{ service.service_name }s</h1>
       <Button onClick={() => setShowEditModal(true)}>Edit Service</Button>
       <Modal show={showEditModal}>
         <Modal.Header closeButton>
@@ -116,7 +120,7 @@ function ServiceView(/* { service } */) {
           </tr>
         </thead>
         <tbody>
-          {guests.map(({ guest_id, first_name, last_name, services }) => {
+          {mockGuests.map(({ guest_id, first_name, last_name, services }) => {
             const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
             const queuedServices = services.filter(
               (service) => service.status === "Queued"
@@ -158,7 +162,7 @@ function ServiceView(/* { service } */) {
           </tr>
         </thead>
         <tbody>
-          {guests.map(({ guest_id, first_name, last_name, services }) => {
+          mockGuests.map(({ guest_id, first_name, last_name, services }) => {
             const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
             const completedServices = services.filter(
               (service) => service.status === "Completed"
