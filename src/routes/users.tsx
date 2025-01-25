@@ -1,17 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import * as API from 'aws-amplify/api';
-import * as Auth from 'aws-amplify/auth';
+import { useEffect, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 
-const UsersView = () => {
+import * as API from "aws-amplify/api";
+import * as Auth from "aws-amplify/auth";
+
+export const Route = createFileRoute("/users")({
+  component: UsersView,
+});
+
+function UsersView() {
   const [publicData, setPublicData] = useState(null);
   const [authData, setAuthData] = useState(null);
   const [loggedIn, setLoggedIn] = useState(null);
   const fetchPublicData = async () => {
     const response = await (
       await API.get({
-        apiName: 'public',
-        path: '/test',
-        options: { queryParams: { id: 'testQueryParam' } },
+        apiName: "public",
+        path: "/test",
+        options: { queryParams: { id: "testQueryParam" } },
       }).response
     ).body.json();
     setPublicData(response);
@@ -19,17 +25,17 @@ const UsersView = () => {
   const fetchAuthData = async () => {
     const response = await (
       await API.post({
-        apiName: 'auth',
-        path: '/authTest',
-        options: { body: { id: 'testBody' } },
+        apiName: "auth",
+        path: "/authTest",
+        options: { body: { id: "testBody" } },
       }).response
     ).body.json();
     setAuthData(response);
   };
 
   const login = async () => {
-    const email = prompt('Email?');
-    const password = prompt('Password?');
+    const email = prompt("Email?");
+    const password = prompt("Password?");
     await Auth.signIn({ username: email, password: password });
     setLoggedIn(true);
   };
@@ -41,9 +47,9 @@ const UsersView = () => {
   const sleep = async (ms) =>
     await new Promise((resolve) => setTimeout(resolve, ms));
   const signup = async () => {
-    const name = prompt('Name?');
-    const email = prompt('Email?');
-    const password = prompt('Password?');
+    const name = prompt("Name?");
+    const email = prompt("Email?");
+    const password = prompt("Password?");
     await Auth.signUp({
       username: crypto.randomUUID(),
       password: password,
@@ -93,6 +99,4 @@ const UsersView = () => {
       <div>{JSON.stringify({ loggedIn })}</div>
     </>
   );
-};
-
-export default UsersView;
+}

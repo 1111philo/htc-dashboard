@@ -1,8 +1,13 @@
-import React from 'react'
+import { createFileRoute } from "@tanstack/react-router";
 
-const VisitsView = () => {
-  return (<>
-    {/*
+export const Route = createFileRoute("/visits")({
+  component: VisitsView,
+});
+
+function VisitsView() {
+  return (
+    <>
+      {/*
       Title: Visits
       Chart:
         arrows to click thru months
@@ -11,9 +16,8 @@ const VisitsView = () => {
       Table: Queue
         search / filter
         fields: time requested, guest name w/ ID, Services requested
-    */}
-    <h1>Visits</h1>
-  </>)
+      */}
+      <h1>Visits</h1>
+    </>
+  );
 }
-
-export default VisitsView

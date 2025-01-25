@@ -1,11 +1,13 @@
-import React from 'react'
-import { useParams } from 'react-router'
+import { createFileRoute } from "@tanstack/react-router";
 
-const GuestProfileView = () => {
-  const { guestId } = useParams()
+export const Route = createFileRoute("/guests_/$guestId")({
+  component: GuestProfileView,
+});
 
-  return (<>
-    {/*
+function GuestProfileView() {
+  return (
+    <>
+      {/*
       Title: Guest ID
       Form
         First name field
@@ -21,8 +23,7 @@ const GuestProfileView = () => {
       Table: Past Visits
         fields:
     */}
-    <h1>Guest Profile (id={guestId})</h1>
-  </>)
+      <h1>Guest Profile</h1>
+    </>
+  );
 }
-
-export default GuestProfileView

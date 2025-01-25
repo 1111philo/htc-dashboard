@@ -1,10 +1,14 @@
-import React from "react";
+import { Suspense } from "react";
+
+import { Outlet, Link as RouterNavLink } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+
 import { Amplify } from "aws-amplify";
 import * as Auth from "aws-amplify/auth";
 
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
-import { NavLink as RouterNavLink, Outlet } from "react-router";
+
 import { Container, Nav, NavDropdown } from "react-bootstrap";
 
 Amplify.configure(
@@ -46,17 +50,26 @@ export default function App() {
   return (
     <>
       <Container className="mt-4">
-        <Header />
+        <AppNav />
         <main>
           <Outlet />
         </main>
-        <div>API URL: {import.meta.env.VITE_API_URL}</div>
+
+        {/* DEV */}
+        <Suspense>
+          {/* for use with dynamically importing dev tools in dev mode, which is not yet set up */}
+          <TanStackRouterDevtools initialIsOpen={false} />
+        </Suspense>
+        <div className="mt-5 text-danger float-end">
+          API URL: {import.meta.env.VITE_API_URL}
+        </div>
+        {/* END DEV */}
       </Container>
     </>
   );
 }
 
-function Header() {
+function AppNav() {
   return (
     <div className="d-flex justify-content-center">
       <Nav variant="tabs" className="mb-4 m-auto">
@@ -80,7 +93,7 @@ function Header() {
             Create Service
           </NavDropdown.Item>
           <NavDropdown.Divider />
-          <NavDropdown.Item as={RouterNavLink} to="/shower" eventKey="5.2">
+          <NavDropdown.Item as={RouterNavLink} to="/services/$serviceId" eventKey="5.2">
             Shower
           </NavDropdown.Item>
         </NavDropdown>

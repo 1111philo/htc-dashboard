@@ -1,14 +1,25 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { Button, Form, Modal, Table } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import Select from "react-select";
+import { Button, Form, Modal, Table } from "react-bootstrap";
 
 import mockGuests from "../../sample-data/get_guests__true_format.json";
 import mockServices from "../../sample-data/get_services.json";
 
-export default function NewVisitView() {
+export const Route = createFileRoute("/new-visit")({
+  component: NewVisitView,
+  loader: () => {
+    // TODO: fetch and return all guests and services
+  },
+});
+
+function NewVisitView() {
   const [showAddNewGuest, setShowAddNewGuest] = useState(false);
-  const [selectedGuestOpt, setSelectedGuestOpt] = useState<ReactSelectOption>(null);
-  const [selectedServicesOpt, setSelectedServicesOpt] = useState<ReactSelectOption[]>([]); // array bc this Select is set to multi
+  const [selectedGuestOpt, setSelectedGuestOpt] =
+    useState<ReactSelectOption>(null);
+  const [selectedServicesOpt, setSelectedServicesOpt] = useState<
+    ReactSelectOption[]
+  >([]); // array bc this Select is set to multi
 
   const [guests, setGuests] = useState<Guest[]>(mockGuests);
   const [notifications, setNotifications] = useState<GuestNotification[]>([]);
@@ -17,7 +28,9 @@ export default function NewVisitView() {
   // derive guest's notifications from selected guest
   useEffect(() => {
     if (selectedGuestOpt) {
-      const guest = guests.find((g) => g.guest_id === parseInt(selectedGuestOpt.value));
+      const guest = guests.find(
+        (g) => g.guest_id === parseInt(selectedGuestOpt.value)
+      );
       setNotifications(
         JSON.parse(guest.notifications as string).filter(
           (n: GuestNotification) => n.status === "Active"
@@ -162,7 +175,7 @@ export default function NewVisitView() {
     );
 
     function updateNotificationStatus(
-      evt: ChangeEvent<HTMLSelectElement>,
+      evt: React.ChangeEvent<HTMLSelectElement>,
       id: number
     ) {
       const { value: newStatus } = evt.target;

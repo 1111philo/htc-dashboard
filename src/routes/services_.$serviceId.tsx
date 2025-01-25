@@ -1,11 +1,18 @@
-import React, { useState } from "react";
-
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import { Button, Modal, Form, Table } from "react-bootstrap";
 
-// import { guests } from "../../sample-data/get_guests";
 import guests from "../../sample-data/get_guests.json";
+import mockServices from "../../sample-data/get_services.json";
 
-const ServiceView = ({ service }) => {
+export const Route = createFileRoute("/services_/$serviceId")({
+  component: ServiceView,
+});
+
+function ServiceView(/* { service } */) {
+  // TEMP so the component isn't broken
+  const service = mockServices[0];
+
   const [showEditModal, setShowEditModal] = useState(false);
 
   const handleMoveToCompleted = () => {};
@@ -16,7 +23,7 @@ const ServiceView = ({ service }) => {
 
   return (
     <>
-      <h1>{ service.name }s</h1>
+      <h1>{service.service_name}s</h1>
       <Button onClick={() => setShowEditModal(true)}>Edit Service</Button>
       <Modal show={showEditModal}>
         <Modal.Header closeButton>
@@ -57,7 +64,9 @@ const ServiceView = ({ service }) => {
                 // for every slot, check if there is a guest with a `service.slot_occupied` matching slot number
                 Array.from({ length: service.quota }).map((_, slotIndex) => {
                   const guest = guests.find(({ services }) =>
-                    services.some(service => service.slot_occupied === slotIndex + 1)
+                    services.some(
+                      (service) => service.slot_occupied === slotIndex + 1
+                    )
                   );
 
                   if (guest) {
@@ -70,8 +79,12 @@ const ServiceView = ({ service }) => {
                         <td>{nameAndID}</td>
                         <td>Occupied</td>
                         <td>
-                          <Button onClick={handleMoveToCompleted}>Move to Completed</Button>
-                          <Button onClick={handleMoveToQueue}>Move to Queue</Button>
+                          <Button onClick={handleMoveToCompleted}>
+                            Move to Completed
+                          </Button>
+                          <Button onClick={handleMoveToQueue}>
+                            Move to Queue
+                          </Button>
                         </td>
                       </tr>
                     );
@@ -114,7 +127,7 @@ const ServiceView = ({ service }) => {
                   <td>{queuedService.queued_at}</td>
                   <td>{nameAndID}</td>
                   <td>
-                    {service.quota? (
+                    {service.quota ? (
                       <Form.Select aria-label="Select which slot to assign">
                         <option>Assign Slot</option>
                         {Array.from({ length: 10 }).map((_, i) => {
@@ -166,6 +179,4 @@ const ServiceView = ({ service }) => {
       </Table>
     </>
   );
-};
-
-export default ServiceView;
+}
