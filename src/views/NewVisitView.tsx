@@ -2,7 +2,7 @@ import React, { ChangeEvent, useEffect, useState } from "react";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import Select from "react-select";
 
-import mockGuests from "../../sample-data/get_guests.json";
+import mockGuests from "../../sample-data/get_guests__true_format.json";
 import mockServices from "../../sample-data/get_services.json";
 
 export default function NewVisitView() {
