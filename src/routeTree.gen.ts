@@ -15,6 +15,7 @@ import { Route as VisitsImport } from './routes/visits'
 import { Route as UsersImport } from './routes/users'
 import { Route as NewVisitImport } from './routes/new-visit'
 import { Route as NewNotificationImport } from './routes/new-notification'
+import { Route as LoginImport } from './routes/login'
 import { Route as GuestsImport } from './routes/guests'
 import { Route as AddServiceImport } from './routes/add-service'
 import { Route as UsersUserIdImport } from './routes/users_.$userId'
@@ -44,6 +45,12 @@ const NewVisitRoute = NewVisitImport.update({
 const NewNotificationRoute = NewNotificationImport.update({
   id: '/new-notification',
   path: '/new-notification',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const LoginRoute = LoginImport.update({
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -93,6 +100,13 @@ declare module '@tanstack/react-router' {
       path: '/guests'
       fullPath: '/guests'
       preLoaderRoute: typeof GuestsImport
+      parentRoute: typeof rootRoute
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
     '/new-notification': {
@@ -152,6 +166,7 @@ declare module '@tanstack/react-router' {
 export interface FileRoutesByFullPath {
   '/add-service': typeof AddServiceRoute
   '/guests': typeof GuestsRoute
+  '/login': typeof LoginRoute
   '/new-notification': typeof NewNotificationRoute
   '/new-visit': typeof NewVisitRoute
   '/users': typeof UsersRoute
@@ -164,6 +179,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/add-service': typeof AddServiceRoute
   '/guests': typeof GuestsRoute
+  '/login': typeof LoginRoute
   '/new-notification': typeof NewNotificationRoute
   '/new-visit': typeof NewVisitRoute
   '/users': typeof UsersRoute
@@ -177,6 +193,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/add-service': typeof AddServiceRoute
   '/guests': typeof GuestsRoute
+  '/login': typeof LoginRoute
   '/new-notification': typeof NewNotificationRoute
   '/new-visit': typeof NewVisitRoute
   '/users': typeof UsersRoute
@@ -191,6 +208,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/add-service'
     | '/guests'
+    | '/login'
     | '/new-notification'
     | '/new-visit'
     | '/users'
@@ -202,6 +220,7 @@ export interface FileRouteTypes {
   to:
     | '/add-service'
     | '/guests'
+    | '/login'
     | '/new-notification'
     | '/new-visit'
     | '/users'
@@ -213,6 +232,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/add-service'
     | '/guests'
+    | '/login'
     | '/new-notification'
     | '/new-visit'
     | '/users'
@@ -226,6 +246,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AddServiceRoute: typeof AddServiceRoute
   GuestsRoute: typeof GuestsRoute
+  LoginRoute: typeof LoginRoute
   NewNotificationRoute: typeof NewNotificationRoute
   NewVisitRoute: typeof NewVisitRoute
   UsersRoute: typeof UsersRoute
@@ -238,6 +259,7 @@ export interface RootRouteChildren {
 const rootRouteChildren: RootRouteChildren = {
   AddServiceRoute: AddServiceRoute,
   GuestsRoute: GuestsRoute,
+  LoginRoute: LoginRoute,
   NewNotificationRoute: NewNotificationRoute,
   NewVisitRoute: NewVisitRoute,
   UsersRoute: UsersRoute,
@@ -259,6 +281,7 @@ export const routeTree = rootRoute
       "children": [
         "/add-service",
         "/guests",
+        "/login",
         "/new-notification",
         "/new-visit",
         "/users",
@@ -273,6 +296,9 @@ export const routeTree = rootRoute
     },
     "/guests": {
       "filePath": "guests.tsx"
+    },
+    "/login": {
+      "filePath": "login.tsx"
     },
     "/new-notification": {
       "filePath": "new-notification.tsx"

@@ -93,7 +93,7 @@ function AppNav() {
             Create Service
           </NavDropdown.Item>
           <NavDropdown.Divider />
-          <NavDropdown.Item as={RouterNavLink} to="/shower" eventKey="5.2">
+          <NavDropdown.Item as={RouterNavLink} to="/services/$serviceId" eventKey="5.2">
             Shower
           </NavDropdown.Item>
         </NavDropdown>

@@ -1,6 +1,23 @@
-import { createFileRoute } from '@tanstack/react-router'
-import VisitsView from '../views/VisitsView'
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/visits')({
+export const Route = createFileRoute("/visits")({
   component: VisitsView,
-})
+});
+
+function VisitsView() {
+  return (
+    <>
+      {/*
+      Title: Visits
+      Chart:
+        arrows to click thru months
+        Button: Export Data (CSV)
+        chart with default past month view
+      Table: Queue
+        search / filter
+        fields: time requested, guest name w/ ID, Services requested
+      */}
+      <h1>Visits</h1>
+    </>
+  );
+}
