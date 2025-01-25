@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 
-import mockGuests from "../../sample-data/get_guests__true_format.json";
+import mockGuests from "../../sample-data/get_guests.json";
 import mockServices from "../../sample-data/get_services.json";
 
 export const Route = createFileRoute("/new-visit")({
