@@ -1,0 +1,17 @@
+[
+    {
+        "slot_number": 1,
+        "service_id": 1,
+        "guest_id": 3
+    },
+    {
+        "slot_number": 2,
+        "service_id": 1,
+        "guest_id": 2
+    },
+    {
+        "slot_number": 3,
+        "service_id": 1,
+        "guest_id": 1
+    }
+]
