@@ -7,11 +7,46 @@
     {
         "slot_number": 2,
         "service_id": 1,
-        "guest_id": 2
+        "guest_id": 4
     },
     {
         "slot_number": 3,
         "service_id": 1,
-        "guest_id": 1
+        "guest_id": 7
+    },
+    {
+        "slot_number": 4,
+        "service_id": 1,
+        "guest_id": 8
+    },
+    {
+        "slot_number": 5,
+        "service_id": 1,
+        "guest_id": 11
+    },
+    {
+        "slot_number": 6,
+        "service_id": 1,
+        "guest_id": null
+    },
+    {
+        "slot_number": 7,
+        "service_id": 1,
+        "guest_id": null
+    },
+    {
+        "slot_number": 8,
+        "service_id": 1,
+        "guest_id": null
+    },
+    {
+        "slot_number": 9,
+        "service_id": 1,
+        "guest_id": null
+    },
+    {
+        "slot_number": 10,
+        "service_id": 1,
+        "guest_id": null
     }
 ]
