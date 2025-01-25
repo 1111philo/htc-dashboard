@@ -1,6 +1,6 @@
 /** App-wide types */
 
-// DB TYPES -- Keep updated
+// DB -- Keep updated
 // TODO: where is the source of truth?
 
 interface Guest {
@@ -28,14 +28,27 @@ interface GuestService {
   service_id: number;
   service_name: string;
   status: "Completed" | "Active";
+  slot_occupied: number;
   queued_at: string;
   slotted_at: string;
   completed_at: string;
 }
 
-// END DB TYPES
+interface Visit {
+  visit_id: number;
+  guest_id: number;
+  service_ids: number;
+  created_at: string;
+  updated_at: string;
+}
+
+// END DB
+
+// MISC
 
 interface ReactSelectOption {
   value: string;
   label: string;
 }
+
+// END MISC

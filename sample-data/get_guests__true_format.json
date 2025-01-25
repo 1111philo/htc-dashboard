@@ -7,10 +7,8 @@
     "dob": "1960-02-06",
     "case_manager": "Blake Bertuccelli-Booth",
     "notifications": "[{\"notification_id\": 1, \"message\": \"This is a test of the notification system\", \"status\": \"Archived\", \"created_at\": \"2025-01-23 20:39:36\"}, {\"notification_id\": 2, \"message\": \"Guest requires prescription pickup\", \"status\": \"Active\", \"created_at\": \"2025-01-24 09:15:00\"}, {\"notification_id\": 3, \"message\": \"Follow-up needed for housing application\", \"status\": \"Active\", \"created_at\": \"2025-01-24 11:30:00\"}]",
-    "services": "[{\"guest_service_id\": 1, \"service_id\": 1, \"status\": \"Completed\", \"queued_at\": \"2025-01-23 21:54:51\", \"slotted_at\": \"2025-01-23 22:29:05\", \"completed_at\": \"2025-01-23 22:29:27\"}]"
+    "services": "[{\"guest_service_id\": 1, \"service_id\": 1, \"status\": \"Completed\", \"queued_at\": \"2025-01-23 21:54:51\", \"slotted_at\": \"2025-01-23 22:29:05\", \"completed_at\": \"2025-01-23 22:29:27\", \"slot_occupied\": 1}]"
   },
-
-  
   {
     "total_guests": 2,
     "guest_id": 2,
@@ -19,7 +17,7 @@
     "dob": "1975-11-15",
     "case_manager": "Maria Rodriguez",
     "notifications": "[{\"notification_id\": 2, \"message\": \"Medical appointment scheduled\", \"status\": \"Active\", \"created_at\": \"2025-01-23 21:15:00\"}]",
-    "services": "[{\"guest_service_id\": 2, \"service_id\": 2, \"status\": \"Pending\", \"queued_at\": \"2025-01-23 22:00:00\", \"slotted_at\": null, \"completed_at\": null}]"
+    "services": "[{\"guest_service_id\": 2, \"service_id\": 2, \"status\": \"Pending\", \"queued_at\": \"2025-01-23 22:00:00\", \"slotted_at\": null, \"completed_at\": null, \"slot_occupied\": 2}]"
   },
   {
     "total_guests": 3,
@@ -29,7 +27,7 @@
     "dob": "1982-07-23",
     "case_manager": "David Williams",
     "notifications": "[{\"notification_id\": 3, \"message\": \"Housing application submitted\", \"status\": \"Active\", \"created_at\": \"2025-01-23 19:30:00\"}]",
-    "services": "[{\"guest_service_id\": 3, \"service_id\": 3, \"status\": \"InProgress\", \"queued_at\": \"2025-01-23 20:00:00\", \"slotted_at\": \"2025-01-23 20:15:00\", \"completed_at\": null}]"
+    "services": "[{\"guest_service_id\": 3, \"service_id\": 3, \"status\": \"InProgress\", \"queued_at\": \"2025-01-23 20:00:00\", \"slotted_at\": \"2025-01-23 20:15:00\", \"completed_at\": null, \"slot_occupied\": 3}]"
   },
   {
     "total_guests": 4,
@@ -39,7 +37,7 @@
     "dob": "1990-03-30",
     "case_manager": "Blake Bertuccelli-Booth",
     "notifications": "[{\"notification_id\": 4, \"message\": \"Document review needed\", \"status\": \"Urgent\", \"created_at\": \"2025-01-23 22:00:00\"}]",
-    "services": "[{\"guest_service_id\": 4, \"service_id\": 4, \"status\": \"Scheduled\", \"queued_at\": \"2025-01-23 21:00:00\", \"slotted_at\": \"2025-01-24 09:00:00\", \"completed_at\": null}]"
+    "services": "[{\"guest_service_id\": 4, \"service_id\": 4, \"status\": \"Scheduled\", \"queued_at\": \"2025-01-23 21:00:00\", \"slotted_at\": \"2025-01-24 09:00:00\", \"completed_at\": null, \"slot_occupied\": 4}]"
   },
   {
     "total_guests": 5,
@@ -49,7 +47,7 @@
     "dob": "1968-12-10",
     "case_manager": "Maria Rodriguez",
     "notifications": "[{\"notification_id\": 5, \"message\": \"Benefits review complete\", \"status\": \"Archived\", \"created_at\": \"2025-01-23 18:45:00\"}]",
-    "services": "[{\"guest_service_id\": 5, \"service_id\": 5, \"status\": \"Completed\", \"queued_at\": \"2025-01-23 17:00:00\", \"slotted_at\": \"2025-01-23 17:30:00\", \"completed_at\": \"2025-01-23 18:00:00\"}]"
+    "services": "[{\"guest_service_id\": 5, \"service_id\": 5, \"status\": \"Completed\", \"queued_at\": \"2025-01-23 17:00:00\", \"slotted_at\": \"2025-01-23 17:30:00\", \"completed_at\": \"2025-01-23 18:00:00\", \"slot_occupied\": 5}]"
   },
   {
     "total_guests": 6,
@@ -59,7 +57,7 @@
     "dob": "1995-09-18",
     "case_manager": "David Williams",
     "notifications": "[{\"notification_id\": 6, \"message\": \"Interview scheduled\", \"status\": \"Active\", \"created_at\": \"2025-01-23 23:00:00\"}]",
-    "services": "[{\"guest_service_id\": 6, \"service_id\": 6, \"status\": \"Pending\", \"queued_at\": \"2025-01-23 22:30:00\", \"slotted_at\": null, \"completed_at\": null}]"
+    "services": "[{\"guest_service_id\": 6, \"service_id\": 6, \"status\": \"Pending\", \"queued_at\": \"2025-01-23 22:30:00\", \"slotted_at\": null, \"completed_at\": null, \"slot_occupied\": 6}]"
   },
   {
     "total_guests": 7,
@@ -69,7 +67,7 @@
     "dob": "1973-05-25",
     "case_manager": "Blake Bertuccelli-Booth",
     "notifications": "[{\"notification_id\": 7, \"message\": \"Follow-up required\", \"status\": \"Urgent\", \"created_at\": \"2025-01-23 21:30:00\"}]",
-    "services": "[{\"guest_service_id\": 7, \"service_id\": 7, \"status\": \"InProgress\", \"queued_at\": \"2025-01-23 20:45:00\", \"slotted_at\": \"2025-01-23 21:00:00\", \"completed_at\": null}]"
+    "services": "[{\"guest_service_id\": 7, \"service_id\": 7, \"status\": \"InProgress\", \"queued_at\": \"2025-01-23 20:45:00\", \"slotted_at\": \"2025-01-23 21:00:00\", \"completed_at\": null, \"slot_occupied\": 7}]"
   },
   {
     "total_guests": 8,
@@ -79,7 +77,7 @@
     "dob": "1988-01-12",
     "case_manager": "Maria Rodriguez",
     "notifications": "[{\"notification_id\": 8, \"message\": \"Appointment reminder\", \"status\": \"Active\", \"created_at\": \"2025-01-23 22:15:00\"}]",
-    "services": "[{\"guest_service_id\": 8, \"service_id\": 8, \"status\": \"Scheduled\", \"queued_at\": \"2025-01-23 21:30:00\", \"slotted_at\": \"2025-01-24 10:00:00\", \"completed_at\": null}]"
+    "services": "[{\"guest_service_id\": 8, \"service_id\": 8, \"status\": \"Scheduled\", \"queued_at\": \"2025-01-23 21:30:00\", \"slotted_at\": \"2025-01-24 10:00:00\", \"completed_at\": null, \"slot_occupied\": 8}]"
   },
   {
     "total_guests": 9,
@@ -89,7 +87,7 @@
     "dob": "1965-08-03",
     "case_manager": "David Williams",
     "notifications": "[{\"notification_id\": 9, \"message\": \"Documentation received\", \"status\": \"Archived\", \"created_at\": \"2025-01-23 19:00:00\"}]",
-    "services": "[{\"guest_service_id\": 9, \"service_id\": 9, \"status\": \"Completed\", \"queued_at\": \"2025-01-23 18:00:00\", \"slotted_at\": \"2025-01-23 18:30:00\", \"completed_at\": \"2025-01-23 19:15:00\"}]"
+    "services": "[{\"guest_service_id\": 9, \"service_id\": 9, \"status\": \"Completed\", \"queued_at\": \"2025-01-23 18:00:00\", \"slotted_at\": \"2025-01-23 18:30:00\", \"completed_at\": \"2025-01-23 19:15:00\", \"slot_occupied\": 9}]"
   },
   {
     "total_guests": 10,
@@ -99,7 +97,7 @@
     "dob": "1992-04-20",
     "case_manager": "Blake Bertuccelli-Booth",
     "notifications": "[{\"notification_id\": 10, \"message\": \"Service eligibility updated\", \"status\": \"Active\", \"created_at\": \"2025-01-23 23:30:00\"}]",
-    "services": "[{\"guest_service_id\": 10, \"service_id\": 10, \"status\": \"Pending\", \"queued_at\": \"2025-01-23 23:00:00\", \"slotted_at\": null, \"completed_at\": null}]"
+    "services": "[{\"guest_service_id\": 10, \"service_id\": 10, \"status\": \"Pending\", \"queued_at\": \"2025-01-23 23:00:00\", \"slotted_at\": null, \"completed_at\": null, \"slot_occupied\": 10}]"
   },
   {
     "total_guests": 11,
@@ -109,8 +107,6 @@
     "dob": "1985-06-15",
     "case_manager": "Maria Rodriguez",
     "notifications": "[{\"notification_id\": 11, \"message\": \"Assessment completed\", \"status\": \"Active\", \"created_at\": \"2025-01-23 23:45:00\"}]",
-    "services": "[{\"guest_service_id\": 11, \"service_id\": 11, \"status\": \"InProgress\", \"queued_at\": \"2025-01-23 23:15:00\", \"slotted_at\": \"2025-01-23 23:30:00\", \"completed_at\": null}]"
+    "services": "[{\"guest_service_id\": 11, \"service_id\": 11, \"status\": \"InProgress\", \"queued_at\": \"2025-01-23 23:15:00\", \"slotted_at\": \"2025-01-23 23:30:00\", \"completed_at\": null, \"slot_occupied\": 11}]"
   }
 ]
-
-
