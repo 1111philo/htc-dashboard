@@ -4,18 +4,29 @@ import { Button, Modal, Form, Table } from "react-bootstrap";
 
 import mockGuests from "../../sample-data/get_guests.json";
 import mockServices from "../../sample-data/get_services.json";
+import mockServiceSlots from '../../sample-data/get_service_slots.json'
 
 export const Route = createFileRoute("/services_/$serviceId")({
   component: ServiceView,
   loader: ({ params: { serviceId }}) => {
+    let serviceSlots;
     // fetch service by ID
-    return mockServices.find(({ service_id }) => service_id === parseInt(serviceId))
+    const service = mockServices.find(({ service_id }) => service_id === parseInt(serviceId))
+    if (service.quota) {
+      // fetch active slots
+      serviceSlots = mockServiceSlots.filter((slot) => slot.service_id === parseInt(serviceId))
+    }
+
+    return {
+      service,
+      serviceSlots
+    }
   }
 });
 
 function ServiceView() {
 
-  const service = Route.useLoaderData()
+  const { service, serviceSlots } = Route.useLoaderData()
 
   const [showEditModal, setShowEditModal] = useState(false);
 
@@ -51,7 +62,7 @@ function ServiceView() {
           <Button variant="primary">Save changes</Button>
         </Modal.Footer>
       </Modal>
-      {service.quota ? (
+      { service.quota ? (
         <>
           <h2>Slots</h2>
           <Table responsive={true}>
@@ -66,15 +77,13 @@ function ServiceView() {
             <tbody>
               {
                 // for every slot, check if there is a guest with a `service.slot_occupied` matching slot number
-                Array.from({ length: service.quota }).map((_, slotIndex) => {
-                  const guest = guests.find(({ services }) =>
-                    services.some(
-                      (service) => service.slot_occupied === slotIndex + 1
-                    )
+                serviceSlots.map((slot, slotIndex) => {
+                  const guest = mockGuests.find((guest) =>
+                    guest.guest_id === slot.guest_id
                   );
 
                   if (guest) {
-                    const { guest_id, first_name, last_name, services } = guest;
+                    const { guest_id, first_name, last_name } = guest;
                     const nameAndID = `${first_name} ${last_name} (${guest_id})`;
 
                     return (
