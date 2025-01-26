@@ -3,14 +3,22 @@ import { Col, ListGroup, Row, Table, Container } from "react-bootstrap";
 
 export const Route = createFileRoute("/guests_/$guestId")({
   component: GuestProfileView,
+  parseParams: (params): { guestId: number } => ({
+    guestId: parseInt(params.guestId)
+  }),
+  loader: async ({ params }) => {
+    const response = await fetch("../../sample-data/get_guests__true_format.json")
+    const guests = await response.json()
+    const { guestId } = params
+    const guest = guestFromId(guestId, guests)
+    return { guest }
+  }
 });
-
-import mockGuests from "../../sample-data/get_guests__true_format.json";
 
 export default function GuestProfileView() {
   const { guestId } = Route.useParams();
-  const guests: Guest[] = mockGuests;
-  const guest = guestFromId(parseInt(guestId));
+  const { guest } = Route.useLoaderData()
+
   const guestFullName = `${guest.first_name} ${guest.last_name}`;
 
   const services: GuestService[] = JSON.parse(guest.services as string);
@@ -31,22 +39,6 @@ export default function GuestProfileView() {
 
   return (
     <>
-      {/*
-      Title: Guest ID
-      Form
-        First name field
-        Last name field
-        Birthday field
-        Case Manager field
-      Button: Save Changes
-
-      Table: Active Notifications
-        fields:
-      Table: Archived Notifications
-        fields:
-      Table: Past Visits
-        fields:
-    */}
       <h1>{guestFullName}</h1>
 
       {/* <GuestForm /> */}
@@ -68,15 +60,15 @@ export default function GuestProfileView() {
         <ListGroup>
         {notifications.map((n, i) => {
             return (
-              <ListItem n={n} i={i} />
+              <NotificationListItem key={i} n={n} i={i} />
             );
           })}
         </ListGroup>
       </div>
     );
 
-    function ListItem({ n, i }) {
-      return <ListGroup.Item key={n.notification_id} className="p-0">
+    function NotificationListItem({ n, i }) {
+      return <ListGroup.Item className="p-0">
         <Container>
           <Row
             className={"flex-nowrap align-items-center " +
@@ -126,9 +118,11 @@ export default function GuestProfileView() {
     );
   }
 
-  /* async */ function guestFromId(id: number): Guest | null {
-    return guests.find((g) => g.guest_id === id) ?? null;
-  }
+
+}
+
+function guestFromId(id: number, guests: Guest[]): Guest | null {
+  return guests?.find((g) => g.guest_id === id) ?? null;
 }
 
 // UTIL
