@@ -8,13 +8,16 @@ import mockServiceSlots from '../../sample-data/get_service_slots.json'
 
 export const Route = createFileRoute("/services_/$serviceId")({
   component: ServiceView,
+  parseParams: (params): { serviceId: number } => ({
+    serviceId: parseInt(params.serviceId),
+  }),
   loader: ({ params: { serviceId }}) => {
     let serviceSlots;
     // fetch service by ID
-    const service = mockServices.find(({ service_id }) => service_id === parseInt(serviceId))
+    const service = mockServices.find(({ service_id }) => service_id === serviceId)
     if (service.quota) {
       // fetch active slots
-      serviceSlots = mockServiceSlots.filter((slot) => slot.service_id === parseInt(serviceId))
+      serviceSlots = mockServiceSlots.filter((slot) => slot.service_id === serviceId)
     }
 
     return {
@@ -25,10 +28,16 @@ export const Route = createFileRoute("/services_/$serviceId")({
 });
 
 function ServiceView() {
-
+  console.log("mackGuests", mockGuests);
   const { service, serviceSlots } = Route.useLoaderData()
 
   const [showEditModal, setShowEditModal] = useState(false);
+
+  // // sort guests with service by time queued_at
+  // const sortedMockGuests = mockGuests.sort((guestA.services[0], guestB) => {
+  //   // guests have an array of services
+  //   // i need only the services that match serviceId
+  // })
 
   const handleMoveToCompleted = () => {};
 
@@ -129,18 +138,24 @@ function ServiceView() {
           </tr>
         </thead>
         <tbody>
-          {mockGuests.map(({ guest_id, first_name, last_name, services }) => {
+          { mockGuests.map(({ guest_id, first_name, last_name, services }) => {
             const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
-            const queuedServices = services.filter(
+            const queuedServices = JSON.parse(services).filter(
               (service) => service.status === "Queued"
-            );
+            )
+            // .sort(
+            //   (a, b) =>
+            //     new Date(a.queued_at).getTime() - new Date(b.queued_at).getTime()
+            // )
+            // console.log("queuedservices", queuedServices)
+
             return queuedServices.map((queuedService, i) => {
               return (
                 <tr key={i}>
                   <td>{queuedService.queued_at}</td>
                   <td>{nameAndID}</td>
                   <td>
-                    {service.quota ? (
+                    { service.quota ? (
                       <Form.Select aria-label="Select which slot to assign">
                         <option>Assign Slot</option>
                         {Array.from({ length: 10 }).map((_, i) => {
@@ -157,7 +172,11 @@ function ServiceView() {
                   </td>
                 </tr>
               );
-            });
+            })
+            .sort(
+              (a, b) =>
+                new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+            )
           })}
         </tbody>
       </Table>
@@ -171,9 +190,9 @@ function ServiceView() {
           </tr>
         </thead>
         <tbody>
-          mockGuests.map(({ guest_id, first_name, last_name, services }) => {
+          { mockGuests.map(({ guest_id, first_name, last_name, services }) => {
             const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
-            const completedServices = services.filter(
+            const completedServices = JSON.parse(services).filter(
               (service) => service.status === "Completed"
             );
             return completedServices.map((completeService, i) => {
