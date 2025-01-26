@@ -12,7 +12,6 @@ interface User {
 }
 
 interface Guest {
-  total_guests: number;
   guest_id: number;
   first_name: string;
   last_name: string;
@@ -20,6 +19,11 @@ interface Guest {
   case_manager: string;
   notifications: string | GuestNotification[];
   services: string | GuestService[];
+}
+
+interface GuestAPIResponse {
+  total_guests: number;
+  guest: Guest;
 }
 
 interface GuestNotification {

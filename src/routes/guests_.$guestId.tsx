@@ -1,14 +1,14 @@
 import { createFileRoute, PathParamError } from "@tanstack/react-router";
+import { isEven, today } from "../lib/utility-funcs";
+import StripedListRow from "../lib/components/StripedListRow";
 import {
   Col,
   ListGroup,
   Row,
-  Container,
   Form,
   Button,
   InputGroup,
 } from "react-bootstrap";
-import { today } from "../lib/utility-funcs";
 
 interface LoaderData {
   guest: Guest;
@@ -239,28 +239,6 @@ export default function GuestProfileView() {
   }
 }
 
-function StripedListRow({ children, i }) {
-  return (
-    <ListGroup.Item className="p-0">
-      <Container>
-        <Row
-          className={
-            "flex-nowrap align-items-center " +
-            (isEven(i) ? "bg-secondary bg-opacity-10" : "bg-white")
-          }
-        >
-          {children}
-        </Row>
-      </Container>
-    </ListGroup.Item>
-  );
-}
-
 function guestFromId(id: number, guests: Guest[]): Guest | null {
   return guests?.find((g) => g.guest_id === id) ?? null;
-}
-
-// UTIL
-function isEven(num) {
-  return (num & 1) === 0;
 }
