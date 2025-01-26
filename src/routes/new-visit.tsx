@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 
 import mockGuests from "../../sample-data/get_guests__true_format.json";
-import mockServices from "../../sample-data/get_services.json";
+
+interface LoaderData {
+  serviceTypes: ServiceType[];
+}
 
 export const Route = createFileRoute("/new-visit")({
   component: NewVisitView,
-  loader: () => {
-    // TODO: fetch and return all guests and services
+  loader: ({ context }): LoaderData => {
+    // TODO: first page of guests
+    const { serviceTypes } = context;
+    return { serviceTypes };
   },
 });
 
@@ -23,7 +28,7 @@ function NewVisitView() {
 
   const [guests, setGuests] = useState<Guest[]>(mockGuests);
   const [notifications, setNotifications] = useState<GuestNotification[]>([]);
-  const [services, setServices] = useState<GuestService[]>(mockServices);
+  const { serviceTypes } = Route.useLoaderData();
 
   // derive guest's notifications from selected guest
   useEffect(() => {
@@ -32,7 +37,7 @@ function NewVisitView() {
         (g) => g.guest_id === parseInt(selectedGuestOpt.value)
       );
       setNotifications(
-        JSON.parse(guest.notifications as string).filter(
+        JSON.parse(guest?.notifications as string ?? "").filter(
           (n: GuestNotification) => n.status === "Active"
         )
       );
@@ -59,7 +64,7 @@ function NewVisitView() {
 
       <Notifications data={notifications} />
 
-      <RequestedServices data={services} />
+      <RequestedServices data={serviceTypes} />
     </>
   );
 
@@ -218,10 +223,12 @@ function NewVisitView() {
 
     /** Map services to `Select` options */
     function servicesOpts() {
-      return services.map((s: GuestService) => ({
-        value: s.service_id.toString(),
-        label: s.service_name,
-      }));
+      return (
+        serviceTypes?.map((s: GuestService) => ({
+          value: s.service_id.toString(),
+          label: s.service_name,
+        })) ?? []
+      );
     }
 
     function logVisit() {
