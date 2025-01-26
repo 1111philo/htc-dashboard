@@ -4,20 +4,21 @@ import { Col, ListGroup, Row, Table, Container } from "react-bootstrap";
 export const Route = createFileRoute("/guests_/$guestId")({
   component: GuestProfileView,
   parseParams: (params): { guestId: number } => ({
-    guestId: parseInt(params.guestId)
+    guestId: parseInt(params.guestId),
   }),
   loader: async ({ params }) => {
-    const response = await fetch("../../sample-data/get_guests__true_format.json")
-    const guests = await response.json()
-    const { guestId } = params
-    const guest = guestFromId(guestId, guests)
-    return { guest }
-  }
+    const response = await fetch(
+      "../../sample-data/get_guests__true_format.json"
+    );
+    const guests = await response.json();
+    const { guestId } = params;
+    const guest = guestFromId(guestId, guests);
+    return { guest };
+  },
 });
 
 export default function GuestProfileView() {
-  const { guestId } = Route.useParams();
-  const { guest } = Route.useLoaderData()
+  const { guest } = Route.useLoaderData();
 
   const guestFullName = `${guest.first_name} ${guest.last_name}`;
 
@@ -35,7 +36,7 @@ export default function GuestProfileView() {
   const archiveNotifications = notifications.filter(
     (n) => n.status === "Archived"
   );
-  notifications = [...activeNotifications, ...archiveNotifications]
+  notifications = [...activeNotifications, ...archiveNotifications];
 
   return (
     <>
@@ -58,33 +59,41 @@ export default function GuestProfileView() {
       <div>
         <h2>Notifications</h2>
         <ListGroup>
-        {notifications.map((n, i) => {
-            return (
-              <NotificationListItem key={i} n={n} i={i} />
-            );
+          {notifications.map((n, i) => {
+            return <NotificationListItem key={i} n={n} i={i} />;
           })}
         </ListGroup>
       </div>
     );
 
     function NotificationListItem({ n, i }) {
-      return <ListGroup.Item className="p-0">
-        <Container>
-          <Row
-            className={"flex-nowrap align-items-center " +
-              (isEven(i) ? "bg-secondary bg-opacity-10" : "bg-white")}
-          >
-            <Col>{n.created_at}</Col>
-            <Col xs={6}>{n.message}</Col>
-            <Col className="text-center">
-              <span className={"badge rounded-pill bg-opacity-100 " +
-                (n.status === "Active" ? "text-bg-warning" : "text-bg-secondary")}>
-                {n.status}
-              </span>
-            </Col>
-          </Row>
-        </Container>
-      </ListGroup.Item>;
+      return (
+        <ListGroup.Item className="p-0">
+          <Container>
+            <Row
+              className={
+                "flex-nowrap align-items-center " +
+                (isEven(i) ? "bg-secondary bg-opacity-10" : "bg-white")
+              }
+            >
+              <Col>{n.created_at}</Col>
+              <Col xs={6}>{n.message}</Col>
+              <Col className="text-center">
+                <span
+                  className={
+                    "badge rounded-pill bg-opacity-100 " +
+                    (n.status === "Active"
+                      ? "text-bg-warning"
+                      : "text-bg-secondary")
+                  }
+                >
+                  {n.status}
+                </span>
+              </Col>
+            </Row>
+          </Container>
+        </ListGroup.Item>
+      );
     }
   }
 
@@ -117,8 +126,6 @@ export default function GuestProfileView() {
       </ListGroup.Item>
     );
   }
-
-
 }
 
 function guestFromId(id: number, guests: Guest[]): Guest | null {
