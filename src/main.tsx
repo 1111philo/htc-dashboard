@@ -1,15 +1,12 @@
 import ReactDOM from "react-dom/client";
-import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { routeTree } from './routeTree.gen'
-import { notFoundRoute } from "./notFoundRoute";
+import { RouterProvider, } from "@tanstack/react-router";
+import { router } from "./router";
 
 declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router
   }
 }
-
-const router = createRouter({ routeTree, notFoundRoute })
 
 const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {

@@ -3,6 +3,14 @@
 // DB -- Keep updated
 // TODO: where is the source of truth?
 
+interface User {
+  user_id: number;
+  email: string;
+  role: "admin" | "manager";
+  created_at: string;
+  updated_at: string;
+}
+
 interface Guest {
   total_guests: number;
   guest_id: number;
@@ -38,6 +46,14 @@ interface Visit {
   visit_id: number;
   guest_id: number;
   service_ids: number;
+  created_at: string;
+  updated_at: string;
+}
+
+interface ServiceType {
+  service_id: number;
+  service_name: string;
+  quota: number | null;
   created_at: string;
   updated_at: string;
 }

@@ -8,5 +8,6 @@
     "lib": ["ES6", "DOM"],
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "strictNullChecks": true,
   }
 }
