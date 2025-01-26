@@ -4,6 +4,7 @@ import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 
 import mockGuests from "../../sample-data/get_guests__true_format.json";
+import { today } from "../lib/utility-funcs";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/new-visit")({
 });
 
 function NewVisitView() {
-  const [showAddNewGuest, setShowAddNewGuest] = useState(false);
+  const [showNewGuestModal, setShowNewGuestModal] = useState(false);
   const [selectedGuestOpt, setSelectedGuestOpt] =
     useState<ReactSelectOption>(null);
   const [selectedServicesOpt, setSelectedServicesOpt] = useState<
@@ -51,12 +52,12 @@ function NewVisitView() {
       {/* TODO: on add new guest, add the new guest to `guests` and fill in the guest Select */}
       <div className="d-flex gap-3">
         <h2>Guest</h2>
-        <Button variant="primary" onClick={() => setShowAddNewGuest(true)}>
+        <Button variant="primary" onClick={() => setShowNewGuestModal(true)}>
           New Guest
         </Button>
       </div>
 
-      <Modal show={showAddNewGuest}>
+      <Modal show={showNewGuestModal}>
         <AddNewGuestForm />
       </Modal>
 
@@ -71,7 +72,7 @@ function NewVisitView() {
   function AddNewGuestForm() {
     return (
       <div className="p-3">
-        <h2 className="pb-3">Add New Guest</h2>
+        <h2 className="mb-3">Add New Guest</h2>
         <Form onSubmit={submitNewGuestForm}>
           <Form.Group className="mb-3">
             <Form.Label>First Name</Form.Label>
@@ -82,7 +83,7 @@ function NewVisitView() {
             <Form.Control type="text" />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Birthday (YYYY/MM/DD)</Form.Label>
+            <Form.Label>Birthday</Form.Label>
             <Form.Control
               type="date"
               min="1911-11-11" // ✨
@@ -94,7 +95,7 @@ function NewVisitView() {
               variant="danger"
               type="button"
               onClick={() => {
-                setShowAddNewGuest(false);
+                setShowNewGuestModal(false);
               }}
             >
               Cancel
@@ -114,7 +115,7 @@ function NewVisitView() {
 
       const { success } = { success: true }; // placeholder
       if (success) {
-        setShowAddNewGuest(false);
+        setShowNewGuestModal(false);
         // TODO: report success with a toast (or anything, for now)
       }
     }
@@ -239,8 +240,4 @@ function NewVisitView() {
   }
 }
 
-// UTIL
-/** Return today's date in YYYY/MM/DD format. */
-function today(): string {
-  return new Date().toISOString().split("T")[0];
-}
+
