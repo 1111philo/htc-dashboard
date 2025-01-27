@@ -138,7 +138,7 @@ function GuestsView() {
         </thead>
         <tbody>
           {paginatedData.map((g) => {
-            const notificationCount = g.notifications.length;
+            const notificationCount = JSON.parse(g.notifications).length;
             const pillColor =
               notificationCount >= 3
                 ? "danger"
