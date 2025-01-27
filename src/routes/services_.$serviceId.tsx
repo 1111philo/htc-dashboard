@@ -2,18 +2,42 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button, Modal, Form, Table } from "react-bootstrap";
 
-import guests from "../../sample-data/get_guests.json";
+import mockGuests from "../../sample-data/get_guests.json";
 import mockServices from "../../sample-data/get_services.json";
+import mockServiceSlots from '../../sample-data/get_service_slots.json'
 
 export const Route = createFileRoute("/services_/$serviceId")({
   component: ServiceView,
+  parseParams: (params): { serviceId: number } => ({
+    serviceId: parseInt(params.serviceId),
+  }),
+  loader: ({ params: { serviceId }}) => {
+    let serviceSlots;
+    // fetch service by ID
+    const service = mockServices.find(({ service_id }) => service_id === serviceId)
+    if (service.quota) {
+      // fetch active slots
+      serviceSlots = mockServiceSlots.filter((slot) => slot.service_id === serviceId)
+    }
+
+    return {
+      service,
+      serviceSlots
+    }
+  }
 });
 
-function ServiceView(/* { service } */) {
-  // TEMP so the component isn't broken
-  const service = mockServices[0];
+function ServiceView() {
+  console.log("mackGuests", mockGuests);
+  const { service, serviceSlots } = Route.useLoaderData()
 
   const [showEditModal, setShowEditModal] = useState(false);
+
+  // // sort guests with service by time queued_at
+  // const sortedMockGuests = mockGuests.sort((guestA.services[0], guestB) => {
+  //   // guests have an array of services
+  //   // i need only the services that match serviceId
+  // })
 
   const handleMoveToCompleted = () => {};
 
@@ -23,7 +47,7 @@ function ServiceView(/* { service } */) {
 
   return (
     <>
-      <h1>{service.service_name}s</h1>
+      <h1>{ service.service_name }s</h1>
       <Button onClick={() => setShowEditModal(true)}>Edit Service</Button>
       <Modal show={showEditModal}>
         <Modal.Header closeButton>
@@ -47,7 +71,7 @@ function ServiceView(/* { service } */) {
           <Button variant="primary">Save changes</Button>
         </Modal.Footer>
       </Modal>
-      {service.quota ? (
+      { service.quota ? (
         <>
           <h2>Slots</h2>
           <Table responsive={true}>
@@ -62,15 +86,13 @@ function ServiceView(/* { service } */) {
             <tbody>
               {
                 // for every slot, check if there is a guest with a `service.slot_occupied` matching slot number
-                Array.from({ length: service.quota }).map((_, slotIndex) => {
-                  const guest = guests.find(({ services }) =>
-                    services.some(
-                      (service) => service.slot_occupied === slotIndex + 1
-                    )
+                serviceSlots.map((slot, slotIndex) => {
+                  const guest = mockGuests.find((guest) =>
+                    guest.guest_id === slot.guest_id
                   );
 
                   if (guest) {
-                    const { guest_id, first_name, last_name, services } = guest;
+                    const { guest_id, first_name, last_name } = guest;
                     const nameAndID = `${first_name} ${last_name} (${guest_id})`;
 
                     return (
@@ -116,18 +138,24 @@ function ServiceView(/* { service } */) {
           </tr>
         </thead>
         <tbody>
-          {guests.map(({ guest_id, first_name, last_name, services }) => {
+          { mockGuests.map(({ guest_id, first_name, last_name, services }) => {
             const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
-            const queuedServices = services.filter(
+            const queuedServices = JSON.parse(services).filter(
               (service) => service.status === "Queued"
-            );
+            )
+            // .sort(
+            //   (a, b) =>
+            //     new Date(a.queued_at).getTime() - new Date(b.queued_at).getTime()
+            // )
+            // console.log("queuedservices", queuedServices)
+
             return queuedServices.map((queuedService, i) => {
               return (
                 <tr key={i}>
                   <td>{queuedService.queued_at}</td>
                   <td>{nameAndID}</td>
                   <td>
-                    {service.quota ? (
+                    { service.quota ? (
                       <Form.Select aria-label="Select which slot to assign">
                         <option>Assign Slot</option>
                         {Array.from({ length: 10 }).map((_, i) => {
@@ -144,7 +172,11 @@ function ServiceView(/* { service } */) {
                   </td>
                 </tr>
               );
-            });
+            })
+            .sort(
+              (a, b) =>
+                new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+            )
           })}
         </tbody>
       </Table>
@@ -158,9 +190,9 @@ function ServiceView(/* { service } */) {
           </tr>
         </thead>
         <tbody>
-          {guests.map(({ guest_id, first_name, last_name, services }) => {
+          { mockGuests.map(({ guest_id, first_name, last_name, services }) => {
             const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
-            const completedServices = services.filter(
+            const completedServices = JSON.parse(services).filter(
               (service) => service.status === "Completed"
             );
             return completedServices.map((completeService, i) => {
