@@ -1,6 +1,7 @@
 import {
   createRootRouteWithContext,
   Outlet,
+  redirect,
   useRouteContext,
   useRouter,
 } from "@tanstack/react-router";
@@ -8,28 +9,23 @@ import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import App from "../App";
 
-// TODO - add auth status
+/* NOTE: auth state is handled by useGlobalStore (zustand) */
+
 interface AppContext {
-  user: User | null;
   // needed by: new visit view, guest profile view, services nav dropdown
-  serviceTypes: ServiceType[] | null;
+  serviceTypes: ServiceType[];
   hideNav: boolean;
 }
 
 export const appContext: AppContext = {
-  user: null,
-  serviceTypes: null,
+  serviceTypes: [],
   hideNav: false,
 };
 
 export const Route = createRootRouteWithContext<AppContext>()({
-  component: () => {
-    const r = useRouter();
-    if (r.state.location.pathname === "/login") return <Outlet />;
-    return <App />;
-  },
-  beforeLoad: async (): Promise<Partial<AppContext>> => {
-    // this poorly named function returns ctx that gets mixed into the parent ctx
+  component: App,
+  // this poorly named function returns ctx that gets mixed into the parent ctx (no parent here cuz root)
+  beforeLoad: async ({ context }): Promise<Partial<AppContext>> => {
     const { serviceTypes } = await fetchGlobalData();
     return { serviceTypes };
   },

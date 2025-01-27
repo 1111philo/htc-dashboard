@@ -1,5 +1,5 @@
 import { createFileRoute, PathParamError } from "@tanstack/react-router";
-import { isEven, today } from "../lib/utility-funcs";
+import { today } from "../lib/utils";
 import StripedListRow from "../lib/components/StripedListRow";
 import {
   Col,

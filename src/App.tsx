@@ -1,56 +1,28 @@
 import { Suspense } from "react";
-
-import { Outlet, Link as RouterNavLink } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link as RouterNavLink,
+  useNavigate,
+  useRouterState,
+} from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-
-import { Amplify } from "aws-amplify";
-import * as Auth from "aws-amplify/auth";
 
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
-
 import { Container, Nav, NavDropdown } from "react-bootstrap";
 
-Amplify.configure(
-  {
-    Auth: {
-      Cognito: {
-        userPoolId: import.meta.env.VITE_USERPOOLID,
-        userPoolClientId: import.meta.env.VITE_USERPOOLWEBCLIENTID,
-      },
-    },
-    API: {
-      REST: {
-        public: {
-          endpoint: `${import.meta.env.VITE_API_URL}/public`,
-        },
-        auth: {
-          endpoint: `${import.meta.env.VITE_API_URL}/auth`,
-        },
-      },
-    },
-  },
-  {
-    API: {
-      REST: {
-        headers: async ({ apiName }) =>
-          apiName === "auth"
-            ? {
-                Authorization: `Bearer ${(
-                  await Auth.fetchAuthSession()
-                ).tokens?.idToken?.toString()}`,
-              }
-            : { "X-Api-Key": "1" },
-      },
-    },
-  }
-);
+import * as auth from "./lib/auth";
+
+auth.configure();
 
 export default function App() {
+  const isLoginRoute = useRouterState().location.pathname === "/login";
   return (
     <>
       <Container className="mt-4">
-        <AppNav />
+        {
+          !isLoginRoute && <AppNav /> // hide nav when user navigates to /login after login in (edge case)
+        }
         <main>
           <Outlet />
         </main>
@@ -70,6 +42,7 @@ export default function App() {
 }
 
 function AppNav() {
+  const navigate = useNavigate();
   return (
     <div className="d-flex justify-content-center">
       <Nav variant="tabs" className="mb-4 m-auto">
@@ -93,7 +66,11 @@ function AppNav() {
             Create Service
           </NavDropdown.Item>
           <NavDropdown.Divider />
-          <NavDropdown.Item as={RouterNavLink} to="/services/$serviceId" eventKey="5.2">
+          <NavDropdown.Item
+            as={RouterNavLink}
+            to="/services/$serviceId"
+            eventKey="5.2"
+          >
             Shower
           </NavDropdown.Item>
         </NavDropdown>
@@ -106,6 +83,9 @@ function AppNav() {
           <Nav.Link as={RouterNavLink} to="/users" eventKey="7">
             Users
           </Nav.Link>
+        </Nav.Item>
+        <Nav.Item>
+          <Nav.Link onClick={() => auth.logout(navigate)}>Log Out</Nav.Link>
         </Nav.Item>
       </Nav>
     </div>

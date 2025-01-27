@@ -1,18 +1,17 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
+import * as auth from "../lib/auth";
 
 export const Route = createFileRoute("/login")({
   component: LoginView,
-  beforeLoad: ({ context }) => {
-    // don't show root layout on this page
-    context.hideNav = true;
-    return { hideNav: true };
+  beforeLoad: async () => {
+    if (await auth.isLoggedIn()) throw redirect({ to: "/" });
   },
 });
 
-/* NOTE: NOTHING IS REDIRECTING HERE YET */
-
-function LoginView() {
+export function LoginView() {
+  const [errorMsg, setErrorMsg] = useState("");
   return (
     <Container className="vh-100 d-flex align-items-center justify-content-center">
       <Row>
@@ -22,11 +21,7 @@ function LoginView() {
               <h2 className="text-center mb-4">Harry Tompson Center</h2>
               <Form onSubmit={onSubmit}>
                 <Form.Group className="mb-3">
-                  <Form.Control
-                    type="text"
-                    placeholder="Username"
-                    name="username"
-                  />
+                  <Form.Control type="email" placeholder="Email" name="email" />
                 </Form.Group>
 
                 <Form.Group className="mb-3">
@@ -47,6 +42,7 @@ function LoginView() {
                   Log In
                 </Button>
               </Form>
+              <p className="mt-3 text-danger">{errorMsg}</p>
             </Card.Body>
           </Card>
         </Col>
@@ -54,12 +50,12 @@ function LoginView() {
     </Container>
   );
 
-  function onSubmit(evt) {
+  async function onSubmit(evt) {
     evt.preventDefault();
-    const formData = {
-      username: evt.target.username.value,
-      password: evt.target.password.value,
-    };
-    console.log("Form submitted:", formData);
+    const success = await auth.login(
+      evt.target.email.value.trim(),
+      evt.target.password.value.trim()
+    );
+    !success && setErrorMsg("Incorrect username or password.");
   }
 }

@@ -4,7 +4,7 @@ import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 
 import mockGuests from "../../sample-data/get_guests__true_format.json";
-import { today } from "../lib/utility-funcs";
+import { today } from "../lib/utils";
 
 interface LoaderData {
   serviceTypes: ServiceType[];

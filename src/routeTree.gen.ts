@@ -18,6 +18,7 @@ import { Route as NewNotificationImport } from './routes/new-notification'
 import { Route as LoginImport } from './routes/login'
 import { Route as GuestsImport } from './routes/guests'
 import { Route as AddServiceImport } from './routes/add-service'
+import { Route as IndexImport } from './routes/index'
 import { Route as UsersUserIdImport } from './routes/users_.$userId'
 import { Route as ServicesServiceIdImport } from './routes/services_.$serviceId'
 import { Route as GuestsGuestIdImport } from './routes/guests_.$guestId'
@@ -66,6 +67,12 @@ const AddServiceRoute = AddServiceImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const IndexRoute = IndexImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const UsersUserIdRoute = UsersUserIdImport.update({
   id: '/users_/$userId',
   path: '/users/$userId',
@@ -88,6 +95,13 @@ const GuestsGuestIdRoute = GuestsGuestIdImport.update({
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexImport
+      parentRoute: typeof rootRoute
+    }
     '/add-service': {
       id: '/add-service'
       path: '/add-service'
@@ -164,6 +178,7 @@ declare module '@tanstack/react-router' {
 // Create and export the route tree
 
 export interface FileRoutesByFullPath {
+  '/': typeof IndexRoute
   '/add-service': typeof AddServiceRoute
   '/guests': typeof GuestsRoute
   '/login': typeof LoginRoute
@@ -177,6 +192,7 @@ export interface FileRoutesByFullPath {
 }
 
 export interface FileRoutesByTo {
+  '/': typeof IndexRoute
   '/add-service': typeof AddServiceRoute
   '/guests': typeof GuestsRoute
   '/login': typeof LoginRoute
@@ -191,6 +207,7 @@ export interface FileRoutesByTo {
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
+  '/': typeof IndexRoute
   '/add-service': typeof AddServiceRoute
   '/guests': typeof GuestsRoute
   '/login': typeof LoginRoute
@@ -206,6 +223,7 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/add-service'
     | '/guests'
     | '/login'
@@ -218,6 +236,7 @@ export interface FileRouteTypes {
     | '/users/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/add-service'
     | '/guests'
     | '/login'
@@ -230,6 +249,7 @@ export interface FileRouteTypes {
     | '/users/$userId'
   id:
     | '__root__'
+    | '/'
     | '/add-service'
     | '/guests'
     | '/login'
@@ -244,6 +264,7 @@ export interface FileRouteTypes {
 }
 
 export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
   AddServiceRoute: typeof AddServiceRoute
   GuestsRoute: typeof GuestsRoute
   LoginRoute: typeof LoginRoute
@@ -257,6 +278,7 @@ export interface RootRouteChildren {
 }
 
 const rootRouteChildren: RootRouteChildren = {
+  IndexRoute: IndexRoute,
   AddServiceRoute: AddServiceRoute,
   GuestsRoute: GuestsRoute,
   LoginRoute: LoginRoute,
@@ -279,6 +301,7 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
+        "/",
         "/add-service",
         "/guests",
         "/login",
@@ -290,6 +313,9 @@ export const routeTree = rootRoute
         "/services_/$serviceId",
         "/users_/$userId"
       ]
+    },
+    "/": {
+      "filePath": "index.tsx"
     },
     "/add-service": {
       "filePath": "add-service.tsx"
