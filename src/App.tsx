@@ -6,6 +6,8 @@ import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { Amplify } from "aws-amplify";
 import * as Auth from "aws-amplify/auth";
 
+import services from '../sample-data/get_services.json'
+
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 
@@ -93,9 +95,20 @@ function AppNav() {
             Create Service
           </NavDropdown.Item>
           <NavDropdown.Divider />
-          <NavDropdown.Item as={RouterNavLink} to="/services/$serviceId" eventKey="5.2">
-            Shower
-          </NavDropdown.Item>
+          {
+            services.map(({ service_id, service_name }, i) => {
+              return (
+                <NavDropdown.Item
+                  as={RouterNavLink}
+                  to={`/services/${service_id}`}
+                  eventKey="5.2"
+                  key={i}
+                >
+                  {service_name}
+                </NavDropdown.Item>
+              )
+            })
+          }
         </NavDropdown>
         <Nav.Item>
           <Nav.Link as={RouterNavLink} to="/guests" eventKey="6">
