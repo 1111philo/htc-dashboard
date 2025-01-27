@@ -1,4 +1,4 @@
-import { isEven } from "../utility-funcs";
+import { isEven } from "../utils";
 import { Container, ListGroup, Row } from "react-bootstrap";
 
 export default function StripedListRow({ children, i }) {

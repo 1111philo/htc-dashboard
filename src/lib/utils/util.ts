@@ -8,3 +8,7 @@ export function today(): string {
 export function isEven(num) {
   return (num & 1) === 0;
 }
+
+export async function sleep(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
