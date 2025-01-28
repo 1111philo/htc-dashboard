@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
+import { FeedbackMessage } from "../lib/components/FeedbackMessage";
 
 import { today } from "../lib/utils";
-import { getGuest, getGuests } from "../lib/api/guest";
+import { addGuest, getGuest, getGuests } from "../lib/api/guest";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
@@ -24,7 +25,13 @@ function NewVisitView() {
   const { guestsResponse, serviceTypes } = Route.useLoaderData();
   const guests = guestsResponse.rows;
 
+  const [feedback, setFeedback] = useState<UserMessage>({
+    text: "",
+    isError: false,
+  });
+
   const [showNewGuestModal, setShowNewGuestModal] = useState(false);
+  const [newGuest, setNewGuest] = useState<Partial<Guest> | null>(null);
 
   const [selectedGuestOpt, setSelectedGuestOpt] =
     useState<ReactSelectOption | null>(null);
@@ -34,10 +41,20 @@ function NewVisitView() {
 
   const [notifications, setNotifications] = useState<GuestNotification[]>([]);
 
+  // set selected guest when new guest if exists
+  useEffect(() => {
+    if (!newGuest) return;
+    setSelectedGuestOpt({
+      value: newGuest.guest_id?.toString()!,
+      label: guestOptLabel(newGuest),
+    });
+  }, [newGuest]);
+
   // get notifications from selected guest
   useEffect(() => {
     if (selectedGuestOpt) {
       getGuest(+selectedGuestOpt.value).then((g) => {
+        if (!g.guest_notifications) return; // new guest is partial, no notifications key
         setNotifications(
           (g.guest_notifications as GuestNotification[]).filter(
             (n: GuestNotification) => n.status === "Active"
@@ -58,6 +75,8 @@ function NewVisitView() {
         </Button>
       </div>
 
+      <FeedbackMessage text={feedback.text} isError={feedback.isError} />
+
       <Modal show={showNewGuestModal}>
         <AddNewGuestForm />
       </Modal>
@@ -71,21 +90,31 @@ function NewVisitView() {
   );
 
   function AddNewGuestForm() {
+    const [formFeedback, setFormFeedback] = useState<UserMessage>({
+      text: "",
+      isError: false,
+    });
     return (
       <div className="p-3">
         <h2 className="mb-3">Add New Guest</h2>
+        <FeedbackMessage
+          text={formFeedback.text}
+          isError={formFeedback.isError}
+        />
         <Form onSubmit={submitNewGuestForm}>
           <Form.Group className="mb-3">
             <Form.Label>First Name</Form.Label>
-            <Form.Control type="text" />
+            <Form.Control id="input-first-name" name="first_name" />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Last Name</Form.Label>
-            <Form.Control type="text" />
+            <Form.Control id="input-last-name" name="last_name" />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>Birthday</Form.Label>
             <Form.Control
+              id="input-dob"
+              name="dob"
               type="date"
               min="1911-11-11" // ✨
               max={today()}
@@ -109,14 +138,24 @@ function NewVisitView() {
       </div>
     );
 
-    function submitNewGuestForm(evt: SubmitEvent) {
-      evt.preventDefault();
-      // TODO: fetch/POST new guest
-      const { success } = { success: true }; // placeholder
-      if (success) {
-        setShowNewGuestModal(false);
-        // TODO: report success with a toast (or anything, for now)
+    // TODO: require at least 2 fields!
+    async function submitNewGuestForm(e: SubmitEvent) {
+      e.preventDefault();
+      const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
+      const guest_id = await addGuest(guest);
+      if (!guest_id) {
+        setFormFeedback({
+          text: "Failed to create guest. Try again in a few.",
+          isError: true,
+        });
+        return;
       }
+      setShowNewGuestModal(false);
+      setFeedback({
+        text: `Guest created successfully! ID: ${guest_id}`,
+        isError: false,
+      });
+      setNewGuest({ ...guest, guest_id });
     }
   }
 
@@ -129,7 +168,17 @@ function NewVisitView() {
           </Form.Label>
           <Select
             id="user-dropdown"
-            options={guestLookupOpts(guests)}
+            options={
+              newGuest
+                ? [
+                    {
+                      value: newGuest.guest_id,
+                      label: guestOptLabel(newGuest),
+                    },
+                    ...guestLookupOpts(guests),
+                  ]
+                : guestLookupOpts(guests)
+            }
             value={selectedGuestOpt}
             onChange={(newVal) => setSelectedGuestOpt(newVal)}
           />
@@ -142,7 +191,7 @@ function NewVisitView() {
       return guests.map((g) => {
         return {
           value: g.guest_id,
-          label: `${g.guest_id} : ${g.first_name} ${g.last_name} : ${g.dob}`,
+          label: guestOptLabel(g),
         };
       });
     }
@@ -235,5 +284,9 @@ function NewVisitView() {
       const serviceIds = selectedServicesOpt.value;
       // TODO: POST
     }
+  }
+
+  function guestOptLabel(g) {
+    return `${g.guest_id} : ${g.first_name} ${g.last_name} : ${g.dob}`;
   }
 }
