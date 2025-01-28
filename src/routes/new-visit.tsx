@@ -6,6 +6,7 @@ import { FeedbackMessage } from "../lib/components/FeedbackMessage";
 
 import { today } from "../lib/utils";
 import { addGuest, getGuest, getGuests } from "../lib/api/guest";
+import { addVisit } from "../lib/api/visit";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
@@ -75,7 +76,11 @@ function NewVisitView() {
         </Button>
       </div>
 
-      <FeedbackMessage text={feedback.text} isError={feedback.isError} />
+      <FeedbackMessage
+        text={feedback.text}
+        isError={feedback.isError}
+        className="my-3"
+      />
 
       <Modal show={showNewGuestModal}>
         <AddNewGuestForm />
@@ -279,14 +284,36 @@ function NewVisitView() {
       );
     }
 
-    function logVisit() {
-      const guestId = selectedGuestOpt.value;
-      const serviceIds = selectedServicesOpt.value;
-      // TODO: POST
+    async function logVisit(e) {
+      e.preventDefault();
+      // TODO validate "form"
+      const v = {
+        guest_id: +selectedGuestOpt.value,
+        service_ids: selectedServicesOpt.map(({ value }) => +value),
+      };
+      const visitId = await addVisit(v);
+      if (!visitId) {
+        setFeedback({
+          text: "Failed to create the visit. Try again in a few.",
+          isError: true,
+        });
+        return;
+      }
+      setShowNewGuestModal(false);
+      setFeedback({
+        text: `Visit created successfully! ID: ${visitId}`,
+        isError: false,
+      });
+      clearInputs();
     }
   }
 
   function guestOptLabel(g) {
     return `${g.guest_id} : ${g.first_name} ${g.last_name} : ${g.dob}`;
+  }
+
+  function clearInputs() {
+    setSelectedGuestOpt(null);
+    setSelectedServicesOpt([]);
   }
 }
