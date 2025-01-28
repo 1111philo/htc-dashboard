@@ -1,7 +1,15 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Table, Form, InputGroup, Pagination } from "react-bootstrap";
+import {
+  Table,
+  Form,
+  InputGroup,
+  Pagination,
+  Button,
+  Modal,
+} from "react-bootstrap";
 import { ArrowUpDown, Search } from "lucide-react";
+import NewGuestForm from "../lib/components/NewGuestForm";
 
 interface LoaderData {
   guests: Guest[];
@@ -29,6 +37,8 @@ function GuestsView() {
     direction: string | null;
   }>({ key: null, direction: null });
 
+  const [showNewGuestModal, setShowNewGuestModal] = useState(true);
+
   const filteredAndSortedData = useMemo(filterAndSort, [
     sortConfig,
     filterText,
@@ -42,12 +52,20 @@ function GuestsView() {
   const totalPages = Math.ceil(filteredAndSortedData.length / ITEMS_PER_PAGE);
 
   return (
-    <div>
-      <h1 className="mb-3">Guests</h1>
+    <>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h1 className="mb-3">Guests</h1>
+        <Button onClick={() => setShowNewGuestModal(true)}>New Guest</Button>
+      </div>
+
+      <Modal show={showNewGuestModal}>
+        <NewGuestForm setShowNewGuestModal={setShowNewGuestModal} />
+      </Modal>
+
       <SearchBar />
       <GuestsTable />
       <Paging />
-    </div>
+    </>
   );
 
   function filterAndSort(): Guest[] {

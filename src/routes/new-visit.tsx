@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import { FeedbackMessage } from "../lib/components/FeedbackMessage";
 
-import { today } from "../lib/utils";
-import { addGuest, getGuest, getGuests } from "../lib/api/guest";
-import { addVisit } from "../lib/api/visit";
+import {
+  getGuest,
+  getGuests,
+  getGuestsWithQueryDebounced,
+} from "../lib/api/guest";
+import NewGuestForm from "../lib/components/NewGuestForm";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
@@ -39,10 +42,34 @@ function NewVisitView() {
   const [selectedServicesOpt, setSelectedServicesOpt] = useState<
     ReactSelectOption[]
   >([]); // array bc this Select is set to multi
+  const [guestSelectOpts, setGuestSelectOpts] = useState<
+    { value: string; label: string }[]
+  >([]);
+  const [searchText, setSearchInput] = useState("");
+
+  // debounced guests query
+  useEffect(() => {
+    if (!searchText) {
+      setGuestSelectOpts([])
+      // TODO: do something here?
+      return;
+    }
+    getGuestsWithQueryDebounced(searchText.trim())
+    .then(guestsResponse => {
+      setGuestSelectOpts(guestLookupOpts(guestsResponse.rows));
+    });
+    guestSelectRef.current?.focus();
+  }, [searchText]);
+
+  useEffect(() => {
+    guestSelectRef.current?.focus();
+  }, [guestSelectOpts]); // Only re-focus when options change
 
   const [notifications, setNotifications] = useState<GuestNotification[]>([]);
 
-  // set selected guest when new guest if exists
+  const guestSelectRef = useRef(null);
+
+  // set selected guest to new guest if exists
   useEffect(() => {
     if (!newGuest) return;
     setSelectedGuestOpt({
@@ -83,7 +110,11 @@ function NewVisitView() {
       />
 
       <Modal show={showNewGuestModal}>
-        <AddNewGuestForm />
+        <NewGuestForm
+          setShowNewGuestModal={setShowNewGuestModal}
+          setNewGuest={setNewGuest}
+          setViewFeedback={setFeedback}
+        />
       </Modal>
 
       <SignInGuestForm />
@@ -94,76 +125,6 @@ function NewVisitView() {
     </>
   );
 
-  function AddNewGuestForm() {
-    const [formFeedback, setFormFeedback] = useState<UserMessage>({
-      text: "",
-      isError: false,
-    });
-    return (
-      <div className="p-3">
-        <h2 className="mb-3">Add New Guest</h2>
-        <FeedbackMessage
-          text={formFeedback.text}
-          isError={formFeedback.isError}
-        />
-        <Form onSubmit={submitNewGuestForm}>
-          <Form.Group className="mb-3">
-            <Form.Label>First Name</Form.Label>
-            <Form.Control id="input-first-name" name="first_name" />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Last Name</Form.Label>
-            <Form.Control id="input-last-name" name="last_name" />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label>Birthday</Form.Label>
-            <Form.Control
-              id="input-dob"
-              name="dob"
-              type="date"
-              min="1911-11-11" // ✨
-              max={today()}
-            />
-          </Form.Group>
-          <div className="d-flex justify-content-between">
-            <Button
-              variant="danger"
-              type="button"
-              onClick={() => {
-                setShowNewGuestModal(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Submit
-            </Button>
-          </div>
-        </Form>
-      </div>
-    );
-
-    // TODO: require at least 2 fields!
-    async function submitNewGuestForm(e: SubmitEvent) {
-      e.preventDefault();
-      const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
-      const guest_id = await addGuest(guest);
-      if (!guest_id) {
-        setFormFeedback({
-          text: "Failed to create guest. Try again in a few.",
-          isError: true,
-        });
-        return;
-      }
-      setShowNewGuestModal(false);
-      setFeedback({
-        text: `Guest created successfully! ID: ${guest_id}`,
-        isError: false,
-      });
-      setNewGuest({ ...guest, guest_id });
-    }
-  }
-
   function SignInGuestForm() {
     return (
       <Form className="mt-3 my-5">
@@ -173,33 +134,23 @@ function NewVisitView() {
           </Form.Label>
           <Select
             id="user-dropdown"
+            ref={guestSelectRef}
             options={
               newGuest
-                ? [
-                    {
-                      value: newGuest.guest_id,
-                      label: guestOptLabel(newGuest),
-                    },
-                    ...guestLookupOpts(guests),
-                  ]
-                : guestLookupOpts(guests)
+                ? [{ value: newGuest.guest_id, label: guestOptLabel(newGuest) }]
+                : guestSelectOpts
             }
+            defaultValue={selectedGuestOpt}
+            defaultInputValue={searchText}
             value={selectedGuestOpt}
             onChange={(newVal) => setSelectedGuestOpt(newVal)}
+            onInputChange={(value) => setSearchInput(value)}
+            menuIsOpen={!!searchText}
+            placeholder={"Search for a guest..."}
           />
         </Form.Group>
       </Form>
     );
-
-    /** Map guests to `Select` options */
-    function guestLookupOpts(guests: Guest[]) {
-      return guests.map((g) => {
-        return {
-          value: g.guest_id,
-          label: guestOptLabel(g),
-        };
-      });
-    }
   }
 
   function Notifications({ data }) {
@@ -284,28 +235,21 @@ function NewVisitView() {
       );
     }
 
-    async function logVisit(e) {
-      e.preventDefault();
-      // TODO validate "form"
-      const v = {
-        guest_id: +selectedGuestOpt.value,
-        service_ids: selectedServicesOpt.map(({ value }) => +value),
-      };
-      const visitId = await addVisit(v);
-      if (!visitId) {
-        setFeedback({
-          text: "Failed to create the visit. Try again in a few.",
-          isError: true,
-        });
-        return;
-      }
-      setShowNewGuestModal(false);
-      setFeedback({
-        text: `Visit created successfully! ID: ${visitId}`,
-        isError: false,
-      });
-      clearInputs();
+    function logVisit() {
+      const guestId = selectedGuestOpt.value;
+      const serviceIds = selectedServicesOpt.value;
+      // TODO: POST
     }
+  }
+
+  /** Map guests to `Select` options */
+  function guestLookupOpts(guests: Guest[]): ReactSelectOption[] {
+    return guests.map((g) => {
+      return {
+        value: g.guest_id.toString(),
+        label: guestOptLabel(g),
+      };
+    });
   }
 
   function guestOptLabel(g) {

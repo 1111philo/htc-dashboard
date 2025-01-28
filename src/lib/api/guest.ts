@@ -1,17 +1,17 @@
 /** Guest-related API calls */
 
 import * as API from "aws-amplify/api";
+import { debounce } from "../utils";
+import { pageOffset } from "../utils";
 
-export async function addGuest(
-  g: Partial<Guest>
-): Promise<number | null> {
+export async function addGuest(g: Partial<Guest>): Promise<number | null> {
   const response = await API.post({
     apiName: "auth",
     path: "/addGuest",
     options: { body: { ...(g as FormData) } },
   }).response;
-  const { guest_id }: {guest_id: number} = (await response.body.json())
-  return guest_id
+  const { guest_id }: { guest_id: number } = await response.body.json();
+  return guest_id;
 }
 
 export async function getGuest(id: number): Promise<GuestDataAPIResponse> {
@@ -24,11 +24,33 @@ export async function getGuest(id: number): Promise<GuestDataAPIResponse> {
   return guestResponse;
 }
 
-export async function getGuests() {
+export async function getGuests(
+  pageNum: number,
+  limit = 10
+): Promise<GuestsAPIResponse> {
+  const offset = pageOffset(pageNum);
   const response = await API.post({
     apiName: "auth",
     path: "/getGuests",
+    options: { body: { offset, limit } },
   }).response;
   const guestsResponse = (await response.body.json()) as GuestsAPIResponse;
   return guestsResponse;
 }
+
+/** Get guests with search query - first, last, dob, id. */
+async function getGuestsWithQuery(query): Promise<GuestsAPIResponse> {
+  const response = await API.post({
+    apiName: "auth",
+    path: "/getGuests",
+    options: { body: { query, offset: 0, limit: 50_000 } },
+  }).response;
+  const guestsResponse = (await response.body.json()) as GuestsAPIResponse;
+  return guestsResponse;
+}
+
+/** Get guests with search query - first, last, dob, id -- debounced. */
+export const getGuestsWithQueryDebounced = debounce(
+  (query) => getGuestsWithQuery(query),
+  1500
+);

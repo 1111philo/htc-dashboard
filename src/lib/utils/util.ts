@@ -25,3 +25,21 @@ export function isEven(num) {
 export async function sleep(ms) {
   await new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export function debounce<T>(func: (...args: any[]) => Promise<T>, delay = 500) {
+  let timeoutId: number;
+  return (...args: any[]): Promise<T> => {
+    return new Promise((resolve) => {
+      window.clearTimeout(timeoutId);
+      timeoutId = window.setTimeout(async () => {
+        const result = await func(...args);  // This passes the search query through
+        resolve(result);
+      }, delay);
+    });
+  };
+}
+
+/** Return an offset for use in API calls for paginated data. */
+export function pageOffset(pageNum: number): number {
+  return pageNum * 10 - 10;
+}
