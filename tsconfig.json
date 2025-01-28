@@ -5,8 +5,9 @@
     ],
     "baseUrl": ".",
     "jsx": "react-jsx",
-    "lib": ["ES6", "DOM"],
+    "lib": ["DOM", "ES2018"],
     "resolveJsonModule": true,
     "esModuleInterop": true,
+    "strictNullChecks": true,
   }
 }

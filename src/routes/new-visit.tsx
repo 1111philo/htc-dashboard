@@ -1,25 +1,44 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
-import { Button, Form, Modal, Table } from "react-bootstrap";
+import { useEffect, useState } from "react";
+import { createFileRoute, useLoaderData } from "@tanstack/react-router";
 import Select from "react-select";
+import { Button, Form, Modal, Table } from "react-bootstrap";
 
-import mockGuests from "../../sample-data/get_guests.json";
-import mockServices from "../../sample-data/get_services.json";
+import mockGuests from "../../sample-data/get_guests__true_format.json";
+import { today } from "../lib/utils";
 
-export default function NewVisitView() {
-  const [showAddNewGuest, setShowAddNewGuest] = useState(false);
-  const [selectedGuestOpt, setSelectedGuestOpt] = useState<ReactSelectOption>(null);
-  const [selectedServicesOpt, setSelectedServicesOpt] = useState<ReactSelectOption[]>([]); // array bc this Select is set to multi
+interface LoaderData {
+  serviceTypes: ServiceType[];
+}
+
+export const Route = createFileRoute("/new-visit")({
+  component: NewVisitView,
+  loader: ({ context }): LoaderData => {
+    // TODO: first page of guests
+    const { serviceTypes } = context;
+    return { serviceTypes };
+  },
+});
+
+function NewVisitView() {
+  const [showNewGuestModal, setShowNewGuestModal] = useState(false);
+  const [selectedGuestOpt, setSelectedGuestOpt] =
+    useState<ReactSelectOption>(null);
+  const [selectedServicesOpt, setSelectedServicesOpt] = useState<
+    ReactSelectOption[]
+  >([]); // array bc this Select is set to multi
 
   const [guests, setGuests] = useState<Guest[]>(mockGuests);
   const [notifications, setNotifications] = useState<GuestNotification[]>([]);
-  const [services, setServices] = useState<GuestService[]>(mockServices);
+  const { serviceTypes } = Route.useLoaderData();
 
   // derive guest's notifications from selected guest
   useEffect(() => {
     if (selectedGuestOpt) {
-      const guest = guests.find((g) => g.guest_id === parseInt(selectedGuestOpt.value));
+      const guest = guests.find(
+        (g) => g.guest_id === parseInt(selectedGuestOpt.value)
+      );
       setNotifications(
-        JSON.parse(guest.notifications as string).filter(
+        JSON.parse(guest?.notifications as string ?? "").filter(
           (n: GuestNotification) => n.status === "Active"
         )
       );
@@ -33,12 +52,12 @@ export default function NewVisitView() {
       {/* TODO: on add new guest, add the new guest to `guests` and fill in the guest Select */}
       <div className="d-flex gap-3">
         <h2>Guest</h2>
-        <Button variant="primary" onClick={() => setShowAddNewGuest(true)}>
+        <Button variant="primary" onClick={() => setShowNewGuestModal(true)}>
           New Guest
         </Button>
       </div>
 
-      <Modal show={showAddNewGuest}>
+      <Modal show={showNewGuestModal}>
         <AddNewGuestForm />
       </Modal>
 
@@ -46,14 +65,14 @@ export default function NewVisitView() {
 
       <Notifications data={notifications} />
 
-      <RequestedServices data={services} />
+      <RequestedServices data={serviceTypes} />
     </>
   );
 
   function AddNewGuestForm() {
     return (
       <div className="p-3">
-        <h2 className="pb-3">Add New Guest</h2>
+        <h2 className="mb-3">Add New Guest</h2>
         <Form onSubmit={submitNewGuestForm}>
           <Form.Group className="mb-3">
             <Form.Label>First Name</Form.Label>
@@ -64,7 +83,7 @@ export default function NewVisitView() {
             <Form.Control type="text" />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Birthday (YYYY/MM/DD)</Form.Label>
+            <Form.Label>Birthday</Form.Label>
             <Form.Control
               type="date"
               min="1911-11-11" // ✨
@@ -76,7 +95,7 @@ export default function NewVisitView() {
               variant="danger"
               type="button"
               onClick={() => {
-                setShowAddNewGuest(false);
+                setShowNewGuestModal(false);
               }}
             >
               Cancel
@@ -96,7 +115,7 @@ export default function NewVisitView() {
 
       const { success } = { success: true }; // placeholder
       if (success) {
-        setShowAddNewGuest(false);
+        setShowNewGuestModal(false);
         // TODO: report success with a toast (or anything, for now)
       }
     }
@@ -162,7 +181,7 @@ export default function NewVisitView() {
     );
 
     function updateNotificationStatus(
-      evt: ChangeEvent<HTMLSelectElement>,
+      evt: React.ChangeEvent<HTMLSelectElement>,
       id: number
     ) {
       const { value: newStatus } = evt.target;
@@ -205,10 +224,12 @@ export default function NewVisitView() {
 
     /** Map services to `Select` options */
     function servicesOpts() {
-      return services.map((s: GuestService) => ({
-        value: s.service_id.toString(),
-        label: s.service_name,
-      }));
+      return (
+        serviceTypes?.map((s: GuestService) => ({
+          value: s.service_id.toString(),
+          label: s.service_name,
+        })) ?? []
+      );
     }
 
     function logVisit() {
@@ -219,8 +240,4 @@ export default function NewVisitView() {
   }
 }
 
-// UTIL
-/** Return today's date in YYYY/MM/DD format. */
-function today(): string {
-  return new Date().toISOString().split("T")[0];
-}
+
