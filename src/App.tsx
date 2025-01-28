@@ -11,7 +11,7 @@ import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { Container, Nav, NavDropdown } from "react-bootstrap";
 
-import * as auth from "./lib/auth";
+import * as auth from "./lib/api/auth";
 import { Route } from './routes/__root';
 
 auth.configure();
