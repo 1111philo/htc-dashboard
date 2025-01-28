@@ -12,6 +12,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { Container, Nav, NavDropdown } from "react-bootstrap";
 
 import * as auth from "./lib/auth";
+import { Route } from './routes/__root';
 
 auth.configure();
 
@@ -42,7 +43,10 @@ export default function App() {
 }
 
 function AppNav() {
+
+  const { serviceTypes } = Route.useLoaderData()
   const navigate = useNavigate();
+
   return (
     <div className="d-flex justify-content-center">
       <Nav variant="tabs" className="mb-4 m-auto">
@@ -66,13 +70,20 @@ function AppNav() {
             Create Service
           </NavDropdown.Item>
           <NavDropdown.Divider />
-          <NavDropdown.Item
-            as={RouterNavLink}
-            to="/services/$serviceId"
-            eventKey="5.2"
-          >
-            Shower
-          </NavDropdown.Item>
+          {
+            serviceTypes?.map(({ name, service_id}) => {
+              return (
+                <NavDropdown.Item
+                  as={RouterNavLink}
+                  to={`/services/${service_id}`}
+                  eventKey="5.2"
+                  key={name}
+                >
+                  { name }
+                </NavDropdown.Item>
+              )
+            })
+          }
         </NavDropdown>
         <Nav.Item>
           <Nav.Link as={RouterNavLink} to="/guests" eventKey="6">

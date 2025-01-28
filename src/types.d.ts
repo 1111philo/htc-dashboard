@@ -58,7 +58,7 @@ interface Visit {
 
 interface ServiceType {
   service_id: number;
-  service_name: string;
+  name: string;
   quota: number | null;
   created_at: string;
   updated_at: string;
