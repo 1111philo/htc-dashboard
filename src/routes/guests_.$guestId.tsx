@@ -103,10 +103,10 @@ export default function GuestProfileView() {
           <Form.Group className="mb-3">
             <Row>
               <Col className="pe-0">
-                <Form.Label>First</Form.Label>
+                <Form.Label className="fst-italic">First</Form.Label>
               </Col>
               <Col className="ps-0">
-                <Form.Label className="ps-0">Last</Form.Label>
+                <Form.Label className="fst-italic ps-0">Last</Form.Label>
               </Col>
             </Row>
             <InputGroup>
@@ -143,7 +143,7 @@ export default function GuestProfileView() {
             </InputGroup>
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Birthday</Form.Label>
+            <Form.Label className="fst-italic">Birthday</Form.Label>
             <Form.Control
               id="input-dob"
               name="dob"
@@ -160,7 +160,7 @@ export default function GuestProfileView() {
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>Case Manager</Form.Label>
+            <Form.Label className="fst-italic">Case Manager</Form.Label>
             <Form.Control
               id="input-case-manager"
               name="case_manager"
