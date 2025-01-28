@@ -18,7 +18,7 @@ export const Route = createFileRoute("/services_/$serviceId")({
     let guestsSlotted;
 
     // fetch service by ID
-    const response = await (
+    const serviceResponse = await (
       API.post({
         apiName: "auth",
         path: "/getServices",
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/services_/$serviceId")({
         }
       }).response
     )
-    const [service,] = (await response.body.json())!.rows
+    const [service,] = (await serviceResponse.body.json())!.rows
 
     if (service.quota) {
       // fetch active slotted guests
@@ -42,20 +42,32 @@ export const Route = createFileRoute("/services_/$serviceId")({
       // TODO: sort this array of guests by slot number
     }
 
-    const guestsQueued = await (
-      await API.post({
+    const guestsQueuedResponse = await (
+      API.post({
         apiName: "auth",
-        path: "/serviceGuestsQueued"
+        path: "/serviceGuestsQueued",
+        options: {
+          body: {
+            service_id: serviceId
+          }
+        }
       }).response
-    ).body.json()
+    )
+    const guestsQueued = guestsQueuedResponse.body.json().rows
     // TODO: sort this array of guests by time queued
 
-    const guestsCompleted = await (
-      await API.post({
+    const guestsCompletedResponse = await (
+      API.post({
         apiName: "auth",
-        path: "/serviceGuestsCompleted"
+        path: "/serviceGuestsCompleted",
+        options: {
+          body: {
+            service_id: serviceId
+          }
+        }
       }).response
-    ).body.json()
+    )
+    const guestsCompleted = guestsCompletedResponse.body.json().rows
     // TODO: sort this array of guests by time queued
     // .sort(
     //   (a, b) =>
@@ -79,12 +91,10 @@ function ServiceView() {
     guestsQueued,
     guestsCompleted,
   } = Route.useLoaderData()
-  console.log("service", service)
-  console.log("guestsSlotted", guestsSlotted)
-  console.log("guestsQueued", guestsQueued)
-  console.log("guestsCompleted", guestsCompleted)
 
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [serviceName, setServiceName] = useState(service.name);
+  const [quota, setQuota] = useState(service.quota);
+
 
   const handleMoveToCompleted = () => {};
 
@@ -94,31 +104,13 @@ function ServiceView() {
 
   return (
     <>
-      <h1>{ service.name }</h1>
-      <Button onClick={() => setShowEditModal(true)}>Edit Service</Button>
-      <Modal show={showEditModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Service</Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3" controlId="serviceName">
-              <Form.Control type="email" defaultValue={"Service name"} />
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="serviceQuota">
-              <Form.Control type="number" defaultValue={10} />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button variant="secondary">Close</Button>
-          <Button variant="primary">Save changes</Button>
-        </Modal.Footer>
-      </Modal>
-      { service.quota ? (
+      <h1>{ serviceName }</h1>
+      <EditServiceModal
+        service={service}
+        setServiceName={setServiceName}
+        setQuota={setQuota}
+      />
+      { quota ? (
         <>
           <h2>Slots</h2>
           <Table responsive={true}>
@@ -133,7 +125,7 @@ function ServiceView() {
             <tbody>
               {
                 // for every slot, display the guestSlotted or empty/available row
-                Array.from({ length: service.quota }).map((slot, slotIndex) => {
+                Array.from({ length: quota }).map((slot, slotIndex) => {
                   if (guestsSlotted[slotIndex]) {
                     const { guest_id, first_name, last_name } = guestsSlotted[slotIndex];
                     const nameAndID = `${first_name} ${last_name} (${guest_id})`;
@@ -197,7 +189,7 @@ function ServiceView() {
                   <td>{queuedService.queued_at}</td>
                   <td>{nameAndID}</td>
                   <td>
-                    { service.quota ? (
+                    { quota ? (
                       <Form.Select aria-label="Select which slot to assign">
                         <option>Assign Slot</option>
                         {Array.from({ length: 10 }).map((_, i) => {
@@ -257,4 +249,90 @@ function ServiceView() {
       </Table>
     </>
   );
+}
+
+function EditServiceModal({
+  service,
+  serviceName,
+  setServiceName,
+  quota,
+  setQuota
+}) {
+
+  const [show, setShow] = useState(false);
+  const [newServiceName, setNewServiceName] = useState<String>("");
+  const [newQuota, setNewQuota] = useState<Number>();
+
+  const handleClose = () => setShow(false)
+
+  const handleSaveService = async () => {
+
+    const updateResponse = await (
+      await API.post({
+        apiName: "auth",
+        path: "/updateService",
+        options: {
+          body: {
+            name: newServiceName,
+            quota: newQuota,
+            service_id: service.service_id
+          }
+        }
+      }).response
+    ).statusCode
+
+    if (updateResponse === 200) {
+      setQuota(newQuota);
+      setServiceName(newServiceName);
+      handleClose();
+    }
+  }
+
+  return (
+    <>
+      <Button onClick={() => setShow(true)}>Edit Service</Button>
+
+      <Modal show={show} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Service</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3" controlId="serviceName">
+              <Form.Control
+                type="email"
+                defaultValue={serviceName}
+                onChange={(e) => setNewServiceName(e.target.value)}
+                placeholder="New Service Name"
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3" controlId="serviceQuota">
+              <Form.Control
+                type="number"
+                defaultValue={quota ?? 0}
+                onChange={(e) => setNewQuota(parseInt(e.target.value))}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={handleClose}
+          >
+            Close
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleSaveService}
+          >
+            Save changes
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
+  )
 }
