@@ -83,4 +83,10 @@ interface ReactSelectOption {
   label: string;
 }
 
+/** Feedback shown to the user on submit event or similar. */
+interface UserMessage {
+  text: string;
+  isError: boolean;
+}
+
 // END MISC

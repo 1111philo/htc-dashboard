@@ -5,7 +5,7 @@
     ],
     "baseUrl": ".",
     "jsx": "react-jsx",
-    "lib": ["DOM", "ES2018"],
+    "lib": ["DOM", "ES2019"],
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "strictNullChecks": true,
