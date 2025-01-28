@@ -5,10 +5,6 @@ import * as API from 'aws-amplify/api';
 
 import { Button, Modal, Form, Table } from "react-bootstrap";
 
-import mockGuests from "../../sample-data/get_guests.json";
-import mockServices from "../../sample-data/get_services.json";
-import mockServiceSlots from '../../sample-data/get_service_slots.json';
-
 export const Route = createFileRoute("/services_/$serviceId")({
   component: ServiceView,
   parseParams: (params): { serviceId: number } => ({
@@ -39,22 +35,20 @@ export const Route = createFileRoute("/services_/$serviceId")({
           path: "/serviceGuestsSlotted"
         }).response
       ).body.json()
-      // TODO: sort this array of guests by slot number
     }
 
     const guestsQueuedResponse = await (
       API.post({
         apiName: "auth",
         path: "/serviceGuestsQueued",
-        options: {
-          body: {
-            service_id: serviceId
-          }
-        }
+        // options: {
+        //   body: {
+        //     service_id: serviceId
+        //   }
+        // }
       }).response
     )
-    const guestsQueued = guestsQueuedResponse.body.json().rows
-    // TODO: sort this array of guests by time queued
+    const guestsQueued = (await guestsQueuedResponse.body.json())
 
     const guestsCompletedResponse = await (
       API.post({
@@ -67,12 +61,7 @@ export const Route = createFileRoute("/services_/$serviceId")({
         }
       }).response
     )
-    const guestsCompleted = guestsCompletedResponse.body.json().rows
-    // TODO: sort this array of guests by time queued
-    // .sort(
-    //   (a, b) =>
-    //     new Date(a.queued_at).getTime() - new Date(b.queued_at).getTime()
-    // )
+    const guestsCompleted = (await guestsCompletedResponse.body.json())!
 
     return {
       service,
@@ -96,11 +85,44 @@ function ServiceView() {
   const [quota, setQuota] = useState(service.quota);
 
 
-  const handleMoveToCompleted = () => {};
+  const handleMoveToNewStatus = async (guestId: Number, newStatus: string) => {
+    // send api call to /updateGuestServiceStatus
+    const updateGuestServiceStatusResponse = await (
+      await API.post({
+        apiName: "auth",
+        path: "/updateGuestServiceStatus",
+        options: {
+          body: {
+            status: newStatus,
+            guest_id: guestId,
+            service_id: service.service_id
+            // TODO: need optional slot here or only have in active request
+          }
+        }
+      }).response
+    ).statusCode
+    console.log("updateGuestServiceStatusResponse", updateGuestServiceStatusResponse)
+    console.log("guestId clicked:", guestId)
+  };
 
-  const handleMoveToQueue = () => {};
-
-  const handleMoveToActive = () => {};
+  const handleMoveToActive = async (slotNum: String) => {
+    const updateGuestServiceStatusResponse = await (
+      API.post({
+        apiName: "auth",
+        path: "/updateGuestServiceStatus",
+        options: {
+          body: {
+            status: "Active",
+            guest_id: 9, // CHANGE TO SELECTION
+            service_id: service.service_id
+            // TODO: need optional slot here or only have in active request
+            // slot: parseInt(slotNum)
+          }
+        }
+      }).response
+    )
+    console.log("updateGuestServiceStatusResponse", updateGuestServiceStatusResponse)
+  };
 
   return (
     <>
@@ -138,10 +160,10 @@ function ServiceView() {
                         <td>{nameAndID}</td>
                         <td>Occupied</td>
                         <td>
-                          <Button onClick={handleMoveToCompleted}>
+                          <Button onClick={() => handleMoveToNewStatus(guest_id, "Completed")}>
                             Move to Completed
                           </Button>
-                          <Button onClick={handleMoveToQueue}>
+                          <Button onClick={() => handleMoveToNewStatus(guest_id, "Queued")}>
                             Move to Queue
                           </Button>
                         </td>
@@ -175,24 +197,19 @@ function ServiceView() {
           </tr>
         </thead>
         <tbody>
-          {
-            // api staging
-            // TODO: map sortedQueuedGuests to queued table
-          }
-          { mockGuests.map(({ guest_id, first_name, last_name, services }) => {
+          { guestsQueued!.map(({ guest_id, first_name, last_name, created_at }, i) => {
             const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
-            const queuedServices = JSON.parse(services).filter(
-              (service) => service.status === "Queued"
-            )
 
-            return queuedServices.map((queuedService, i) => {
               return (
-                <tr key={i}>
-                  <td>{queuedService.queued_at}</td>
+                <tr key={`${guest_id}-${i}`}>
+                  <td>{created_at}</td>
                   <td>{nameAndID}</td>
                   <td>
                     { quota ? (
-                      <Form.Select aria-label="Select which slot to assign">
+                      <Form.Select
+                        aria-label="Select which slot to assign"
+                        onChange={(e) => handleMoveToActive(e.target.value)}
+                      >
                         <option>Assign Slot</option>
                         {Array.from({ length: 10 }).map((_, i) => {
                           // TODO: need array of available slots for these options
@@ -202,18 +219,14 @@ function ServiceView() {
                     ) : (
                       ""
                     )}
-                    <Button onClick={handleMoveToCompleted}>
+                    <Button onClick={() => handleMoveToNewStatus(guest_id, "Completed")}>
                       Move to Completed
                     </Button>
                   </td>
                 </tr>
               );
             })
-            .sort(
-              (a, b) =>
-                new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-            )
-          })}
+          }
         </tbody>
       </Table>
       <h2>Completed</h2>
@@ -226,27 +239,20 @@ function ServiceView() {
           </tr>
         </thead>
         <tbody>
-          {
-            // api staging
-            // TODO: map sortedCompletedGuests to queued table
-          }
-          { mockGuests.map(({ guest_id, first_name, last_name, services }) => {
+          { guestsCompleted!.map(({ guest_id, first_name, last_name, created_at }, i) => {
             const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
-            const completedServices = JSON.parse(services).filter(
-              (service) => service.status === "Completed"
-            );
-            return completedServices.map((completeService, i) => {
+
               return (
-                <tr key={i}>
-                  <td>{completeService.queued_at}</td>
+                <tr key={`${guest_id}-${i}`}>
+                  <td>{created_at}</td>
                   <td>{nameAndID}</td>
                   <td>
-                    <Button onClick={handleMoveToQueue}>Move to Queue</Button>
+                    <Button onClick={() => handleMoveToNewStatus(guest_id, "Queued")}>Move to Queue</Button>
                   </td>
                 </tr>
               );
-            });
-          })}
+            })
+          }
         </tbody>
       </Table>
     </>
