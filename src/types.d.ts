@@ -19,13 +19,8 @@ interface Guest {
   last_name: string;
   dob: string;
   case_manager: string;
-  notifications: string | GuestNotification[];
-  services: string | GuestService[];
-}
-
-interface GuestAPIResponse {
-  total_guests: number;
-  guest: Guest;
+  guest_notifications: GuestNotification[];
+  guest_services: GuestService[];
 }
 
 interface GuestNotification {
@@ -65,6 +60,21 @@ interface ServiceType {
 }
 
 // END DB
+
+// RESPONSE
+
+interface GuestDataAPIResponse extends Guest {
+  total: number;
+}
+
+interface GuestsAPIResponse {
+  total: number;
+  offset: number;
+  limit: number;
+  rows: Guest[];
+}
+
+// END RESPONSE
 
 // MISC
 

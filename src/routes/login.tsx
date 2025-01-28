@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
-import * as auth from "../lib/auth";
+import * as auth from "../lib/api/auth";
 
 export const Route = createFileRoute("/login")({
   component: LoginView,

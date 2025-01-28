@@ -1,50 +1,58 @@
 import { useEffect, useState } from "react";
-import { createFileRoute, useLoaderData } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 
-import mockGuests from "../../sample-data/get_guests__true_format.json";
 import { today } from "../lib/utils";
+import { getGuest } from "../lib/api/guest";
+
+import * as API from "aws-amplify/api";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
+  guestsResponse: GuestsAPIResponse;
 }
 
 export const Route = createFileRoute("/new-visit")({
   component: NewVisitView,
-  loader: ({ context }): LoaderData => {
+  loader: async ({ context }): Promise<LoaderData> => {
     // TODO: first page of guests
     const { serviceTypes } = context;
 
     // TODO: guest guests
-
-    return { serviceTypes };
+    const response = await API.post({
+      apiName: "auth",
+      path: "/getGuests",
+    }).response;
+    const guestsResponse = (await response.body.json()) as GuestsAPIResponse;
+    return { serviceTypes, guestsResponse };
   },
 });
 
 function NewVisitView() {
+  const { guestsResponse, serviceTypes } = Route.useLoaderData();
+  const guests = guestsResponse.rows;
+
   const [showNewGuestModal, setShowNewGuestModal] = useState(false);
+
   const [selectedGuestOpt, setSelectedGuestOpt] =
     useState<ReactSelectOption>(null);
   const [selectedServicesOpt, setSelectedServicesOpt] = useState<
     ReactSelectOption[]
   >([]); // array bc this Select is set to multi
 
-  const [guests, setGuests] = useState<Guest[]>(mockGuests);
   const [notifications, setNotifications] = useState<GuestNotification[]>([]);
-  const { serviceTypes } = Route.useLoaderData();
 
-  // derive guest's notifications from selected guest
+  // get notifications from selected guest
   useEffect(() => {
     if (selectedGuestOpt) {
-      const guest = guests.find(
-        (g) => g.guest_id === parseInt(selectedGuestOpt.value)
-      );
-      setNotifications(
-        JSON.parse(guest?.notifications as string ?? "").filter(
-          (n: GuestNotification) => n.status === "Active"
-        )
-      );
+      getGuest(+selectedGuestOpt.value).then((g) => {
+        setNotifications(
+          (g.guest_notifications as GuestNotification[]).filter(
+            (n: GuestNotification) => n.status === "Active"
+          )
+        );
+      });
     }
   }, [selectedGuestOpt]);
 
@@ -52,7 +60,6 @@ function NewVisitView() {
     <>
       <h1 className="mb-4">Add New Visit</h1>
 
-      {/* TODO: on add new guest, add the new guest to `guests` and fill in the guest Select */}
       <div className="d-flex gap-3">
         <h2>Guest</h2>
         <Button variant="primary" onClick={() => setShowNewGuestModal(true)}>
@@ -113,9 +120,7 @@ function NewVisitView() {
 
     function submitNewGuestForm(evt: SubmitEvent) {
       evt.preventDefault();
-
       // TODO: fetch/POST new guest
-
       const { success } = { success: true }; // placeholder
       if (success) {
         setShowNewGuestModal(false);
@@ -211,7 +216,6 @@ function NewVisitView() {
           options={servicesOpts()}
           value={selectedServicesOpt}
           onChange={(newVal: []) => {
-            console.log("SELECTED SERVICES:", newVal);
             setSelectedServicesOpt(newVal);
           }}
         />
@@ -242,5 +246,3 @@ function NewVisitView() {
     }
   }
 }
-
-
