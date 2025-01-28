@@ -5,6 +5,19 @@ export function today(): string {
   return new Date().toISOString().split("T")[0];
 }
 
+/** Return human readable date-time in format MM/DD/YYYY 00:00:00 AM */
+export function readableDateTime(ISODateString: string): string {
+  const ISODate = new Date(ISODateString);
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: undefined,
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+  };
+
+  return `${ISODate.toLocaleDateString('en-US', options)} ${ISODate.toLocaleTimeString('en-US')}`
+}
+
 export function isEven(num) {
   return (num & 1) === 0;
 }

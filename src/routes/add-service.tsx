@@ -10,7 +10,15 @@ export const Route = createFileRoute("/add-service")({
 });
 
 function AddServiceView() {
+  return (
+    <>
+      <h1>Create Service</h1>
+      <AddNewServiceForm />
+    </>
+  )
+}
 
+function AddNewServiceForm() {
   const [newServiceName, setNewServiceName] = useState("")
   const [optionalQuota, setOptionalQuota] = useState("")
 
@@ -32,23 +40,29 @@ function AddServiceView() {
   }
 
   return (
-    <>
-      <h1>Create Service</h1>
-      <Form>
-        <Form.Group className="mb-3" controlId="serviceName">
-          <Form.Control type="email" placeholder="New Service Name" onChange={(e) => setNewServiceName(e.target.value)}/>
-        </Form.Group>
+    <Form>
+      <Form.Group className="mb-3" controlId="serviceName">
+        <Form.Control
+          type="email"
+          placeholder="New Service Name"
+          onChange={(e) => setNewServiceName(e.target.value)}
+        />
+      </Form.Group>
 
-        <Form.Group className="mb-3" controlId="serviceQuota">
-          <Form.Control type="number" placeholder="Quota (optional)" onChange={(e) => setOptionalQuota(e.target.value)}/>
-        </Form.Group>
-        <Button
-          variant="primary"
-          onClick={handleCreateNewService}
-        >
-          Create New Service
-        </Button>
-      </Form>
-    </>
+      <Form.Group className="mb-3" controlId="serviceQuota">
+        <Form.Control
+          type="number"
+          placeholder="Quota (optional)"
+          onChange={(e) => setOptionalQuota(e.target.value)}
+        />
+      </Form.Group>
+
+      <Button
+        variant="primary"
+        onClick={handleCreateNewService}
+      >
+        Create New Service
+      </Button>
+    </Form>
   );
 }
