@@ -10,6 +10,7 @@ import {
   getGuestsWithQueryDebounced,
 } from "../lib/api/guest";
 import NewGuestForm from "../lib/components/NewGuestForm";
+import { addVisit } from "../lib/api/visit";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
@@ -235,10 +236,27 @@ function NewVisitView() {
       );
     }
 
-    function logVisit() {
-      const guestId = selectedGuestOpt.value;
-      const serviceIds = selectedServicesOpt.value;
-      // TODO: POST
+    async function logVisit(e) {
+      e.preventDefault();
+      // TODO validate "form"
+      const v: Partial<Visit> = {
+        guest_id: +selectedGuestOpt!.value,
+        service_ids: selectedServicesOpt.map(({ value }) => +value),
+      };
+      const visitId = await addVisit(v);
+      if (!visitId) {
+        setFeedback({
+          text: "Failed to create the visit. Try again in a few.",
+          isError: true,
+        });
+        return;
+      }
+      setShowNewGuestModal(false);
+      setFeedback({
+        text: `Visit created successfully! ID: ${visitId}`,
+        isError: false,
+      });
+      clearInputs();
     }
   }
 
