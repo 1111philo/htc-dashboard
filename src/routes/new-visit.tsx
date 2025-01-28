@@ -4,9 +4,7 @@ import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 
 import { today } from "../lib/utils";
-import { getGuest } from "../lib/api/guest";
-
-import * as API from "aws-amplify/api";
+import { getGuest, getGuests } from "../lib/api/guest";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
@@ -16,15 +14,8 @@ interface LoaderData {
 export const Route = createFileRoute("/new-visit")({
   component: NewVisitView,
   loader: async ({ context }): Promise<LoaderData> => {
-    // TODO: first page of guests
     const { serviceTypes } = context;
-
-    // TODO: guest guests
-    const response = await API.post({
-      apiName: "auth",
-      path: "/getGuests",
-    }).response;
-    const guestsResponse = (await response.body.json()) as GuestsAPIResponse;
+    const guestsResponse = await getGuests();
     return { serviceTypes, guestsResponse };
   },
 });
@@ -36,7 +27,7 @@ function NewVisitView() {
   const [showNewGuestModal, setShowNewGuestModal] = useState(false);
 
   const [selectedGuestOpt, setSelectedGuestOpt] =
-    useState<ReactSelectOption>(null);
+    useState<ReactSelectOption | null>(null);
   const [selectedServicesOpt, setSelectedServicesOpt] = useState<
     ReactSelectOption[]
   >([]); // array bc this Select is set to multi
@@ -170,7 +161,6 @@ function NewVisitView() {
                   <td>{n.message}</td>
                   <td>
                     <Form.Select
-                      value={n.status}
                       onChange={(evt) =>
                         updateNotificationStatus(evt, n.notification_id)
                       }
@@ -195,6 +185,7 @@ function NewVisitView() {
       const { value: newStatus } = evt.target;
       // TODO: fetch/POST notification status change
       // TODO: on success, change the value to the updated status
+      // or, update optimistically, and revert on failure, showing error message
       const { success } = { success: true }; // placeholder
       if (success) {
         // TODO: Instead of removing the item from the notifications list, leave it
