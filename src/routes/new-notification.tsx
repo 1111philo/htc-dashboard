@@ -47,33 +47,32 @@ function AddNewNotificationForm() {
 
   const handleCreateNotification = async (e) => {
     if (selectedGuest === undefined) {
-      // TODO: warn user
+      alert(`Notifications must have a guest.`)
       return;
     }
     console.log("notif guest", selectedGuest);
     console.log("notif message", message);
-    // const response = await (
-    //   await API.post({
-    //     apiName: "auth",
-    //     path: "/addGuestNotification",
-    //     options: {
-    //       body: {
-    //         guest_id: selectedGuest.value, // TODO: 
-    //         message: "This is a message",
-    //         status: "Active"
-    //       }
-    //     }
-    //   }).response
-    // ).statusCode
+    const response = await (
+      await API.post({
+        apiName: "auth",
+        path: "/addGuestNotification",
+        options: {
+          body: {
+            guest_id: selectedGuest.guest_id,
+            message: message,
+            status: "Active"
+          }
+        }
+      }).response
+    ).statusCode
+    setSelectedGuest(undefined);
+    setMessage("");
     // return response
   };
 
   const handleEnter = (e) => {
     if (e.key === "Enter") {
-      // submit form
-      console.log("key", e.key);
-      console.log("notif guest", selectedGuest);
-      console.log("notif message", message);
+      handleCreateNotification(e)
     }
   };
 
