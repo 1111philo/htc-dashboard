@@ -25,7 +25,7 @@ export const Route = createFileRoute("/services_/$serviceId")({
         }
       }).response
     )
-    const [service,] = (await serviceResponse.body.json())!.rows
+    const [service,]: ServiceType[] = (await serviceResponse.body.json())!.rows
 
     if (service.quota) {
       // fetch active slotted guests
@@ -105,18 +105,17 @@ function ServiceView() {
     console.log("guestId clicked:", guestId)
   };
 
-  const handleMoveToActive = async (slotNum: String) => {
+  const handleMoveToSLotted = async (guestId: Number, slotNum: String) => {
     const updateGuestServiceStatusResponse = await (
       API.post({
         apiName: "auth",
         path: "/updateGuestServiceStatus",
         options: {
           body: {
-            status: "Active",
-            guest_id: 9, // CHANGE TO SELECTION
-            service_id: service.service_id
-            // TODO: need optional slot here or only have in active request
-            // slot: parseInt(slotNum)
+            status: "Slotted",
+            guest_id: guestId,
+            service_id: service.service_id,
+            slot_id: slotNum
           }
         }
       }).response
@@ -126,7 +125,7 @@ function ServiceView() {
 
   return (
     <>
-      <h1>{ serviceName }</h1>
+      <h1>{ service.name }</h1>
       <EditServiceModal
         service={service}
         serviceName={serviceName}
@@ -134,7 +133,7 @@ function ServiceView() {
         quota={quota}
         setQuota={setQuota}
       />
-      { quota ? (
+      { service.quota ? (
         <>
           <h2>Slots</h2>
           <Table responsive={true}>
@@ -149,8 +148,8 @@ function ServiceView() {
             <tbody>
               {
                 // for every slot, display the guestSlotted or empty/available row
-                Array.from({ length: quota }).map((slot, slotIndex) => {
-                  if (guestsSlotted[slotIndex]) {
+                Array.from({ length: service.quota }).map((slot, slotIndex) => {
+                  if (guestsSlotted && guestsSlotted[slotIndex]) {
                     const { guest_id, first_name, last_name } = guestsSlotted[slotIndex];
                     const nameAndID = `${first_name} ${last_name} (${guest_id})`;
 
@@ -205,10 +204,10 @@ function ServiceView() {
                   <td>{created_at}</td>
                   <td>{nameAndID}</td>
                   <td>
-                    { quota ? (
+                    { service.quota ? (
                       <Form.Select
                         aria-label="Select which slot to assign"
-                        onChange={(e) => handleMoveToActive(e.target.value)}
+                        onChange={(e) => handleMoveToSLotted(guest_id, e.target.value)}
                       >
                         <option>Assign Slot</option>
                         {Array.from({ length: 10 }).map((_, i) => {
