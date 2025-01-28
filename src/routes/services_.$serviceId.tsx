@@ -5,10 +5,6 @@ import * as API from 'aws-amplify/api';
 
 import { Button, Modal, Form, Table } from "react-bootstrap";
 
-import mockGuests from "../../sample-data/get_guests.json";
-import mockServices from "../../sample-data/get_services.json";
-import mockServiceSlots from '../../sample-data/get_service_slots.json';
-
 export const Route = createFileRoute("/services_/$serviceId")({
   component: ServiceView,
   parseParams: (params): { serviceId: number } => ({
@@ -39,7 +35,6 @@ export const Route = createFileRoute("/services_/$serviceId")({
           path: "/serviceGuestsSlotted"
         }).response
       ).body.json()
-      // TODO: sort this array of guests by slot number
     }
 
     const guestsQueuedResponse = await (
@@ -54,7 +49,6 @@ export const Route = createFileRoute("/services_/$serviceId")({
       }).response
     )
     const guestsQueued = (await guestsQueuedResponse.body.json())
-    // TODO: sort this array of guests by time queued
 
     const guestsCompletedResponse = await (
       API.post({
@@ -67,12 +61,7 @@ export const Route = createFileRoute("/services_/$serviceId")({
         }
       }).response
     )
-    const guestsCompleted = guestsCompletedResponse.body.json().rows
-    // TODO: sort this array of guests by time queued
-    // .sort(
-    //   (a, b) =>
-    //     new Date(a.queued_at).getTime() - new Date(b.queued_at).getTime()
-    // )
+    const guestsCompleted = (await guestsCompletedResponse.body.json())!
 
     return {
       service,
@@ -91,7 +80,7 @@ function ServiceView() {
     guestsQueued,
     guestsCompleted,
   } = Route.useLoaderData()
-  console.log("guestsQueued", guestsQueued)
+
   const [serviceName, setServiceName] = useState(service.name);
   const [quota, setQuota] = useState(service.quota);
 
@@ -175,10 +164,6 @@ function ServiceView() {
           </tr>
         </thead>
         <tbody>
-          {
-            // api staging
-            // TODO: map sortedQueuedGuests to queued table
-          }
           { guestsQueued!.map(({ guest_id, first_name, last_name, created_at }, i) => {
             const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
 
@@ -218,27 +203,20 @@ function ServiceView() {
           </tr>
         </thead>
         <tbody>
-          {
-            // api staging
-            // TODO: map sortedCompletedGuests to queued table
-          }
-          { mockGuests.map(({ guest_id, first_name, last_name, services }) => {
+          { guestsCompleted!.map(({ guest_id, first_name, last_name, created_at }, i) => {
             const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
-            const completedServices = JSON.parse(services).filter(
-              (service) => service.status === "Completed"
-            );
-            return completedServices.map((completeService, i) => {
+
               return (
-                <tr key={i}>
-                  <td>{completeService.queued_at}</td>
+                <tr key={`${guest_id}-${i}`}>
+                  <td>{created_at}</td>
                   <td>{nameAndID}</td>
                   <td>
                     <Button onClick={handleMoveToQueue}>Move to Queue</Button>
                   </td>
                 </tr>
               );
-            });
-          })}
+            })
+          }
         </tbody>
       </Table>
     </>
