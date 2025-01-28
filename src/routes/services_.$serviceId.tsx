@@ -107,7 +107,9 @@ function ServiceView() {
       <h1>{ serviceName }</h1>
       <EditServiceModal
         service={service}
+        serviceName={serviceName}
         setServiceName={setServiceName}
+        quota={quota}
         setQuota={setQuota}
       />
       { quota ? (
