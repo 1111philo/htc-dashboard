@@ -60,11 +60,6 @@ function AppNav() {
             New Visit
           </Nav.Link>
         </Nav.Item>
-        <Nav.Item>
-          <Nav.Link as={RouterNavLink} to="/visits" eventKey="4">
-            Visits
-          </Nav.Link>
-        </Nav.Item>
         <NavDropdown title="Services">
           <NavDropdown.Item as={RouterNavLink} to="/add-service" eventKey="5.1">
             Create Service
