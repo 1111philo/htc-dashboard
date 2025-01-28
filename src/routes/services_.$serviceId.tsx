@@ -18,13 +18,18 @@ export const Route = createFileRoute("/services_/$serviceId")({
     let guestsSlotted;
 
     // fetch service by ID
-    const service = await (
-      await API.post({
+    const response = await (
+      API.post({
         apiName: "auth",
-        path: "/getServices"
+        path: "/getServices",
+        options: {
+          body: {
+            service_id: serviceId
+          }
+        }
       }).response
-    ).body.json()
-    // TODO: .find(({ service_id }) => service_id === serviceId)
+    )
+    const [service,] = (await response.body.json())!.rows
 
     if (service.quota) {
       // fetch active slotted guests
@@ -89,7 +94,7 @@ function ServiceView() {
 
   return (
     <>
-      <h1>{ service.service_name }s</h1>
+      <h1>{ service.name }</h1>
       <Button onClick={() => setShowEditModal(true)}>Edit Service</Button>
       <Modal show={showEditModal}>
         <Modal.Header closeButton>
