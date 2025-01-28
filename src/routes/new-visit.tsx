@@ -291,7 +291,6 @@ function NewVisitView() {
         guest_id: +selectedGuestOpt.value,
         service_ids: selectedServicesOpt.map(({ value }) => +value),
       };
-      debugger;
       const visitId = await addVisit(v);
       if (!visitId) {
         setFeedback({
