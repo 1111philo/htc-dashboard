@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import {
+  Link,
   Outlet,
   Link as RouterNavLink,
   useNavigate,
@@ -66,17 +67,18 @@ function AppNav() {
           </NavDropdown.Item>
           <NavDropdown.Divider />
           {
-            serviceTypes?.map(({ name, service_id}, i) => {
+            serviceTypes?.map(({ name, service_id }) => {
               return (
-                <NavDropdown.Item
-                  as={RouterNavLink}
-                  to={`/services/${service_id}`}
-                  eventKey="5.2"
-                  key={`${name}-${i}`}
-                >
-                  { name }
+                <NavDropdown.Item as="div" key={service_id}>
+                  <Link
+                    to="/services/$serviceId"
+                    params={{ serviceId: service_id }}
+                    className="text-decoration-none"
+                  >
+                    {name}
+                  </Link>
                 </NavDropdown.Item>
-              )
+              );
             })
           }
         </NavDropdown>
