@@ -46,14 +46,14 @@ export const Route = createFileRoute("/services_/$serviceId")({
       API.post({
         apiName: "auth",
         path: "/serviceGuestsQueued",
-        options: {
-          body: {
-            service_id: serviceId
-          }
-        }
+        // options: {
+        //   body: {
+        //     service_id: serviceId
+        //   }
+        // }
       }).response
     )
-    const guestsQueued = guestsQueuedResponse.body.json().rows
+    const guestsQueued = (await guestsQueuedResponse.body.json())
     // TODO: sort this array of guests by time queued
 
     const guestsCompletedResponse = await (
@@ -91,7 +91,7 @@ function ServiceView() {
     guestsQueued,
     guestsCompleted,
   } = Route.useLoaderData()
-
+  console.log("guestsQueued", guestsQueued)
   const [serviceName, setServiceName] = useState(service.name);
   const [quota, setQuota] = useState(service.quota);
 
@@ -179,16 +179,12 @@ function ServiceView() {
             // api staging
             // TODO: map sortedQueuedGuests to queued table
           }
-          { mockGuests.map(({ guest_id, first_name, last_name, services }) => {
+          { guestsQueued!.map(({ guest_id, first_name, last_name, created_at }, i) => {
             const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
-            const queuedServices = JSON.parse(services).filter(
-              (service) => service.status === "Queued"
-            )
 
-            return queuedServices.map((queuedService, i) => {
               return (
-                <tr key={i}>
-                  <td>{queuedService.queued_at}</td>
+                <tr key={`${guest_id}-${i}`}>
+                  <td>{created_at}</td>
                   <td>{nameAndID}</td>
                   <td>
                     { quota ? (
@@ -209,11 +205,7 @@ function ServiceView() {
                 </tr>
               );
             })
-            .sort(
-              (a, b) =>
-                new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-            )
-          })}
+          }
         </tbody>
       </Table>
       <h2>Completed</h2>
