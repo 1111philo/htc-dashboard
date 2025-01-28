@@ -46,7 +46,7 @@ interface GuestService {
 interface Visit {
   visit_id: number;
   guest_id: number;
-  service_ids: number;
+  service_ids: number[];
   created_at: string;
   updated_at: string;
 }
