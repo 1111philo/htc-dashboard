@@ -7,7 +7,7 @@ interface User {
   user_id: number;
   name: string;
   email: string;
-  role: "admin" | "manager";
+  role: "Admin" | "Manager";
   created_at: string;
   updated_at: string;
   sub: string; // Amplify auth ID, not used
