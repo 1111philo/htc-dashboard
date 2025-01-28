@@ -27,7 +27,7 @@ export const appContext: AppContext = {
 export const Route = createRootRouteWithContext<AppContext>()({
   component: App,
   // this poorly named function returns ctx that gets mixed into the parent ctx (no parent here cuz root)
-  beforeLoad: async ({ context }): Promise<Partial<AppContext>> => {
+  beforeLoad: async (): Promise<Partial<AppContext>> => {
     const { serviceTypes } = await fetchGlobalData();
     return { serviceTypes };
   },

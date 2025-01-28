@@ -15,6 +15,9 @@ export const Route = createFileRoute("/new-visit")({
   loader: ({ context }): LoaderData => {
     // TODO: first page of guests
     const { serviceTypes } = context;
+
+    // TODO: guest guests
+
     return { serviceTypes };
   },
 });
@@ -225,9 +228,9 @@ function NewVisitView() {
     /** Map services to `Select` options */
     function servicesOpts() {
       return (
-        serviceTypes?.map((s: GuestService) => ({
+        serviceTypes?.map((s: ServiceType) => ({
           value: s.service_id.toString(),
-          label: s.service_name,
+          label: s.name,
         })) ?? []
       );
     }
