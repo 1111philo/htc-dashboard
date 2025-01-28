@@ -85,11 +85,44 @@ function ServiceView() {
   const [quota, setQuota] = useState(service.quota);
 
 
-  const handleMoveToCompleted = () => {};
+  const handleMoveToNewStatus = async (guestId: Number, newStatus: string) => {
+    // send api call to /updateGuestServiceStatus
+    const updateGuestServiceStatusResponse = await (
+      await API.post({
+        apiName: "auth",
+        path: "/updateGuestServiceStatus",
+        options: {
+          body: {
+            status: newStatus,
+            guest_id: guestId,
+            service_id: service.service_id
+            // TODO: need optional slot here or only have in active request
+          }
+        }
+      }).response
+    ).statusCode
+    console.log("updateGuestServiceStatusResponse", updateGuestServiceStatusResponse)
+    console.log("guestId clicked:", guestId)
+  };
 
-  const handleMoveToQueue = () => {};
-
-  const handleMoveToActive = () => {};
+  const handleMoveToActive = async (slotNum: String) => {
+    const updateGuestServiceStatusResponse = await (
+      API.post({
+        apiName: "auth",
+        path: "/updateGuestServiceStatus",
+        options: {
+          body: {
+            status: "Active",
+            guest_id: 9, // CHANGE TO SELECTION
+            service_id: service.service_id
+            // TODO: need optional slot here or only have in active request
+            // slot: parseInt(slotNum)
+          }
+        }
+      }).response
+    )
+    console.log("updateGuestServiceStatusResponse", updateGuestServiceStatusResponse)
+  };
 
   return (
     <>
@@ -127,10 +160,10 @@ function ServiceView() {
                         <td>{nameAndID}</td>
                         <td>Occupied</td>
                         <td>
-                          <Button onClick={handleMoveToCompleted}>
+                          <Button onClick={() => handleMoveToNewStatus(guest_id, "Completed")}>
                             Move to Completed
                           </Button>
-                          <Button onClick={handleMoveToQueue}>
+                          <Button onClick={() => handleMoveToNewStatus(guest_id, "Queued")}>
                             Move to Queue
                           </Button>
                         </td>
@@ -173,7 +206,10 @@ function ServiceView() {
                   <td>{nameAndID}</td>
                   <td>
                     { quota ? (
-                      <Form.Select aria-label="Select which slot to assign">
+                      <Form.Select
+                        aria-label="Select which slot to assign"
+                        onChange={(e) => handleMoveToActive(e.target.value)}
+                      >
                         <option>Assign Slot</option>
                         {Array.from({ length: 10 }).map((_, i) => {
                           // TODO: need array of available slots for these options
@@ -183,7 +219,7 @@ function ServiceView() {
                     ) : (
                       ""
                     )}
-                    <Button onClick={handleMoveToCompleted}>
+                    <Button onClick={() => handleMoveToNewStatus(guest_id, "Completed")}>
                       Move to Completed
                     </Button>
                   </td>
@@ -211,7 +247,7 @@ function ServiceView() {
                   <td>{created_at}</td>
                   <td>{nameAndID}</td>
                   <td>
-                    <Button onClick={handleMoveToQueue}>Move to Queue</Button>
+                    <Button onClick={() => handleMoveToNewStatus(guest_id, "Queued")}>Move to Queue</Button>
                   </td>
                 </tr>
               );
