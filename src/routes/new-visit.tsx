@@ -103,7 +103,11 @@ function NewVisitView() {
         </Button>
       </div>
 
-      <FeedbackMessage text={feedback.text} isError={feedback.isError} />
+      <FeedbackMessage
+        text={feedback.text}
+        isError={feedback.isError}
+        className="my-3"
+      />
 
       <Modal show={showNewGuestModal}>
         <NewGuestForm
@@ -250,5 +254,10 @@ function NewVisitView() {
 
   function guestOptLabel(g) {
     return `${g.guest_id} : ${g.first_name} ${g.last_name} : ${g.dob}`;
+  }
+
+  function clearInputs() {
+    setSelectedGuestOpt(null);
+    setSelectedServicesOpt([]);
   }
 }

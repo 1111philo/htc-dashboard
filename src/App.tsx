@@ -66,13 +66,13 @@ function AppNav() {
           </NavDropdown.Item>
           <NavDropdown.Divider />
           {
-            serviceTypes?.map(({ name, service_id}) => {
+            serviceTypes?.map(({ name, service_id}, i) => {
               return (
                 <NavDropdown.Item
                   as={RouterNavLink}
                   to={`/services/${service_id}`}
                   eventKey="5.2"
-                  key={name}
+                  key={`${name}-${i}`}
                 >
                   { name }
                 </NavDropdown.Item>
