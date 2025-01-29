@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
-import { FeedbackMessage } from "../lib/components/FeedbackMessage";
+import FeedbackMessage from "../lib/components/FeedbackMessage";
 
 import {
-  getGuest,
+  getGuestData,
   getGuests,
   getGuestsWithQueryDebounced,
 } from "../lib/api/guest";
@@ -82,7 +82,7 @@ function NewVisitView() {
   // get notifications from selected guest
   useEffect(() => {
     if (selectedGuestOpt) {
-      getGuest(+selectedGuestOpt.value).then((g) => {
+      getGuestData(+selectedGuestOpt.value).then((g) => {
         if (!g.guest_notifications) return; // new guest is partial, no notifications key
         setNotifications(
           (g.guest_notifications as GuestNotification[]).filter(
