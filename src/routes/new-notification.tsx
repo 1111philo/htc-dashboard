@@ -55,9 +55,9 @@ function NewNotificationView() {
 function AddNewNotificationForm({ allGuests }) {
 
   const [selectedGuest, setSelectedGuest] = useState<ReactSelectOption>();
+  const [message, setMessage] = useState("");
   const [creationSuccess, setCreationSuccess] = useState(false);
   const [creationWarning, setCreationWarning] = useState(false);
-  const [message, setMessage] = useState("");
 
   const guestOptions = allGuests.rows.map((g) => {
     return {
@@ -119,7 +119,7 @@ function AddNewNotificationForm({ allGuests }) {
             options={guestOptions}
             value={selectedGuest}
             onChange={(searchInput) => setSelectedGuest(searchInput)}
-            placeholder="Guest"
+            placeholder="Search for a guest..."
           />
         </Form.Group>
 
