@@ -52,13 +52,13 @@ function AppNav() {
     <div className="d-flex justify-content-center">
       <Nav variant="tabs" className="mb-4 m-auto">
         <Nav.Item>
-          <Nav.Link as={RouterNavLink} to="/new-notification" eventKey="2">
-            New Notification
+          <Nav.Link as={RouterNavLink} to="/new-visit" eventKey="3">
+            New Visit
           </Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link as={RouterNavLink} to="/new-visit" eventKey="3">
-            New Visit
+          <Nav.Link as={RouterNavLink} to="/new-notification" eventKey="2">
+            New Notification
           </Nav.Link>
         </Nav.Item>
         <NavDropdown title="Services">
