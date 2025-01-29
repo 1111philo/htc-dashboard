@@ -62,10 +62,14 @@ function UsersView() {
     <div>
       <div
         className="d-flex justify-content-between align-items-center mb-3"
-        onClick={() => setShowNewUserModal(true)}
       >
         <h1 className="mb-3">Staff</h1>
-        <Button className="m-2">New User</Button>
+        <Button
+          className="m-2"
+          onClick={() => setShowNewUserModal(true)}
+        >
+          New User
+        </Button>
       </div>
       <Modal show={showUserModal}>
         <NewUserForm />
