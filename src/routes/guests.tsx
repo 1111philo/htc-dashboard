@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Table,
   Form,
@@ -8,58 +8,89 @@ import {
   Button,
   Modal,
 } from "react-bootstrap";
-import { ArrowUpDown, Search } from "lucide-react";
+import { ArrowUpDown, Search as SearchIcon } from "lucide-react";
 import NewGuestForm from "../lib/components/NewGuestForm";
+import FeedbackMessage from "../lib/components/FeedbackMessage";
+import { getGuestData, getGuests } from "../lib/api/guest";
 
 interface LoaderData {
-  guests: Guest[];
+  // guestsResponse: GuestsAPIResponse;
+  // TODO: request a route for this page -- when i query guests, i need active_notification_count!!! -- maybe stick this into getGuests - otherwise, I'm making a request for each guest in the table just to get notification counts
+  guestsDatas: Guest[]; // so these requests execute in parallel
 }
 
 export const Route = createFileRoute("/guests")({
   component: GuestsView,
+  validateSearch: (search: Record<string, unknown>): { page } => {
+    // validate and parse the search params into a typed state
+    return { page: Number(search?.page ?? 1) };
+  },
   loader: async (): Promise<LoaderData> => {
-    let response = await fetch("../../sample-data/get_guests.json");
-    const guests: Guest[] = await response.json();
-    return { guests };
+    const guestsResponse = await getGuests(1); // page 1
+
+    const guestsDatas = await Promise.all(
+      guestsResponse.rows.map((g) =>
+        getGuestData(g.guest_id).then((guestResp) => {
+          const { total, ...guest } = guestResp;
+          return guest;
+        })
+      )
+    );
+
+    return { /* guestsResponse, */ guestsDatas };
   },
 });
 
 function GuestsView() {
-  const ITEMS_PER_PAGE = 5;
+  const ITEMS_PER_PAGE = 3;
 
-  const { guests } = Route.useLoaderData();
+  const { page } = Route.useSearch();
+
+  const { guestsDatas } = Route.useLoaderData();
+  const guests = guestsDatas;
   const navigate = useNavigate();
 
   const [filterText, setFilterText] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+
   const [sortConfig, setSortConfig] = useState<{
     key: string | null;
     direction: string | null;
   }>({ key: null, direction: null });
 
-  const [showNewGuestModal, setShowNewGuestModal] = useState(true);
+  const [showNewGuestModal, setShowNewGuestModal] = useState(false);
+
+  const [feedback, setFeedback] = useState<UserMessage>({
+    text: "",
+    isError: false,
+  });
 
   const filteredAndSortedData = useMemo(filterAndSort, [
     sortConfig,
     filterText,
   ]);
 
-  const paginatedData = useMemo(paginated, [
-    filteredAndSortedData,
-    currentPage,
-  ]);
+  const paginatedData = useMemo(paginated, [filteredAndSortedData, page]);
 
   const totalPages = Math.ceil(filteredAndSortedData.length / ITEMS_PER_PAGE);
 
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h1 className="mb-3">Guests</h1>
+        <h1>Guests</h1>
         <Button onClick={() => setShowNewGuestModal(true)}>New Guest</Button>
       </div>
 
+      <FeedbackMessage
+        text={feedback.text}
+        isError={feedback.isError}
+        className="my-3"
+      />
+
       <Modal show={showNewGuestModal}>
-        <NewGuestForm setShowNewGuestModal={setShowNewGuestModal} />
+        <NewGuestForm
+          setShowNewGuestModal={setShowNewGuestModal}
+          setViewFeedback={setFeedback}
+        />
       </Modal>
 
       <SearchBar />
@@ -85,8 +116,8 @@ function GuestsView() {
         let bValue = b[sortConfig.key as keyof Guest];
 
         if (sortConfig.key === "notifications") {
-          aValue = a.notifications.length;
-          bValue = b.notifications.length;
+          aValue = a.guest_notifications.length;
+          bValue = b.guest_notifications.length;
         }
 
         if (aValue < bValue) {
@@ -102,7 +133,7 @@ function GuestsView() {
   }
 
   function paginated(): Guest[] {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const startIndex = (page - 1) * ITEMS_PER_PAGE;
     return filteredAndSortedData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }
 
@@ -110,21 +141,24 @@ function GuestsView() {
     return (
       <InputGroup className="mb-4">
         <InputGroup.Text className="border-secondary">
-          <Search size={20} className="text-muted" />
+          <SearchIcon size={20} className="text-muted" />
         </InputGroup.Text>
         <Form.Control
-          placeholder="Search guests..."
+          // placeholder="Search guests..."
+          placeholder="I don't work yet. I'm not using the network"
           value={filterText}
           onChange={(e) => {
             setFilterText(e.target.value);
-            setCurrentPage(1);
+            // TODO: HOW DO I SET THE PAGE HERE? (need to know for search filtering)
+            // setPage(1);
           }}
-          className="text-light border-secondary rounded-end"
+          className="border-secondary rounded-end"
         />
       </InputGroup>
     );
   }
 
+  // !!! TODO: add guest to in-memory guests if successfully created
   function GuestsTable() {
     return (
       <Table
@@ -146,7 +180,7 @@ function GuestsView() {
               DOB <ArrowUpDown className="ms-2" size={16} />
             </th>
             <th
-              onClick={() => sortBy("notifications")}
+              onClick={() => sortBy("guest_notifications")}
               className="overflow-hidden text-truncate"
               title="Sort by notification count"
             >
@@ -156,13 +190,7 @@ function GuestsView() {
         </thead>
         <tbody>
           {paginatedData.map((g) => {
-            const notificationCount = JSON.parse(g.notifications).length;
-            const pillColor =
-              notificationCount >= 3
-                ? "danger"
-                : notificationCount > 0
-                  ? "warning"
-                  : "sencondary";
+            const notificationCount = g.guest_notifications.length;
             return (
               <tr
                 key={g.guest_id}
@@ -177,10 +205,8 @@ function GuestsView() {
                 <td>{g.first_name}</td>
                 <td>{g.last_name}</td>
                 <td>{g.dob}</td>
-                <td className="overflow-hidden">
-                  <span className={`badge bg-${pillColor} rounded-pill`}>
-                    {notificationCount}
-                  </span>
+                <td>
+                  <div className="fs-4" style={{ marginBlock: "-5px" }}>{notificationCount > 0 ? "❗️" : ""}</div>
                 </td>
               </tr>
             );
@@ -208,24 +234,30 @@ function GuestsView() {
 
         <Pagination className="mb-0">
           <Pagination.Prev
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
+            as={Link}
+            to="/guests"
+            search={{ page: page === 1 ? page : page - 1 }}
+            disabled={page === 1}
           />
 
           {[...Array(totalPages)].map((_, index) => (
             <Pagination.Item
+              as={Link}
               key={index}
-              active={currentPage === index + 1}
-              onClick={() => setCurrentPage(index + 1)}
+              to="/guests"
+              search={{ page: index + 1 }}
+              active={page === index + 1}
             >
               {index + 1}
             </Pagination.Item>
           ))}
 
           <Pagination.Next
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          />
+            as={Link}
+            disabled={page === totalPages}
+            to="/guests"
+            search={{ page: page + 1 }}
+          ></Pagination.Next>
         </Pagination>
       </div>
     );

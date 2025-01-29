@@ -14,7 +14,7 @@ export async function addGuest(g: Partial<Guest>): Promise<number | null> {
   return guest_id;
 }
 
-export async function getGuest(id: number): Promise<GuestDataAPIResponse> {
+export async function getGuestData(id: number): Promise<GuestDataAPIResponse> {
   const response = await API.post({
     apiName: "auth",
     path: "/getGuestData",
