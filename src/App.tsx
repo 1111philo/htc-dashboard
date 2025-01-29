@@ -6,7 +6,12 @@ import {
   useNavigate,
   useRouterState,
 } from "@tanstack/react-router";
+import {
+  QueryClient,
+  QueryClientProvider
+} from '@tanstack/react-query'
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
@@ -17,27 +22,32 @@ import { Route } from './routes/__root';
 
 auth.configure();
 
+const queryClient = new QueryClient();
+
 export default function App() {
   const isLoginRoute = useRouterState().location.pathname === "/login";
   return (
     <>
       <Container className="mt-4">
-        {
-          !isLoginRoute && <AppNav /> // hide nav when user navigates to /login after login in (edge case)
-        }
-        <main>
-          <Outlet />
-        </main>
+        <QueryClientProvider client={queryClient}>
+          {
+            !isLoginRoute && <AppNav /> // hide nav when user navigates to /login after login in (edge case)
+          }
+            <main>
+              <Outlet />
+            </main>
 
-        {/* DEV */}
-        <Suspense>
-          {/* for use with dynamically importing dev tools in dev mode, which is not yet set up */}
-          <TanStackRouterDevtools initialIsOpen={false} />
-        </Suspense>
-        <div className="mt-5 text-danger float-end">
-          API URL: {import.meta.env.VITE_API_URL}
-        </div>
-        {/* END DEV */}
+          {/* DEV */}
+          <Suspense>
+            {/* for use with dynamically importing dev tools in dev mode, which is not yet set up */}
+            <TanStackRouterDevtools initialIsOpen={false} />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </Suspense>
+          <div className="mt-5 text-danger float-end">
+            API URL: {import.meta.env.VITE_API_URL}
+          </div>
+          {/* END DEV */}
+        </QueryClientProvider>
       </Container>
     </>
   );
