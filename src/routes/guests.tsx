@@ -152,7 +152,7 @@ function GuestsView() {
             // TODO: HOW DO I SET THE PAGE HERE? (need to know for search filtering)
             // setPage(1);
           }}
-          className="text-light border-secondary rounded-end"
+          className="border-secondary rounded-end"
         />
       </InputGroup>
     );

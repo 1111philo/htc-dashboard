@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import {
   createFileRoute,
-  parsePathname,
   useNavigate,
 } from "@tanstack/react-router";
 import {
@@ -198,7 +197,7 @@ function UsersView() {
             setFilterText(e.target.value);
             setCurrentPage(1);
           }}
-          className="text-light border-secondary rounded-end"
+          className="border-secondary rounded-end"
         />
       </InputGroup>
     );
