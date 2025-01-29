@@ -96,8 +96,8 @@ function ServiceView() {
               {
                 // for every slot, display the guestSlotted or empty/available row
                 Array.from({ length: service.quota }).map((slot, slotIndex) => {
-                  if (guestsSlotted && guestsSlotted[slotIndex]) {
-                    const { guest_id, first_name, last_name } = guestsSlotted[slotIndex];
+                  if (guestsSlottedState.length !== 0 && slotIndex < guestsSlottedState.length) {
+                    const { guest_id, first_name, last_name } = guestsSlottedState[slotIndex];
                     const nameAndID = `${first_name} ${last_name} (${guest_id})`;
 
                     return (
@@ -143,7 +143,7 @@ function ServiceView() {
           </tr>
         </thead>
         <tbody>
-          { guestsQueued!.map(({ guest_id, first_name, last_name, created_at }, i) => {
+          { guestsQueuedState!.map(({ guest_id, first_name, last_name, created_at }, i) => {
             const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
 
               return (
@@ -157,7 +157,7 @@ function ServiceView() {
                         onChange={(e) => handleMoveToNewStatus(guest_id, "Slotted", parseInt(e.target.value))}
                       >
                         <option>Assign Slot</option>
-                        {Array.from({ length: 10 }).map((_, i) => {
+                        {Array.from({ length: service.quota }).map((_, i) => {
                           // TODO: need array of available slots for these options
                           return <option key={i}>{i + 1}</option>;
                         })}
@@ -185,7 +185,7 @@ function ServiceView() {
           </tr>
         </thead>
         <tbody>
-          { guestsCompleted!.map(({ guest_id, first_name, last_name, created_at }, i) => {
+          { guestsCompletedState!.map(({ guest_id, first_name, last_name, created_at }, i) => {
             const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
 
               return (
