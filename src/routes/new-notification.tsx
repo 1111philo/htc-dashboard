@@ -1,58 +1,78 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import * as API from "aws-amplify/api";
 
 import { Button, Form, Modal } from "react-bootstrap";
 import Select from "react-select";
 
-import mockGuests from "../../sample-data/get_guests.json";
-
 export const Route = createFileRoute("/new-notification")({
   component: NewNotificationView,
 });
 
-const allGuests = mockGuests.map((g) => {
-  return {
-    ...g,
-    value: g.guest_id,
-    label: `${g.guest_id} : ${g.first_name} ${g.last_name} : ${g.dob}`,
-  };
-});
-
-const getGuestOptions = async () => {
+const getAllGuests = async () => {
   // fetch all guests
-  // const allGuests = await (
-  //   await API.post({
-  //     apiName: "auth",
-  //     path: "/getGuests",
-  //   }).response
-  // ).body.json();
-  // console.log("allGuests", allGuests)
-  // return allGuests
+  const allGuests = await (
+    await API.post({
+      apiName: "auth",
+      path: "/getGuests",
+      options: {
+        body: {
+          limit: 10000
+        }
+      }
+    }).response
+  ).body.json();
+
+  return allGuests
 };
 
 function NewNotificationView() {
+  const queryClient = useQueryClient();
+
+  const { isPending, isError, isLoading, data, error } = useQuery({
+    queryKey: ['allGuests'],
+    queryFn: getAllGuests
+  });
+
+  if (isPending) {
+    return <span>Loading...</span>
+  }
+
+  if (isError) {
+    return <span>Error: {error.message}</span>
+  }
+
   return (
     <>
-      <h1>New Notification</h1>
-      <AddNewNotificationForm />
+      <h1>Add New Notification</h1>
+      <AddNewNotificationForm allGuests={data}/>
     </>
   );
 }
 
-function AddNewNotificationForm() {
+function AddNewNotificationForm({ allGuests }) {
+
   const [selectedGuest, setSelectedGuest] = useState<ReactSelectOption>();
-  const [success, setSuccess] = useState(false);
+  const [creationSuccess, setCreationSuccess] = useState(false);
+  const [creationWarning, setCreationWarning] = useState(false);
   const [message, setMessage] = useState("");
+
+  const guestOptions = allGuests.rows.map((g) => {
+    return {
+      ...g,
+      value: g.guest_id,
+      label: `(ID: ${g.guest_id}) ${g.first_name} ${g.last_name} - ${g.dob}`,
+    };
+  });
 
   const handleCreateNotification = async (e) => {
     if (selectedGuest === undefined) {
-      alert(`Notifications must have a guest.`)
+      setCreationWarning(true);
       return;
     }
-    console.log("notif guest", selectedGuest);
-    console.log("notif message", message);
+
     const response = await (
       await API.post({
         apiName: "auth",
@@ -67,11 +87,12 @@ function AddNewNotificationForm() {
       }).response
     ).statusCode
     if (response === 200) {
-      setSuccess(true);
+      setCreationSuccess(true);
+      setSelectedGuest(undefined);
+      setMessage("");
+    } else {
+      setCreationWarning(true);
     }
-    setSelectedGuest(undefined);
-    setMessage("");
-    // return response
   };
 
   const handleEnter = (e) => {
@@ -80,18 +101,22 @@ function AddNewNotificationForm() {
     }
   };
 
-  const handleClose = () => setSuccess(false);
+  const handleClose = () => {
+    setCreationSuccess(false);
+    setCreationWarning(false);
+  }
 
   return (
     <>
-      <Form>
+      <Form id="new-notification">
         <Form.Group className="mb-3" controlId="guest">
           <Form.Label>
-            <i>Search by UID, Name, or Birthday (YYYY/MM/DD):</i>
+            <i>Search by UID, Name, or Birthday (YYYY-MM-DD):</i>
           </Form.Label>
           <Select
             id="guest-dropdown"
-            options={allGuests}
+            key={`reset-key-${selectedGuest}`}
+            options={guestOptions}
             value={selectedGuest}
             onChange={(searchInput) => setSelectedGuest(searchInput)}
             placeholder="Guest"
@@ -102,6 +127,7 @@ function AddNewNotificationForm() {
           <Form.Control
             type="text"
             placeholder="Message (optional)"
+            value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleEnter}
           />
@@ -112,13 +138,23 @@ function AddNewNotificationForm() {
         </Button>
       </Form>
 
-      <Modal show={success} onHide={handleClose}>
+      <Modal show={creationSuccess} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title>Success</Modal.Title>
         </Modal.Header>
 
         <Modal.Body>
           <p>Notification created!</p>
+        </Modal.Body>
+      </Modal>
+
+      <Modal show={creationWarning} onHide={handleClose}>
+        <Modal.Header closeButton>
+          <Modal.Title>⚠️ Warning ⚠️</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <p>Notification must include a guest.</p>
         </Modal.Body>
       </Modal>
     </>
