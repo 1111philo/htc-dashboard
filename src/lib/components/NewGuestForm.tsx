@@ -1,5 +1,5 @@
 import { Button, Form } from "react-bootstrap";
-import { FeedbackMessage } from "./FeedbackMessage";
+import FeedbackMessage from "./FeedbackMessage";
 import { today } from "../utils";
 import { Dispatch, SetStateAction, useState } from "react";
 import { addGuest } from "../api/guest";
@@ -22,6 +22,7 @@ export default function NewGuestForm(props: NewGuestFormProps) {
       <FeedbackMessage
         text={formFeedback.text}
         isError={formFeedback.isError}
+        className="my-3"
       />
       <Form onSubmit={submitNewGuestForm}>
         <Form.Group className="mb-3">
