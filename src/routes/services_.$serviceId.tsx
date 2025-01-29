@@ -1,7 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
 import * as API from 'aws-amplify/api';
+import {
+  fetchServiceByID,
+  fetchServiceGuestsCompleted,
+  fetchServiceGuestsQueued,
+  fetchServiceGuestsSlotted,
+  updateGuestServiceStatus
+} from '../lib/api'
 
 import { Button, Modal, Form, Table } from "react-bootstrap";
 
@@ -13,55 +20,13 @@ export const Route = createFileRoute("/services_/$serviceId")({
   loader: async ({ params: { serviceId }}) => {
     let guestsSlotted;
 
-    // fetch service by ID
-    const serviceResponse = await (
-      API.post({
-        apiName: "auth",
-        path: "/getServices",
-        options: {
-          body: {
-            service_id: serviceId
-          }
-        }
-      }).response
-    )
-    const [service,]: ServiceType[] = (await serviceResponse.body.json())!.rows
+    const service = await fetchServiceByID(serviceId);
 
     if (service.quota) {
-      // fetch active slotted guests
-      guestsSlotted = await (
-        await API.post({
-          apiName: "auth",
-          path: "/serviceGuestsSlotted"
-        }).response
-      ).body.json()
+      guestsSlotted = await fetchServiceGuestsSlotted(serviceId)
     }
-
-    const guestsQueuedResponse = await (
-      API.post({
-        apiName: "auth",
-        path: "/serviceGuestsQueued",
-        // options: {
-        //   body: {
-        //     service_id: serviceId
-        //   }
-        // }
-      }).response
-    )
-    const guestsQueued = (await guestsQueuedResponse.body.json())
-
-    const guestsCompletedResponse = await (
-      API.post({
-        apiName: "auth",
-        path: "/serviceGuestsCompleted",
-        options: {
-          body: {
-            service_id: serviceId
-          }
-        }
-      }).response
-    )
-    const guestsCompleted = (await guestsCompletedResponse.body.json())!
+    const guestsQueued = await fetchServiceGuestsQueued(serviceId)
+    const guestsCompleted = await fetchServiceGuestsCompleted(serviceId)
 
     return {
       service,
@@ -83,44 +48,26 @@ function ServiceView() {
 
   const [serviceName, setServiceName] = useState(service.name);
   const [quota, setQuota] = useState(service.quota);
+  const [guestsSlottedState, setGuestsSlottedState] = useState(guestsSlotted)
+  const [guestsQueuedState, setGuestsQueuedState] = useState(guestsQueued)
+  const [guestsCompletedState, setGuestsCompletedState] = useState(guestsCompleted)
 
-
-  const handleMoveToNewStatus = async (guestId: Number, newStatus: string) => {
-    // send api call to /updateGuestServiceStatus
-    const updateGuestServiceStatusResponse = await (
-      await API.post({
-        apiName: "auth",
-        path: "/updateGuestServiceStatus",
-        options: {
-          body: {
-            status: newStatus,
-            guest_id: guestId,
-            service_id: service.service_id
-            // TODO: need optional slot here or only have in active request
-          }
-        }
-      }).response
-    ).statusCode
-    console.log("updateGuestServiceStatusResponse", updateGuestServiceStatusResponse)
-    console.log("guestId clicked:", guestId)
-  };
-
-  const handleMoveToSLotted = async (guestId: Number, slotNum: String) => {
-    const updateGuestServiceStatusResponse = await (
-      API.post({
-        apiName: "auth",
-        path: "/updateGuestServiceStatus",
-        options: {
-          body: {
-            status: "Slotted",
-            guest_id: guestId,
-            service_id: service.service_id,
-            slot_id: slotNum
-          }
-        }
-      }).response
+  const handleMoveToNewStatus = async (
+    guestId: number,
+    newStatus: string,
+    slotNum: number | null
+  ) => {
+    updateGuestServiceStatus(
+      service,
+      newStatus,
+      guestId,
+      slotNum
     )
-    console.log("updateGuestServiceStatusResponse", updateGuestServiceStatusResponse)
+    if (service.quota) {
+      setGuestsSlottedState(await fetchServiceGuestsSlotted(service.service_id));
+    }
+    setGuestsQueuedState(await fetchServiceGuestsQueued(service.service_id));
+    setGuestsCompletedState(await fetchServiceGuestsCompleted(service.service_id));
   };
 
   return (
@@ -159,10 +106,10 @@ function ServiceView() {
                         <td>{nameAndID}</td>
                         <td>Occupied</td>
                         <td>
-                          <Button onClick={() => handleMoveToNewStatus(guest_id, "Completed")}>
+                          <Button onClick={() => handleMoveToNewStatus(guest_id, "Completed", null)}>
                             Move to Completed
                           </Button>
-                          <Button onClick={() => handleMoveToNewStatus(guest_id, "Queued")}>
+                          <Button onClick={() => handleMoveToNewStatus(guest_id, "Queued", null)}>
                             Move to Queue
                           </Button>
                         </td>
@@ -207,7 +154,7 @@ function ServiceView() {
                     { service.quota ? (
                       <Form.Select
                         aria-label="Select which slot to assign"
-                        onChange={(e) => handleMoveToSLotted(guest_id, e.target.value)}
+                        onChange={(e) => handleMoveToNewStatus(guest_id, "Slotted", parseInt(e.target.value))}
                       >
                         <option>Assign Slot</option>
                         {Array.from({ length: 10 }).map((_, i) => {
@@ -218,7 +165,7 @@ function ServiceView() {
                     ) : (
                       ""
                     )}
-                    <Button onClick={() => handleMoveToNewStatus(guest_id, "Completed")}>
+                    <Button onClick={() => handleMoveToNewStatus(guest_id, "Completed", null)}>
                       Move to Completed
                     </Button>
                   </td>
@@ -246,7 +193,7 @@ function ServiceView() {
                   <td>{created_at}</td>
                   <td>{nameAndID}</td>
                   <td>
-                    <Button onClick={() => handleMoveToNewStatus(guest_id, "Queued")}>Move to Queue</Button>
+                    <Button onClick={() => handleMoveToNewStatus(guest_id, "Queued", null)}>Move to Queue</Button>
                   </td>
                 </tr>
               );
