@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Table, Button, Modal } from "react-bootstrap";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown as SortIcon } from "lucide-react";
 import NewGuestForm from "../lib/components/NewGuestForm";
 import FeedbackMessage from "../lib/components/FeedbackMessage";
 import TableFilter from "../lib/components/TableFilter";
@@ -163,58 +163,30 @@ function GuestsView() {
   }
 }
 
-function GuestsTable({ rows, setSortedRows }) {
-  let sortDirection = SORT_DIRECTION.DESCENDING;
+// TODO: Once api supports sorting, use navigate() with search key
+function GuestsTable({ rows /* setSortedRows */ }) {
   const navigate = useNavigate();
   return (
     <Table className="mb-4 text-center table-sm" style={{ cursor: "pointer" }}>
       <thead>
         <tr>
-          <th
-            title="Sort by guest ID"
-            onClick={() =>
-              sortRowsBy("guest_id", !sortDirection, rows, setSortedRows)
-            }
-          >
-            ID <ArrowUpDown className="ms-2" size={16} />
+          <th /* title="Sort by guest ID" onClick={} */>
+            ID {/* <SortIcon className="ms-2" size={16} /> */}
+          </th>
+          <th /* title="Sort by first name" onClick={} */>
+            First {/* <SortIcon className="ms-2" size={16} /> */}
+          </th>
+          <th /* title="Sort by last name" onClick={} */>
+            Last {/* <SortIcon className="ms-2" size={16} /> */}
+          </th>
+          <th /* title="Sort by birthday" onClick={} */>
+            DOB {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
           <th
-            title="Sort by first name"
-            onClick={() =>
-              sortRowsBy("first_name", !sortDirection, rows, setSortedRows)
-            }
-          >
-            First <ArrowUpDown className="ms-2" size={16} />
-          </th>
-          <th
-            title="Sort by last name"
-            onClick={() =>
-              sortRowsBy("last_name", !sortDirection, rows, setSortedRows)
-            }
-          >
-            Last <ArrowUpDown className="ms-2" size={16} />
-          </th>
-          <th
-            title="Sort by birthday"
-            onClick={() =>
-              sortRowsBy("dob", !sortDirection, rows, setSortedRows)
-            }
-          >
-            DOB <ArrowUpDown className="ms-2" size={16} />
-          </th>
-          <th
-            onClick={() =>
-              sortRowsBy(
-                "guest_notifications",
-                !sortDirection,
-                rows,
-                setSortedRows
-              )
-            }
+            /* title="Sort by notification count" */
             className="overflow-hidden text-truncate"
-            title="Sort by notification count"
           >
-            Alerts <ArrowUpDown className="ms-2" size={16} />
+            Alerts {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
         </tr>
       </thead>
