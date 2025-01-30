@@ -6,11 +6,7 @@ import NewGuestForm from "../lib/components/NewGuestForm";
 import FeedbackMessage from "../lib/components/FeedbackMessage";
 import TableFilter from "../lib/components/TableFilter";
 import TablePager from "../lib/components/TablePaging";
-import {
-  getGuestData,
-  getGuests,
-  getGuestsWithQuery,
-} from "../lib/api/guest";
+import { getGuestData, getGuests, getGuestsWithQuery } from "../lib/api/guest";
 import { sortTableBy } from "../lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -19,6 +15,7 @@ const ITEMS_PER_PAGE = 10;
 interface LoaderData {
   // TODO: request a route for this page -- when i query guests, i need active_notification_count!!! -- maybe stick this into getGuests - otherwise, I'm making a request for each guest in the table just to get notification counts
   guests: Guest[];
+  totalGuestCount: number;
   page: number;
   totalPages: number;
 }
@@ -31,19 +28,21 @@ interface SearchParams {
 export const Route = createFileRoute("/guests")({
   component: GuestsView,
   validateSearch: (search: Record<string, unknown>): SearchParams => {
-    const { query, page: _page } = search
-    const page = Number(_page ?? 1)
-    if (!query) return { page }
+    const { query, page: _page } = search;
+    const page = Number(_page ?? 1);
+    if (!query) return { page };
     return {
       query: String(query || ""),
-      page
+      page,
     };
   },
   loaderDeps: ({ search: { query, page } }) => {
     return { query, page };
   },
   loader: async ({ deps: { query, page } }): Promise<LoaderData> => {
-    const guestsResponse = query?.length ? await getGuestsWithQuery(query) : await getGuests(page ?? 1, ITEMS_PER_PAGE)
+    const guestsResponse = query
+      ? await getGuestsWithQuery(query)
+      : await getGuests(page ?? 1, ITEMS_PER_PAGE);
     /** Filtered and sorted. */
     const guests = await Promise.all(
       guestsResponse.rows.map((g) =>
@@ -56,33 +55,34 @@ export const Route = createFileRoute("/guests")({
     // TODO: fix api -- need total user count (key 'total' = 0, always)
     // BUG? NO! the page count remaining the same when a query returns 1 page of results is because we can't yet get total guest count from the api
     /** TODO: WHEN API WORKS -- remove `|| 48` below */
-    const totalPages = Math.ceil( (guestsResponse.total || 48) / ITEMS_PER_PAGE)
-    return { guests, page: page!, totalPages };
+    const totalGuestCount = guestsResponse.total || 48;
+    const totalPages = Math.ceil(totalGuestCount / ITEMS_PER_PAGE);
+    return {
+      guests,
+      totalGuestCount,
+      page: page!,
+      totalPages,
+    };
   },
 });
 
 function GuestsView() {
-  let { guests, page, totalPages } = Route.useLoaderData();
+  let { guests, totalGuestCount, page, totalPages } = Route.useLoaderData();
 
   const [filterText, setFilterText] = useState("");
   const navigate = useNavigate();
   const executeSearch = useDebouncedCallback(() => {
     if (!filterText) {
-      navigate({ to: "/guests" })
-      return
+      navigate({ to: "/guests" });
+      return;
     }
     navigate({ to: "/guests", search: { query: filterText } });
   }, 500);
-
 
   const [sortConfig, setSortConfig] = useState<{
     key: string | null;
     direction: string | null;
   }>({ key: null, direction: null });
-  const filteredAndSortedData = useMemo(filterAndSort, [
-    sortConfig,
-    filterText,
-  ]);
 
   const [showNewGuestModal, setShowNewGuestModal] = useState(false);
 
@@ -127,14 +127,14 @@ function GuestsView() {
         page={page}
         totalPages={totalPages}
         paginatedDataLength={guests.length}
-        rowsCount={filteredAndSortedData.length}
+        rowsCount={totalGuestCount}
       />
     </>
   );
 
   async function onChangeSearch(newVal) {
     setFilterText(newVal);
-    executeSearch()
+    executeSearch();
   }
 
   function filterAndSort(): Guest[] {
