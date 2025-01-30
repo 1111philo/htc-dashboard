@@ -48,10 +48,3 @@ export async function getGuestsWithQuery(query): Promise<GuestsAPIResponse> {
   const guestsResponse = (await response.body.json()) as GuestsAPIResponse;
   return guestsResponse;
 }
-
-// TODO: remove this function after implementing useDebouncedCallback in New Visit View
-/** Get guests with search query - first, last, dob, id -- debounced. */
-export const getGuestsWithQueryDebounced = debounce(
-  (query) => getGuestsWithQuery(query),
-  1500
-);
