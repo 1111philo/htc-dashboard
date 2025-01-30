@@ -7,6 +7,7 @@ import NewGuestForm from "../lib/components/NewGuestForm";
 import { addGuest, getGuestData, getGuestsWithQuery } from "../lib/api/guest";
 import { addVisit } from "../lib/api/visit";
 import { useDebouncedCallback } from "use-debounce";
+import { toggleGuestNotificationStatus } from "../lib/api/notification";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
@@ -66,7 +67,7 @@ function NewVisitView() {
     <>
       <h1 className="mb-4">Add New Visit</h1>
 
-      <div className="d-flex gap-3">
+      <div className="d-flex gap-3 justify-content-between">
         <h2>Guest</h2>
         <Button variant="primary" onClick={() => setShowNewGuestModal(true)}>
           New Guest
@@ -135,10 +136,11 @@ function NewVisitView() {
                   <td>{n.message}</td>
                   <td>
                     <Form.Select
-                      onChange={(evt) =>
-                        updateNotificationStatus(evt, n.notification_id)
+                      onChange={async () =>
+                        await updateNotificationStatus(n.notification_id, n.status)
                       }
                       style={{ minWidth: "11ch" }}
+                      data-notification-id={n.notification_id}
                     >
                       <option value="Active">ACTIVE</option>
                       <option value="Archived">Archive</option>
@@ -152,20 +154,17 @@ function NewVisitView() {
       </div>
     );
 
-    function updateNotificationStatus(
-      evt: React.ChangeEvent<HTMLSelectElement>,
-      id: number
+    async function updateNotificationStatus(
+      notificationId: number,
+      status: GuestNotificationStatus
     ) {
-      const { value: newStatus } = evt.target;
-      // TODO: fetch/POST notification status change
-      // TODO: on success, change the value to the updated status
-      // or, update optimistically, and revert on failure, showing error message
-      const { success } = { success: true }; // placeholder
-      if (success) {
-        // TODO: Instead of removing the item from the notifications list, leave it
-        // and treat it as a form field in a form that gets submitted by clicking the
-        // Log Visit button. ADD THIS TO logVisit()!
-      }
+      const success = await toggleGuestNotificationStatus(notificationId);
+      if (success) return;
+      // unsuccessful -> revert value
+      const notificationSelect = document.querySelector(
+        `[data-notification-id="${notificationId}"]`
+      ) as HTMLSelectElement | null;
+      notificationSelect!.value = status
     }
   }
 
