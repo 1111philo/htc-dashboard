@@ -4,24 +4,48 @@ import { Table, Button, Modal } from "react-bootstrap";
 import { ArrowUpDown, Search as SearchIcon } from "lucide-react";
 import NewGuestForm from "../lib/components/NewGuestForm";
 import FeedbackMessage from "../lib/components/FeedbackMessage";
-import SearchBar from "../lib/components/SearchBar";
+import TableFilter from "../lib/components/TableFilter";
 import TablePager from "../lib/components/TablePaging";
-import { getGuestData, getGuests } from "../lib/api/guest";
+import {
+  getGuestData,
+  getGuests,
+  getGuestsWithQuery,
+} from "../lib/api/guest";
 import { sortTableBy } from "../lib/utils";
+import { useDebouncedCallback } from "use-debounce";
+
+const ITEMS_PER_PAGE = 10;
 
 interface LoaderData {
   // TODO: request a route for this page -- when i query guests, i need active_notification_count!!! -- maybe stick this into getGuests - otherwise, I'm making a request for each guest in the table just to get notification counts
-  guestsDatas: Guest[]; // so these requests execute in parallel
+  guests: Guest[];
+  page: number;
+  totalPages: number;
+}
+
+interface SearchParams {
+  query?: string;
+  page?: number;
 }
 
 export const Route = createFileRoute("/guests")({
   component: GuestsView,
-  validateSearch: (search: Record<string, unknown>): { page } => {
-    return { page: Number(search?.page ?? 1) };
+  validateSearch: (search: Record<string, unknown>): SearchParams => {
+    const { query, page: _page } = search
+    const page = Number(_page ?? 1)
+    if (!query) return { page }
+    return {
+      query: String(query || ""),
+      page
+    };
   },
-  loader: async (): Promise<LoaderData> => {
-    const guestsResponse = await getGuests(1); // page 1
-    const guestsDatas = await Promise.all(
+  loaderDeps: ({ search: { query, page } }) => {
+    return { query, page };
+  },
+  loader: async ({ deps: { query, page } }): Promise<LoaderData> => {
+    const guestsResponse = query?.length ? await getGuestsWithQuery(query) : await getGuests(page ?? 1, ITEMS_PER_PAGE)
+    /** Filtered and sorted. */
+    const guests = await Promise.all(
       guestsResponse.rows.map((g) =>
         getGuestData(g.guest_id).then((guestResp) => {
           const { total, ...guest } = guestResp;
@@ -29,19 +53,28 @@ export const Route = createFileRoute("/guests")({
         })
       )
     );
-    debugger
-    return { guestsDatas };
+    // TODO: fix api -- need total user count (key 'total' = 0, always)
+    // BUG? NO! the page count remaining the same when a query returns 1 page of results is because we can't yet get total guest count from the api
+    /** TODO: WHEN API WORKS -- remove `|| 48` below */
+    const totalPages = Math.ceil( (guestsResponse.total || 48) / ITEMS_PER_PAGE)
+    return { guests, page: page!, totalPages };
   },
 });
 
 function GuestsView() {
-  const ITEMS_PER_PAGE = 5;
-  const { page } = Route.useSearch();
-
-  const { guestsDatas } = Route.useLoaderData();
-  const guests = guestsDatas;
+  let { guests, page, totalPages } = Route.useLoaderData();
 
   const [filterText, setFilterText] = useState("");
+  const navigate = useNavigate();
+  const executeSearch = useDebouncedCallback(() => {
+    if (!filterText) {
+      navigate({ to: "/guests" })
+      return
+    }
+    navigate({ to: "/guests", search: { query: filterText } });
+  }, 500);
+
+
   const [sortConfig, setSortConfig] = useState<{
     key: string | null;
     direction: string | null;
@@ -50,9 +83,6 @@ function GuestsView() {
     sortConfig,
     filterText,
   ]);
-
-  const paginatedData = useMemo(paginated, [filteredAndSortedData, page]);
-  const totalPages = Math.ceil(filteredAndSortedData.length / ITEMS_PER_PAGE);
 
   const [showNewGuestModal, setShowNewGuestModal] = useState(false);
 
@@ -81,25 +111,31 @@ function GuestsView() {
         />
       </Modal>
 
-      <SearchBar
+      <TableFilter
+        label="Search guests by ID, Name, Birthday, or Notification Count"
         placeholder="I don't work yet. I'm not using the network"
         filterText={filterText}
-        setFilterText={setFilterText}
+        onChange={onChangeSearch}
       />
 
       <GuestsTable
-        paginatedData={paginatedData}
+        rows={guests}
         sortConfig={sortConfig}
         setSortConfig={setSortConfig}
       />
       <TablePager
         page={page}
         totalPages={totalPages}
-        paginatedDataLength={paginatedData.length}
-        filteredAndSortedDataLength={filteredAndSortedData.length}
+        paginatedDataLength={guests.length}
+        rowsCount={filteredAndSortedData.length}
       />
     </>
   );
+
+  async function onChangeSearch(newVal) {
+    setFilterText(newVal);
+    executeSearch()
+  }
 
   function filterAndSort(): Guest[] {
     let sortedAndFiltered = guests;
@@ -133,15 +169,10 @@ function GuestsView() {
     }
     return sortedAndFiltered;
   }
-
-  function paginated(): Guest[] {
-    const startIndex = (page - 1) * ITEMS_PER_PAGE;
-    return filteredAndSortedData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }
 }
 
 // !!! TODO: add guest to in-memory guests if successfully created
-function GuestsTable({ paginatedData, sortConfig, setSortConfig }) {
+function GuestsTable({ rows, sortConfig, setSortConfig }) {
   const navigate = useNavigate();
   return (
     <Table className="mb-4 text-center table-sm" style={{ cursor: "pointer" }}>
@@ -183,8 +214,8 @@ function GuestsTable({ paginatedData, sortConfig, setSortConfig }) {
         </tr>
       </thead>
       <tbody>
-        {paginatedData.map((g) => {
-          const notificationCount = g.guest_notifications.length;
+        {rows.map((g) => {
+          const notificationCount = g.guest_notifications?.length ?? 0;
           return (
             <tr
               key={g.guest_id}

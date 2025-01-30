@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import { ArrowUpDown, Search } from "lucide-react";
-import SearchBar from "../lib/components/SearchBar";
+import TableFilter from "../lib/components/TableFilter";
 import TablePager from "../lib/components/TablePaging";
 import { sortTableBy } from "../lib/utils";
 
@@ -62,7 +62,7 @@ function UsersView() {
         <NewUserForm setShowNewUserModal={setShowNewUserModal} />
       </Modal>
 
-      <SearchBar
+      <TableFilter
         placeholder="Search users..."
         filterText={filterText}
         setFilterText={setFilterText}

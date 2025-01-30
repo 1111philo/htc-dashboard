@@ -39,7 +39,7 @@ export async function getGuests(
 }
 
 /** Get guests with search query - first, last, dob, id. */
-async function getGuestsWithQuery(query): Promise<GuestsAPIResponse> {
+export async function getGuestsWithQuery(query): Promise<GuestsAPIResponse> {
   const response = await API.post({
     apiName: "auth",
     path: "/getGuests",

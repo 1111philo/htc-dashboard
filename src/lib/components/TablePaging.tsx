@@ -5,12 +5,12 @@ export default function TablePager({
   page,
   totalPages,
   paginatedDataLength,
-  filteredAndSortedDataLength,
+  rowsCount,
 }) {
   return (
     <div className="d-flex justify-content-between align-items-center text-muted">
       <small>
-        Showing {paginatedDataLength} of {filteredAndSortedDataLength} guests
+        Showing {paginatedDataLength} of {rowsCount} guests
       </small>
 
       <Pagination className="mb-0">
