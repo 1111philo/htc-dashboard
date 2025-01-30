@@ -5,8 +5,8 @@ import { Button, Form, Modal, Table } from "react-bootstrap";
 import FeedbackMessage from "../lib/components/FeedbackMessage";
 
 import {
+  addGuest,
   getGuestData,
-  getGuests,
   getGuestsWithQueryDebounced,
 } from "../lib/api/guest";
 import NewGuestForm from "../lib/components/NewGuestForm";
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/new-visit")({
   component: NewVisitView,
   loader: async ({ context }): Promise<LoaderData> => {
     let { serviceTypes } = context;
-    serviceTypes = serviceTypes ?? []
+    serviceTypes = serviceTypes ?? [];
     return { serviceTypes };
   },
 });
@@ -44,7 +44,6 @@ function NewVisitView() {
 
   const [notifications, setNotifications] = useState<GuestNotification[]>([]);
 
-
   // set selected guest to new guest if exists
   useEffect(() => {
     if (!newGuest) return;
@@ -54,19 +53,19 @@ function NewVisitView() {
     });
   }, [newGuest]);
 
-  // get notifications from selected guest
-  useEffect(() => {
-    if (selectedGuestOpt) {
-      getGuestData(+selectedGuestOpt.value).then((g) => {
-        if (!g.guest_notifications) return; // new guest is partial, no notifications key
-        setNotifications(
-          (g.guest_notifications as GuestNotification[]).filter(
-            (n: GuestNotification) => n.status === "Active"
-          )
-        );
-      });
-    }
-  }, [selectedGuestOpt]);
+  // // get notifications from selected guest
+  // useEffect(() => {
+  //   if (selectedGuestOpt) {
+  //     getGuestData(+selectedGuestOpt.value).then((g) => {
+  //       if (!g.guest_notifications) return; // new guest is partial, no notifications key
+  //       setNotifications(
+  //         (g.guest_notifications as GuestNotification[]).filter(
+  //           (n: GuestNotification) => n.status === "Active"
+  //         )
+  //       );
+  //     });
+  //   }
+  // }, [selectedGuestOpt]);
 
   return (
     <>
@@ -88,8 +87,8 @@ function NewVisitView() {
       <Modal show={showNewGuestModal}>
         <NewGuestForm
           setShowNewGuestModal={setShowNewGuestModal}
-          setNewGuest={setNewGuest}
           setViewFeedback={setFeedback}
+          onSubmit={onSubmitNewGuestForm}
         />
       </Modal>
 
@@ -104,6 +103,25 @@ function NewVisitView() {
       <RequestedServices data={serviceTypes} />
     </>
   );
+
+  // TODO: require at least 2 fields!
+  async function onSubmitNewGuestForm(
+    e: React.FormEvent<HTMLFormElement>,
+  ): Promise<number | null> {
+    e.preventDefault();
+    const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
+    const guest_id = await addGuest(guest);
+    if (!guest_id) return null;
+    setShowNewGuestModal(false);
+    setFeedback &&
+      setFeedback({
+        text: `Guest created successfully! ID: ${guest_id}`,
+        isError: false,
+      });
+    const newGuest: Partial<Guest> = { ...guest, guest_id };
+    setNewGuest(newGuest)
+    return guest_id;
+  }
 
   function Notifications({ data }) {
     return (

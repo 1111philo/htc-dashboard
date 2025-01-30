@@ -9,6 +9,7 @@ interface NewGuestFormProps {
   setViewFeedback?: (_: UserMessage) => void;
   sortedGuests: Guest[];
   setSortedGuests;
+  onSubmit: (e: React.FormEvent) => Promise<number | null>;
 }
 
 export default function NewGuestForm(props: NewGuestFormProps) {
@@ -17,6 +18,7 @@ export default function NewGuestForm(props: NewGuestFormProps) {
     setViewFeedback,
     sortedGuests,
     setSortedGuests,
+    onSubmit,
   } = props;
   const [formFeedback, setFormFeedback] = useState<UserMessage>({
     text: "",
@@ -31,14 +33,29 @@ export default function NewGuestForm(props: NewGuestFormProps) {
         className="my-3"
       />
       <Form
-        onSubmit={(e) =>
-          submitNewGuestForm(
-            e,
-            setShowNewGuestModal,
-            sortedGuests,
-            setSortedGuests
-          )
-        }
+        // onSubmit={(e) =>
+        //   onSubmit ? onSubmit(e) : submitNewGuestForm(e, setShowNewGuestModal)
+        // }
+        // onSubmit={(e) => {
+        //   // TODO: remove ternary, just fire onSubmit, once below submitNewGuestForm is moved to Guests View
+        //   onSubmit ? onSubmit(e) : submitNewGuestForm(e, setShowNewGuestModal);
+        // }}
+        onSubmit={async e => {
+          const guest_id = await onSubmit(e)
+          if (!guest_id) {
+            setFormFeedback({
+              text: "Failed to create guest. Try again in a few.",
+              isError: true,
+            });
+            return;
+          }
+          // TODO: move this to Guests view
+          setViewFeedback &&
+            setViewFeedback({
+              text: `Guest created successfully! ID: ${guest_id}`,
+              isError: false,
+            });
+        }}
       >
         <Form.Group className="mb-3">
           <Form.Label>First Name</Form.Label>
@@ -80,9 +97,7 @@ export default function NewGuestForm(props: NewGuestFormProps) {
   // TODO: require at least 2 fields!
   async function submitNewGuestForm(
     e: React.FormEvent<HTMLFormElement>,
-    setShowNewGuestModal,
-    sortedUsers,
-    setSortedUsers
+    setShowNewGuestModal
   ) {
     e.preventDefault();
     const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
@@ -101,7 +116,10 @@ export default function NewGuestForm(props: NewGuestFormProps) {
         isError: false,
       });
 
-      const newGuest: Partial<Guest> = { ...guest, guest_id }
-      setSortedGuests([newGuest, ...sortedGuests])
+    // TODO: move me to a func to pass to this component's onSubmit. new func in Guests view
+    //      then replace this line with onSubmit from props
+    //      OR! move this entire submit func to Guests, and in this component, call whatever onSubmit was passed in
+    const newGuest: Partial<Guest> = { ...guest, guest_id };
+    setSortedGuests && setSortedGuests([newGuest, ...sortedGuests]);
   }
 }
