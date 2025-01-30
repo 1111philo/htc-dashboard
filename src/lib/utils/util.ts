@@ -45,35 +45,7 @@ export function pageOffset(pageNum: number): number {
 }
 
 type SortDirection = boolean;
-export const SORT_DIRECTION = Object.freeze({ ASCENDING: true, DESCENDING: false });
-
-export function sortRowsBy(
-  key: keyof Guest | keyof User,
-  direction: SortDirection,
-  rows: User[],
-  setSortedRows
-) {
-  let sorted = rows;
-  if (key) {
-    sorted = [...sorted].sort((a, b) => {
-      let aValue: string | number;
-      let bValue: string | number;
-      if (typeof a[key] === "string") {
-        aValue = a[key].toString().toLowerCase();
-        bValue = b[key].toString().toLowerCase();
-      }
-      if (typeof a[key] === "number") {
-        aValue = a[key];
-        bValue = b[key];
-      }
-      if (aValue! < bValue!) {
-        return direction === SORT_DIRECTION.ASCENDING ? -1 : 1;
-      }
-      if (aValue! > bValue!) {
-        return direction === SORT_DIRECTION.DESCENDING ? 1 : -1;
-      }
-      return 0;
-    });
-  }
-  setSortedRows(sorted);
-}
+export const SORT_DIRECTION = Object.freeze({
+  ASCENDING: true,
+  DESCENDING: false,
+});

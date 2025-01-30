@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button, Form, Modal, Table } from "react-bootstrap";
-import { ArrowUpDown } from "lucide-react";
+import { ArrowUpDown as SortIcon } from "lucide-react";
 import FeedbackMessage from "../lib/components/FeedbackMessage";
 import TableFilter from "../lib/components/TableFilter";
 import TablePager from "../lib/components/TablePager";
@@ -239,36 +239,21 @@ function NewUserForm({
   }
 }
 
-function UsersTable({ rows, setSortedRows }) {
-  let sortDirection = SORT_DIRECTION.DESCENDING;
+// TODO: Once api supports sorting, use navigate() with search key
+function UsersTable({ rows /* setSortedRows */ }) {
   const navigate = useNavigate();
   return (
     <Table className="mb-4 text-center table-sm" style={{ cursor: "pointer" }}>
       <thead>
         <tr>
-          <th
-            title="Sort by name"
-            onClick={() =>
-              sortRowsBy("name", !sortDirection, rows, setSortedRows)
-            }
-          >
-            Name <ArrowUpDown className="ms-2" size={16} />
+          <th title="Sort by name">
+            Name {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
-          <th
-            title="Sort by email"
-            onClick={() =>
-              sortRowsBy("email", !sortDirection, rows, setSortedRows)
-            }
-          >
-            Email <ArrowUpDown className="ms-2" size={16} />
+          <th title="Sort by email">
+            Email {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
-          <th
-            title="Sort by role"
-            onClick={() =>
-              sortRowsBy("role", !sortDirection, rows, setSortedRows)
-            }
-          >
-            Role <ArrowUpDown className="ms-2" size={16} />
+          <th title="Sort by role">
+            Role {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
         </tr>
       </thead>
