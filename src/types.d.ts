@@ -23,14 +23,18 @@ interface Guest {
   guest_services: GuestService[];
 }
 
+type GuestNotificationStatus = "Archived" | "Active"
+
 interface GuestNotification {
   notification_id: number;
   guest_id: number;
   message: string;
-  status: "Archived" | "Active";
+  status: GuestNotificationStatus;
   created_at: string;
   updated_at: string;
 }
+
+type GuestServiceStatus = "Completed" | "Active" | "Queued"
 
 interface GuestService {
   guest_service_id: number;
@@ -62,6 +66,10 @@ interface ServiceType {
 // END DB
 
 // RESPONSE
+
+interface SuccessResponse {
+  success: boolean;
+}
 
 interface GuestDataAPIResponse extends Guest {
   total: number;
