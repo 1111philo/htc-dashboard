@@ -3,14 +3,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import FeedbackMessage from "../lib/components/FeedbackMessage";
-
-import {
-  getGuestData,
-  getGuests,
-  getGuestsWithQueryDebounced,
-} from "../lib/api/guest";
 import NewGuestForm from "../lib/components/NewGuestForm";
+import { addGuest, getGuestData, getGuestsWithQuery } from "../lib/api/guest";
 import { addVisit } from "../lib/api/visit";
+import { useDebouncedCallback } from "use-debounce";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
@@ -20,7 +16,7 @@ export const Route = createFileRoute("/new-visit")({
   component: NewVisitView,
   loader: async ({ context }): Promise<LoaderData> => {
     let { serviceTypes } = context;
-    serviceTypes = serviceTypes ?? []
+    serviceTypes = serviceTypes ?? [];
     return { serviceTypes };
   },
 });
@@ -44,7 +40,6 @@ function NewVisitView() {
 
   const [notifications, setNotifications] = useState<GuestNotification[]>([]);
 
-
   // set selected guest to new guest if exists
   useEffect(() => {
     if (!newGuest) return;
@@ -56,16 +51,15 @@ function NewVisitView() {
 
   // get notifications from selected guest
   useEffect(() => {
-    if (selectedGuestOpt) {
-      getGuestData(+selectedGuestOpt.value).then((g) => {
-        if (!g.guest_notifications) return; // new guest is partial, no notifications key
-        setNotifications(
-          (g.guest_notifications as GuestNotification[]).filter(
-            (n: GuestNotification) => n.status === "Active"
-          )
-        );
-      });
-    }
+    if (!selectedGuestOpt) return;
+    getGuestData(+selectedGuestOpt.value).then((g) => {
+      if (!g.guest_notifications) return; // new guest is partial, so no notifications key
+      setNotifications(
+        (g.guest_notifications as GuestNotification[]).filter(
+          (n: GuestNotification) => n.status === "Active"
+        )
+      );
+    });
   }, [selectedGuestOpt]);
 
   return (
@@ -87,9 +81,8 @@ function NewVisitView() {
 
       <Modal show={showNewGuestModal}>
         <NewGuestForm
-          setShowNewGuestModal={setShowNewGuestModal}
-          setNewGuest={setNewGuest}
-          setViewFeedback={setFeedback}
+          onSubmit={onSubmitNewGuestForm}
+          onClose={onCloseNewGuestForm}
         />
       </Modal>
 
@@ -104,6 +97,30 @@ function NewVisitView() {
       <RequestedServices data={serviceTypes} />
     </>
   );
+
+  // TODO: require at least 2 fields!
+  async function onSubmitNewGuestForm(
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<number | null> {
+    e.preventDefault();
+    const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
+    const guest_id = await addGuest(guest);
+    if (!guest_id) return null;
+    setShowNewGuestModal(false);
+    setFeedback &&
+      setFeedback({
+        text: `Guest created successfully! ID: ${guest_id}`,
+        isError: false,
+      });
+    const newGuest: Partial<Guest> = { ...guest, guest_id };
+    setNewGuest(newGuest);
+    return guest_id;
+  }
+
+  function onCloseNewGuestForm() {
+    if (!confirm("Discard the new guest?")) return;
+    setShowNewGuestModal(false);
+  }
 
   function Notifications({ data }) {
     return (
@@ -222,20 +239,13 @@ function SignInGuestForm({ newGuest, selectedGuestOpt, setSelectedGuestOpt }) {
     { value: string; label: string }[]
   >([]);
 
-  const [searchText, setSearchInput] = useState("");
+  const [searchText, setSearchText] = useState("");
 
-  // TODO: move me to onChange handler
-  // debounce guests query and update search results on search change
-  useEffect(() => {
-    if (!searchText) {
-      setGuestSelectOpts([]);
-      // TODO: do something here?
-      return;
-    }
-    getGuestsWithQueryDebounced(searchText.trim()).then((guestsResponse) => {
+  const executeSearch = useDebouncedCallback((searchText) => {
+    getGuestsWithQuery(searchText.trim()).then((guestsResponse) => {
       setGuestSelectOpts(guestLookupOpts(guestsResponse.rows));
     });
-  }, [searchText]);
+  }, 500);
 
   return (
     <Form className="mt-3 my-5">
@@ -254,13 +264,18 @@ function SignInGuestForm({ newGuest, selectedGuestOpt, setSelectedGuestOpt }) {
           defaultInputValue={searchText}
           value={selectedGuestOpt}
           onChange={(newVal) => setSelectedGuestOpt(newVal)}
-          onInputChange={(value) => setSearchInput(value)}
+          onInputChange={onChangeInput}
           menuIsOpen={!!searchText}
           placeholder={"Search for a guest..."}
         />
       </Form.Group>
     </Form>
   );
+
+  function onChangeInput(val) {
+    setSearchText(val);
+    val && executeSearch(val.trim());
+  }
 }
 
 function guestOptLabel(g: Guest) {
