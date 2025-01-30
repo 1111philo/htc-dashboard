@@ -109,7 +109,7 @@ function UsersView() {
 
       <TableFilter
         label="Filter Users by ID, Name, Birthday, or Notification Count"
-        placeholder="Search users..."
+        placeholder="Oops, I don't work yet! Waiting for the API to support queries..."
         filterText={filterText}
         onChange={onChangeFilter}
       />
@@ -246,13 +246,13 @@ function UsersTable({ rows /* setSortedRows */ }) {
     <Table className="mb-4 text-center table-sm" style={{ cursor: "pointer" }}>
       <thead>
         <tr>
-          <th title="Sort by name">
+          <th /* title="Sort by name" */>
             Name {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
-          <th title="Sort by email">
+          <th /* title="Sort by email" */>
             Email {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
-          <th title="Sort by role">
+          <th /* title="Sort by role" */>
             Role {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
         </tr>
