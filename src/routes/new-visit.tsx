@@ -53,19 +53,19 @@ function NewVisitView() {
     });
   }, [newGuest]);
 
-  // // get notifications from selected guest
-  // useEffect(() => {
-  //   if (selectedGuestOpt) {
-  //     getGuestData(+selectedGuestOpt.value).then((g) => {
-  //       if (!g.guest_notifications) return; // new guest is partial, no notifications key
-  //       setNotifications(
-  //         (g.guest_notifications as GuestNotification[]).filter(
-  //           (n: GuestNotification) => n.status === "Active"
-  //         )
-  //       );
-  //     });
-  //   }
-  // }, [selectedGuestOpt]);
+  // get notifications from selected guest
+  useEffect(() => {
+    if (selectedGuestOpt) {
+      getGuestData(+selectedGuestOpt.value).then((g) => {
+        if (!g.guest_notifications) return; // new guest is partial, no notifications key
+        setNotifications(
+          (g.guest_notifications as GuestNotification[]).filter(
+            (n: GuestNotification) => n.status === "Active"
+          )
+        );
+      });
+    }
+  }, [selectedGuestOpt]);
 
   return (
     <>
@@ -89,6 +89,7 @@ function NewVisitView() {
           setShowNewGuestModal={setShowNewGuestModal}
           setViewFeedback={setFeedback}
           onSubmit={onSubmitNewGuestForm}
+          onClose={onCloseNewGuestForm}
         />
       </Modal>
 
@@ -121,6 +122,11 @@ function NewVisitView() {
     const newGuest: Partial<Guest> = { ...guest, guest_id };
     setNewGuest(newGuest)
     return guest_id;
+  }
+
+  function onCloseNewGuestForm() {
+    if (!confirm("Discard the new guest?")) return;
+    setShowNewGuestModal(false)
   }
 
   function Notifications({ data }) {

@@ -6,7 +6,12 @@ import NewGuestForm from "../lib/components/NewGuestForm";
 import FeedbackMessage from "../lib/components/FeedbackMessage";
 import TableFilter from "../lib/components/TableFilter";
 import TablePager from "../lib/components/TablePager";
-import { getGuestData, getGuests, getGuestsWithQuery } from "../lib/api/guest";
+import {
+  addGuest,
+  getGuestData,
+  getGuests,
+  getGuestsWithQuery,
+} from "../lib/api/guest";
 import { SORT_DIRECTION, sortRowsBy } from "../lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 
@@ -106,15 +111,13 @@ function GuestsView() {
 
       <Modal show={showNewGuestModal}>
         <NewGuestForm
-          setShowNewGuestModal={setShowNewGuestModal}
-          setViewFeedback={setFeedback}
-          sortedGuests={sortedGuests}
-          setSortedGuests={setSortedGuests}
+          onSubmit={onSubmitNewGuestForm}
+          onClose={onCloseNewGuestForm}
         />
       </Modal>
 
       <TableFilter
-        label="Filter Guests by ID, Name, Birthday, or Notification Count"
+        label="Filter Guests by ID, Name, Birthday"
         placeholder="Filter guests..."
         filterText={filterText}
         onChange={onChangeFilter}
@@ -135,9 +138,31 @@ function GuestsView() {
     setFilterText(newVal);
     executeSearch();
   }
+
+  // TODO: require at least 2 fields!
+  async function onSubmitNewGuestForm(
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<number | null> {
+    e.preventDefault();
+    const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
+    const guest_id = await addGuest(guest);
+    if (!guest_id) return null;
+    setShowNewGuestModal(false);
+    setFeedback({
+      text: `Guest created successfully! ID: ${guest_id}`,
+      isError: false,
+    });
+    const newGuest: Partial<Guest> = { ...guest, guest_id };
+    setSortedGuests && setSortedGuests([newGuest as Guest, ...sortedGuests]);
+    return guest_id;
+  }
+
+  function onCloseNewGuestForm() {
+    if (!confirm("Discard the new guest?")) return;
+    setShowNewGuestModal(false);
+  }
 }
 
-// !!! TODO: add guest to in-memory guests if successfully created
 function GuestsTable({ rows, setSortedRows }) {
   let sortDirection = SORT_DIRECTION.DESCENDING;
   const navigate = useNavigate();
