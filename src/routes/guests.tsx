@@ -7,7 +7,7 @@ import FeedbackMessage from "../lib/components/FeedbackMessage";
 import TableFilter from "../lib/components/TableFilter";
 import TablePager from "../lib/components/TablePager";
 import { getGuestData, getGuests, getGuestsWithQuery } from "../lib/api/guest";
-import { sortTableBy } from "../lib/utils";
+import { SORT_DIRECTION, sortRowsBy } from "../lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 
 const ITEMS_PER_PAGE = 10;
@@ -69,6 +69,8 @@ export const Route = createFileRoute("/guests")({
 function GuestsView() {
   let { guests, totalGuestCount, page, totalPages } = Route.useLoaderData();
 
+  const [sortedGuests, setSortedGuests] = useState<Guest[]>(guests)
+
   const [filterText, setFilterText] = useState("");
   const navigate = useNavigate();
   const executeSearch = useDebouncedCallback(() => {
@@ -78,11 +80,6 @@ function GuestsView() {
     }
     navigate({ to: "/guests", search: { query: filterText } });
   }, 500);
-
-  const [sortConfig, setSortConfig] = useState<{
-    key: string | null;
-    direction: string | null;
-  }>({ key: null, direction: null });
 
   const [showNewGuestModal, setShowNewGuestModal] = useState(false);
 
@@ -122,15 +119,14 @@ function GuestsView() {
       />
 
       <GuestsTable
-        rows={guests}
-        sortConfig={sortConfig}
-        setSortConfig={setSortConfig}
+        rows={sortedGuests}
+        setSortedRows={setSortedGuests}
       />
       <TablePager
         queryRoute="/guests"
         page={page}
         totalPages={totalPages}
-        paginatedDataLength={guests.length}
+        paginatedDataLength={sortedGuests.length}
         rowsCount={totalGuestCount}
       />
     </>
@@ -142,8 +138,10 @@ function GuestsView() {
   }
 }
 
+
 // !!! TODO: add guest to in-memory guests if successfully created
-function GuestsTable({ rows, sortConfig, setSortConfig }) {
+function GuestsTable({ rows, setSortedRows }) {
+  let sortDirection = SORT_DIRECTION.DESCENDING
   const navigate = useNavigate();
   return (
     <Table className="mb-4 text-center table-sm" style={{ cursor: "pointer" }}>
@@ -151,31 +149,31 @@ function GuestsTable({ rows, sortConfig, setSortConfig }) {
         <tr>
           <th
             title="Sort by guest ID"
-            onClick={() => sortTableBy("guest_id", sortConfig, setSortConfig)}
+            onClick={() => sortRowsBy("guest_id", !sortDirection, rows, setSortedRows)}
           >
             ID <ArrowUpDown className="ms-2" size={16} />
           </th>
           <th
             title="Sort by first name"
-            onClick={() => sortTableBy("first_name", sortConfig, setSortConfig)}
+            onClick={() => sortRowsBy("first_name", )}
           >
             First <ArrowUpDown className="ms-2" size={16} />
           </th>
           <th
             title="Sort by last name"
-            onClick={() => sortTableBy("last_name", sortConfig, setSortConfig)}
+            onClick={() => sortRowsBy("last_name", !sortDirection, rows, setSortedRows)}
           >
             Last <ArrowUpDown className="ms-2" size={16} />
           </th>
           <th
             title="Sort by birthday"
-            onClick={() => sortTableBy("dob", sortConfig, setSortConfig)}
+            onClick={() => sortRowsBy("dob", !sortDirection, rows, setSortedRows)}
           >
             DOB <ArrowUpDown className="ms-2" size={16} />
           </th>
           <th
             onClick={() =>
-              sortTableBy("guest_notifications", sortConfig, setSortConfig)
+              sortRowsBy("guest_notifications", !sortDirection, rows, setSortedRows)
             }
             className="overflow-hidden text-truncate"
             title="Sort by notification count"

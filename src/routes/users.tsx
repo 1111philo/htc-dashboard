@@ -1,11 +1,11 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import { ArrowUpDown } from "lucide-react";
 import FeedbackMessage from "../lib/components/FeedbackMessage";
 import TableFilter from "../lib/components/TableFilter";
 import TablePager from "../lib/components/TablePager";
-import { sortTableBy } from "../lib/utils";
+import { SORT_DIRECTION, sortRowsBy } from "../lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 import { addUser, getUsers, getUsersWithQuery } from "../lib/api/user";
 
@@ -63,6 +63,8 @@ export const Route = createFileRoute("/users")({
 function UsersView() {
   const { users, totalUserCount, page, totalPages } = Route.useLoaderData();
 
+  const [sortedUsers, setSortedUsers] = useState<User[]>(users);
+
   const [filterText, setFilterText] = useState("");
   const navigate = useNavigate();
   const executeSearch = useDebouncedCallback(() => {
@@ -73,12 +75,7 @@ function UsersView() {
     navigate({ to: "/users", search: { query: filterText } });
   }, 500);
 
-  const [sortConfig, setSortConfig] = useState<{
-    key: string | null;
-    direction: string | null;
-  }>({ key: null, direction: null });
-
-  const [showUserModal, setShowNewUserModal] = useState(false);
+  const [showNewUserModal, setShowNewUserModal] = useState(false);
 
   const [feedback, setFeedback] = useState<UserMessage>({
     text: "",
@@ -100,7 +97,7 @@ function UsersView() {
         className="my-3"
       />
 
-      <Modal show={showUserModal}>
+      <Modal show={showNewUserModal}>
         <NewUserForm
           setShowNewUserModal={setShowNewUserModal}
           setViewFeedback={setFeedback}
@@ -116,15 +113,14 @@ function UsersView() {
       />
 
       <UsersTable
-        rows={users}
-        sortConfig={sortConfig}
-        setSortConfig={setSortConfig}
+        rows={sortedUsers}
+        setSortedRows={setSortedUsers}
       />
       <TablePager
         queryRoute="/users"
         page={page}
         totalPages={totalPages}
-        paginatedDataLength={users.length}
+        paginatedDataLength={sortedUsers.length}
         rowsCount={totalUserCount}
       />
     </>
@@ -194,7 +190,7 @@ function NewUserForm({ setShowNewUserModal, setViewFeedback, setNewUser }) {
             variant="danger"
             type="button"
             onClick={() => {
-              if (!confirm("Discard the new user?")) return
+              if (!confirm("Discard the new user?")) return;
               setShowNewUserModal(false);
             }}
           >
@@ -228,12 +224,14 @@ function NewUserForm({ setShowNewUserModal, setViewFeedback, setNewUser }) {
         text: `User created successfully! ID: ${user_id}`,
         isError: false,
       });
-    setNewUser && setNewUser({ ...user, user_id });
+
+    // TODO: add new user to top of list!
+    // setNewUser && setNewUser({ ...user, user_id });
   }
 }
 
-function UsersTable({ rows, sortConfig, setSortConfig }) {
-  debugger
+function UsersTable({ rows, setSortedRows }) {
+  let sortDirection = SORT_DIRECTION.DESCENDING;
   const navigate = useNavigate();
   return (
     <Table className="mb-4 text-center table-sm" style={{ cursor: "pointer" }}>
@@ -241,19 +239,25 @@ function UsersTable({ rows, sortConfig, setSortConfig }) {
         <tr>
           <th
             title="Sort by name"
-            onClick={() => sortTableBy("name", sortConfig, setSortConfig)}
+            onClick={() =>
+              sortRowsBy("name", !sortDirection, rows, setSortedRows)
+            }
           >
             Name <ArrowUpDown className="ms-2" size={16} />
           </th>
           <th
             title="Sort by email"
-            onClick={() => sortTableBy("email", sortConfig, setSortConfig)}
+            onClick={() =>
+              sortRowsBy("email", !sortDirection, rows, setSortedRows)
+            }
           >
             Email <ArrowUpDown className="ms-2" size={16} />
           </th>
           <th
             title="Sort by role"
-            onClick={() => sortTableBy("role", sortConfig, setSortConfig)}
+            onClick={() =>
+              sortRowsBy("role", !sortDirection, rows, setSortedRows)
+            }
           >
             Role <ArrowUpDown className="ms-2" size={16} />
           </th>

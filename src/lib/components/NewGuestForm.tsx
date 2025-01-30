@@ -5,13 +5,13 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { addGuest } from "../api/guest";
 
 interface NewGuestFormProps {
-  setShowNewGuestModal: Dispatch<SetStateAction<boolean>>,
-  setViewFeedback?: (_: UserMessage) => void,
-  setNewGuest?: (_: Partial<Guest>) => void
+  setShowNewGuestModal: Dispatch<SetStateAction<boolean>>;
+  setViewFeedback?: (_: UserMessage) => void;
+  setNewGuest?: (_: Partial<Guest>) => void;
 }
 
 export default function NewGuestForm(props: NewGuestFormProps) {
-  const { setShowNewGuestModal, setViewFeedback, setNewGuest } = props
+  const { setShowNewGuestModal, setViewFeedback, setNewGuest } = props;
   const [formFeedback, setFormFeedback] = useState<UserMessage>({
     text: "",
     isError: false,
@@ -48,7 +48,7 @@ export default function NewGuestForm(props: NewGuestFormProps) {
             variant="danger"
             type="button"
             onClick={() => {
-              if (!confirm("Discard the new guest?")) return
+              if (!confirm("Discard the new guest?")) return;
               setShowNewGuestModal(false);
             }}
           >
@@ -75,10 +75,13 @@ export default function NewGuestForm(props: NewGuestFormProps) {
       return;
     }
     setShowNewGuestModal(false);
-    setViewFeedback && (setViewFeedback({
-      text: `Guest created successfully! ID: ${guest_id}`,
-      isError: false,
-    }))
+    setViewFeedback &&
+      setViewFeedback({
+        text: `Guest created successfully! ID: ${guest_id}`,
+        isError: false,
+      });
+
+    // TODO: add new guest to top of list!
     setNewGuest && setNewGuest({ ...guest, guest_id });
   }
 }
