@@ -1,22 +1,27 @@
 import { Link } from "@tanstack/react-router";
 import { Pagination } from "react-bootstrap";
 
-export default function TablePager({
-  page,
-  totalPages,
-  paginatedDataLength,
-  filteredAndSortedDataLength,
-}) {
+interface Props {
+  queryRoute: "/guests" | "/users";
+  page: number;
+  totalPages: number;
+  paginatedDataLength;
+  rowsCount;
+}
+
+export default function TablePager(props: Props) {
+  const { queryRoute, page, totalPages, paginatedDataLength, rowsCount } =
+    props;
   return (
     <div className="d-flex justify-content-between align-items-center text-muted">
       <small>
-        Showing {paginatedDataLength} of {filteredAndSortedDataLength} guests
+        Showing {paginatedDataLength} of {rowsCount} guests
       </small>
 
       <Pagination className="mb-0">
         <Pagination.Prev
           as={Link}
-          to="/guests"
+          to={queryRoute}
           search={{ page: page === 1 ? page : page - 1 }}
           disabled={page === 1}
         />
@@ -25,7 +30,7 @@ export default function TablePager({
           <Pagination.Item
             as={Link}
             key={index}
-            to="/guests"
+            to={queryRoute}
             search={{ page: index + 1 }}
             active={page === index + 1}
           >
@@ -36,7 +41,7 @@ export default function TablePager({
         <Pagination.Next
           as={Link}
           disabled={page === totalPages}
-          to="/guests"
+          to={queryRoute}
           search={{ page: page + 1 }}
         ></Pagination.Next>
       </Pagination>

@@ -5,13 +5,19 @@ import { Dispatch, SetStateAction, useState } from "react";
 import { addGuest } from "../api/guest";
 
 interface NewGuestFormProps {
-  setShowNewGuestModal: Dispatch<SetStateAction<boolean>>,
-  setViewFeedback?: (_: UserMessage) => void,
-  setNewGuest?: (_: Partial<Guest>) => void
+  setShowNewGuestModal: Dispatch<SetStateAction<boolean>>;
+  setViewFeedback?: (_: UserMessage) => void;
+  sortedGuests: Guest[];
+  setSortedGuests;
 }
 
 export default function NewGuestForm(props: NewGuestFormProps) {
-  const { setShowNewGuestModal, setViewFeedback, setNewGuest } = props
+  const {
+    setShowNewGuestModal,
+    setViewFeedback,
+    sortedGuests,
+    setSortedGuests,
+  } = props;
   const [formFeedback, setFormFeedback] = useState<UserMessage>({
     text: "",
     isError: false,
@@ -24,7 +30,16 @@ export default function NewGuestForm(props: NewGuestFormProps) {
         isError={formFeedback.isError}
         className="my-3"
       />
-      <Form onSubmit={submitNewGuestForm}>
+      <Form
+        onSubmit={(e) =>
+          submitNewGuestForm(
+            e,
+            setShowNewGuestModal,
+            sortedGuests,
+            setSortedGuests
+          )
+        }
+      >
         <Form.Group className="mb-3">
           <Form.Label>First Name</Form.Label>
           <Form.Control id="input-first-name" name="first_name" />
@@ -48,6 +63,7 @@ export default function NewGuestForm(props: NewGuestFormProps) {
             variant="danger"
             type="button"
             onClick={() => {
+              if (!confirm("Discard the new guest?")) return;
               setShowNewGuestModal(false);
             }}
           >
@@ -62,7 +78,12 @@ export default function NewGuestForm(props: NewGuestFormProps) {
   );
 
   // TODO: require at least 2 fields!
-  async function submitNewGuestForm(e: React.FormEvent<HTMLFormElement>) {
+  async function submitNewGuestForm(
+    e: React.FormEvent<HTMLFormElement>,
+    setShowNewGuestModal,
+    sortedUsers,
+    setSortedUsers
+  ) {
     e.preventDefault();
     const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
     const guest_id = await addGuest(guest);
@@ -74,10 +95,13 @@ export default function NewGuestForm(props: NewGuestFormProps) {
       return;
     }
     setShowNewGuestModal(false);
-    setViewFeedback && (setViewFeedback({
-      text: `Guest created successfully! ID: ${guest_id}`,
-      isError: false,
-    }))
-    setNewGuest && setNewGuest({ ...guest, guest_id });
+    setViewFeedback &&
+      setViewFeedback({
+        text: `Guest created successfully! ID: ${guest_id}`,
+        isError: false,
+      });
+
+      const newGuest: Partial<Guest> = { ...guest, guest_id }
+      setSortedGuests([newGuest, ...sortedGuests])
   }
 }
