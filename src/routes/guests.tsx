@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Table, Button, Modal } from "react-bootstrap";
-import { ArrowUpDown, Search as SearchIcon } from "lucide-react";
+import { ArrowUpDown } from "lucide-react";
 import NewGuestForm from "../lib/components/NewGuestForm";
 import FeedbackMessage from "../lib/components/FeedbackMessage";
 import TableFilter from "../lib/components/TableFilter";
