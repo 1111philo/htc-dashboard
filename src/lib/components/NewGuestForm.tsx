@@ -81,8 +81,6 @@ export default function NewGuestForm(props: NewGuestFormProps) {
   async function submitNewGuestForm(
     e: React.FormEvent<HTMLFormElement>,
     setShowNewGuestModal,
-    sortedUsers,
-    setSortedUsers
   ) {
     e.preventDefault();
     const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
