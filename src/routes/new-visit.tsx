@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
@@ -14,21 +14,19 @@ import { addVisit } from "../lib/api/visit";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
-  guestsResponse: GuestsAPIResponse;
 }
 
 export const Route = createFileRoute("/new-visit")({
   component: NewVisitView,
   loader: async ({ context }): Promise<LoaderData> => {
-    const { serviceTypes } = context;
-    const guestsResponse = await getGuests();
-    return { serviceTypes, guestsResponse };
+    let { serviceTypes } = context;
+    serviceTypes = serviceTypes ?? []
+    return { serviceTypes };
   },
 });
 
 function NewVisitView() {
-  const { guestsResponse, serviceTypes } = Route.useLoaderData();
-  const guests = guestsResponse.rows;
+  const { serviceTypes } = Route.useLoaderData();
 
   const [feedback, setFeedback] = useState<UserMessage>({
     text: "",
@@ -43,32 +41,9 @@ function NewVisitView() {
   const [selectedServicesOpt, setSelectedServicesOpt] = useState<
     ReactSelectOption[]
   >([]); // array bc this Select is set to multi
-  const [guestSelectOpts, setGuestSelectOpts] = useState<
-    { value: string; label: string }[]
-  >([]);
-  const [searchText, setSearchInput] = useState("");
-
-  // debounced guests query
-  useEffect(() => {
-    if (!searchText) {
-      setGuestSelectOpts([])
-      // TODO: do something here?
-      return;
-    }
-    getGuestsWithQueryDebounced(searchText.trim())
-    .then(guestsResponse => {
-      setGuestSelectOpts(guestLookupOpts(guestsResponse.rows));
-    });
-    guestSelectRef.current?.focus();
-  }, [searchText]);
-
-  useEffect(() => {
-    guestSelectRef.current?.focus();
-  }, [guestSelectOpts]); // Only re-focus when options change
 
   const [notifications, setNotifications] = useState<GuestNotification[]>([]);
 
-  const guestSelectRef = useRef(null);
 
   // set selected guest to new guest if exists
   useEffect(() => {
@@ -118,41 +93,17 @@ function NewVisitView() {
         />
       </Modal>
 
-      <SignInGuestForm />
+      <SignInGuestForm
+        newGuest={newGuest}
+        selectedGuestOpt={selectedGuestOpt}
+        setSelectedGuestOpt={setSelectedGuestOpt}
+      />
 
       <Notifications data={notifications} />
 
       <RequestedServices data={serviceTypes} />
     </>
   );
-
-  function SignInGuestForm() {
-    return (
-      <Form className="mt-3 my-5">
-        <Form.Group className="mb-3" controlId="formUID">
-          <Form.Label>
-            <i>Search by UID, Name, or Birthday (YYYY/MM/DD):</i>
-          </Form.Label>
-          <Select
-            id="user-dropdown"
-            ref={guestSelectRef}
-            options={
-              newGuest
-                ? [{ value: newGuest.guest_id, label: guestOptLabel(newGuest) }]
-                : guestSelectOpts
-            }
-            defaultValue={selectedGuestOpt}
-            defaultInputValue={searchText}
-            value={selectedGuestOpt}
-            onChange={(newVal) => setSelectedGuestOpt(newVal)}
-            onInputChange={(value) => setSearchInput(value)}
-            menuIsOpen={!!searchText}
-            placeholder={"Search for a guest..."}
-          />
-        </Form.Group>
-      </Form>
-    );
-  }
 
   function Notifications({ data }) {
     return (
@@ -260,22 +211,68 @@ function NewVisitView() {
     }
   }
 
-  /** Map guests to `Select` options */
-  function guestLookupOpts(guests: Guest[]): ReactSelectOption[] {
-    return guests.map((g) => {
-      return {
-        value: g.guest_id.toString(),
-        label: guestOptLabel(g),
-      };
-    });
-  }
-
-  function guestOptLabel(g) {
-    return `${g.guest_id} : ${g.first_name} ${g.last_name} : ${g.dob}`;
-  }
-
   function clearInputs() {
     setSelectedGuestOpt(null);
     setSelectedServicesOpt([]);
   }
+}
+
+function SignInGuestForm({ newGuest, selectedGuestOpt, setSelectedGuestOpt }) {
+  const [guestSelectOpts, setGuestSelectOpts] = useState<
+    { value: string; label: string }[]
+  >([]);
+
+  const [searchText, setSearchInput] = useState("");
+
+  // TODO: move me to onChange handler
+  // debounce guests query and update search results on search change
+  useEffect(() => {
+    if (!searchText) {
+      setGuestSelectOpts([]);
+      // TODO: do something here?
+      return;
+    }
+    getGuestsWithQueryDebounced(searchText.trim()).then((guestsResponse) => {
+      setGuestSelectOpts(guestLookupOpts(guestsResponse.rows));
+    });
+  }, [searchText]);
+
+  return (
+    <Form className="mt-3 my-5">
+      <Form.Group className="mb-3" controlId="formUID">
+        <Form.Label>
+          <i>Search by UID, Name, or Birthday (YYYY/MM/DD):</i>
+        </Form.Label>
+        <Select
+          id="user-dropdown"
+          options={
+            newGuest
+              ? [{ value: newGuest.guest_id, label: guestOptLabel(newGuest) }]
+              : guestSelectOpts
+          }
+          defaultValue={selectedGuestOpt}
+          defaultInputValue={searchText}
+          value={selectedGuestOpt}
+          onChange={(newVal) => setSelectedGuestOpt(newVal)}
+          onInputChange={(value) => setSearchInput(value)}
+          menuIsOpen={!!searchText}
+          placeholder={"Search for a guest..."}
+        />
+      </Form.Group>
+    </Form>
+  );
+}
+
+function guestOptLabel(g: Guest) {
+  return `${g.guest_id} : ${g.first_name} ${g.last_name} : ${g.dob}`;
+}
+
+/** Map guests to `Select` options */
+function guestLookupOpts(guests: Guest[]): ReactSelectOption[] {
+  return guests.map((g) => {
+    return {
+      value: g.guest_id.toString(),
+      label: guestOptLabel(g),
+    };
+  });
 }
