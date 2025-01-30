@@ -36,7 +36,7 @@ function NewNotificationView() {
     queryFn: getAllGuests
   });
 
-  if (isPending) {
+  if (isPending || isLoading) {
     return <span>Loading...</span>
   }
 
@@ -55,9 +55,9 @@ function NewNotificationView() {
 function AddNewNotificationForm({ allGuests }) {
 
   const [selectedGuest, setSelectedGuest] = useState<ReactSelectOption>();
+  const [message, setMessage] = useState("");
   const [creationSuccess, setCreationSuccess] = useState(false);
   const [creationWarning, setCreationWarning] = useState(false);
-  const [message, setMessage] = useState("");
 
   const guestOptions = allGuests.rows.map((g) => {
     return {
@@ -86,12 +86,11 @@ function AddNewNotificationForm({ allGuests }) {
         }
       }).response
     ).statusCode
+
     if (response === 200) {
       setCreationSuccess(true);
       setSelectedGuest(undefined);
       setMessage("");
-    } else {
-      setCreationWarning(true);
     }
   };
 
@@ -119,17 +118,17 @@ function AddNewNotificationForm({ allGuests }) {
             options={guestOptions}
             value={selectedGuest}
             onChange={(searchInput) => setSelectedGuest(searchInput)}
-            placeholder="Guest"
+            placeholder="Search for a guest..."
           />
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="message">
           <Form.Control
             type="text"
-            placeholder="Message (optional)"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleEnter}
+            placeholder="Message (optional)"
           />
         </Form.Group>
 

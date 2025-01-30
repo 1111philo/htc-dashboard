@@ -18,6 +18,17 @@ export async function fetchServiceByID(serviceId: number) {
   return service;
 }
 
+export async function fetchServices() {
+  const servicesResponse = await (
+    API.post({
+      apiName: "auth",
+      path: "/getServices"
+    }).response
+  )
+  const services: ServiceType[] = (await servicesResponse.body.json())!.rows
+  return services;
+}
+
 export async function fetchServiceGuestsSlotted(serviceId: number): Guest[] {
   const guestsSlotted = await (
     await API.post({
