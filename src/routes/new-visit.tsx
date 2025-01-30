@@ -3,14 +3,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import FeedbackMessage from "../lib/components/FeedbackMessage";
-
-import {
-  getGuestData,
-  getGuests,
-  getGuestsWithQueryDebounced,
-} from "../lib/api/guest";
 import NewGuestForm from "../lib/components/NewGuestForm";
+import { addGuest, getGuestData, getGuestsWithQuery } from "../lib/api/guest";
 import { addVisit } from "../lib/api/visit";
+import { useDebouncedCallback } from "use-debounce";
+import { toggleGuestNotificationStatus } from "../lib/api/notification";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
@@ -20,7 +17,7 @@ export const Route = createFileRoute("/new-visit")({
   component: NewVisitView,
   loader: async ({ context }): Promise<LoaderData> => {
     let { serviceTypes } = context;
-    serviceTypes = serviceTypes ?? []
+    serviceTypes = serviceTypes ?? [];
     return { serviceTypes };
   },
 });
@@ -44,7 +41,6 @@ function NewVisitView() {
 
   const [notifications, setNotifications] = useState<GuestNotification[]>([]);
 
-
   // set selected guest to new guest if exists
   useEffect(() => {
     if (!newGuest) return;
@@ -56,23 +52,22 @@ function NewVisitView() {
 
   // get notifications from selected guest
   useEffect(() => {
-    if (selectedGuestOpt) {
-      getGuestData(+selectedGuestOpt.value).then((g) => {
-        if (!g.guest_notifications) return; // new guest is partial, no notifications key
-        setNotifications(
-          (g.guest_notifications as GuestNotification[]).filter(
-            (n: GuestNotification) => n.status === "Active"
-          )
-        );
-      });
-    }
+    if (!selectedGuestOpt) return;
+    getGuestData(+selectedGuestOpt.value).then((g) => {
+      if (!g.guest_notifications) return; // new guest is partial, so no notifications key
+      setNotifications(
+        (g.guest_notifications as GuestNotification[]).filter(
+          (n: GuestNotification) => n.status === "Active"
+        )
+      );
+    });
   }, [selectedGuestOpt]);
 
   return (
     <>
       <h1 className="mb-4">Add New Visit</h1>
 
-      <div className="d-flex gap-3">
+      <div className="d-flex gap-3 justify-content-between">
         <h2>Guest</h2>
         <Button variant="primary" onClick={() => setShowNewGuestModal(true)}>
           New Guest
@@ -87,9 +82,8 @@ function NewVisitView() {
 
       <Modal show={showNewGuestModal}>
         <NewGuestForm
-          setShowNewGuestModal={setShowNewGuestModal}
-          setNewGuest={setNewGuest}
-          setViewFeedback={setFeedback}
+          onSubmit={onSubmitNewGuestForm}
+          onClose={onCloseNewGuestForm}
         />
       </Modal>
 
@@ -105,6 +99,30 @@ function NewVisitView() {
     </>
   );
 
+  // TODO: require at least 2 fields!
+  async function onSubmitNewGuestForm(
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<number | null> {
+    e.preventDefault();
+    const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
+    const guest_id = await addGuest(guest);
+    if (!guest_id) return null;
+    setShowNewGuestModal(false);
+    setFeedback &&
+      setFeedback({
+        text: `Guest created successfully! ID: ${guest_id}`,
+        isError: false,
+      });
+    const newGuest: Partial<Guest> = { ...guest, guest_id };
+    setNewGuest(newGuest);
+    return guest_id;
+  }
+
+  function onCloseNewGuestForm() {
+    if (!confirm("Discard the new guest?")) return;
+    setShowNewGuestModal(false);
+  }
+
   function Notifications({ data }) {
     return (
       <div className="pb-5">
@@ -118,10 +136,11 @@ function NewVisitView() {
                   <td>{n.message}</td>
                   <td>
                     <Form.Select
-                      onChange={(evt) =>
-                        updateNotificationStatus(evt, n.notification_id)
+                      onChange={async () =>
+                        await updateNotificationStatus(n.notification_id, n.status)
                       }
                       style={{ minWidth: "11ch" }}
+                      data-notification-id={n.notification_id}
                     >
                       <option value="Active">ACTIVE</option>
                       <option value="Archived">Archive</option>
@@ -135,20 +154,17 @@ function NewVisitView() {
       </div>
     );
 
-    function updateNotificationStatus(
-      evt: React.ChangeEvent<HTMLSelectElement>,
-      id: number
+    async function updateNotificationStatus(
+      notificationId: number,
+      status: GuestNotificationStatus
     ) {
-      const { value: newStatus } = evt.target;
-      // TODO: fetch/POST notification status change
-      // TODO: on success, change the value to the updated status
-      // or, update optimistically, and revert on failure, showing error message
-      const { success } = { success: true }; // placeholder
-      if (success) {
-        // TODO: Instead of removing the item from the notifications list, leave it
-        // and treat it as a form field in a form that gets submitted by clicking the
-        // Log Visit button. ADD THIS TO logVisit()!
-      }
+      const success = await toggleGuestNotificationStatus(notificationId);
+      if (success) return;
+      // unsuccessful -> revert value
+      const notificationSelect = document.querySelector(
+        `[data-notification-id="${notificationId}"]`
+      ) as HTMLSelectElement | null;
+      notificationSelect!.value = status
     }
   }
 
@@ -222,20 +238,13 @@ function SignInGuestForm({ newGuest, selectedGuestOpt, setSelectedGuestOpt }) {
     { value: string; label: string }[]
   >([]);
 
-  const [searchText, setSearchInput] = useState("");
+  const [searchText, setSearchText] = useState("");
 
-  // TODO: move me to onChange handler
-  // debounce guests query and update search results on search change
-  useEffect(() => {
-    if (!searchText) {
-      setGuestSelectOpts([]);
-      // TODO: do something here?
-      return;
-    }
-    getGuestsWithQueryDebounced(searchText.trim()).then((guestsResponse) => {
+  const executeSearch = useDebouncedCallback((searchText) => {
+    getGuestsWithQuery(searchText.trim()).then((guestsResponse) => {
       setGuestSelectOpts(guestLookupOpts(guestsResponse.rows));
     });
-  }, [searchText]);
+  }, 500);
 
   return (
     <Form className="mt-3 my-5">
@@ -254,13 +263,18 @@ function SignInGuestForm({ newGuest, selectedGuestOpt, setSelectedGuestOpt }) {
           defaultInputValue={searchText}
           value={selectedGuestOpt}
           onChange={(newVal) => setSelectedGuestOpt(newVal)}
-          onInputChange={(value) => setSearchInput(value)}
+          onInputChange={onChangeInput}
           menuIsOpen={!!searchText}
           placeholder={"Search for a guest..."}
         />
       </Form.Group>
     </Form>
   );
+
+  function onChangeInput(val) {
+    setSearchText(val);
+    val && executeSearch(val.trim());
+  }
 }
 
 function guestOptLabel(g: Guest) {
