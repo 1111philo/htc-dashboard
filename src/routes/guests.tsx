@@ -108,7 +108,8 @@ function GuestsView() {
         <NewGuestForm
           setShowNewGuestModal={setShowNewGuestModal}
           setViewFeedback={setFeedback}
-          // setNewGuest={setNewGuest}
+          sortedGuests={sortedGuests}
+          setSortedGuests={setSortedGuests}
         />
       </Modal>
 

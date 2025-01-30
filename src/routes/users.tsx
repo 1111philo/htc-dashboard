@@ -102,7 +102,8 @@ function UsersView() {
         <NewUserForm
           setShowNewUserModal={setShowNewUserModal}
           setViewFeedback={setFeedback}
-          // setNewUser={setNewUser}
+          sortedUsers={sortedUsers}
+          setSortedUsers={setSortedUsers}
         />
       </Modal>
 
@@ -130,7 +131,12 @@ function UsersView() {
   }
 }
 
-function NewUserForm({ setShowNewUserModal, setViewFeedback, setNewUser }) {
+function NewUserForm({
+  setShowNewUserModal,
+  setViewFeedback,
+  sortedUsers,
+  setSortedUsers,
+}) {
   const [formFeedback, setFormFeedback] = useState<UserMessage>({
     text: "",
     isError: false,
@@ -150,7 +156,11 @@ function NewUserForm({ setShowNewUserModal, setViewFeedback, setNewUser }) {
         isError={formFeedback.isError}
         className="my-3"
       />
-      <Form onSubmit={(e) => submitNewUserForm(e, setShowNewUserModal)}>
+      <Form
+        onSubmit={(e) =>
+          submitNewUserForm(e, setShowNewUserModal, sortedUsers, setSortedUsers)
+        }
+      >
         <Form.Group className="mb-3">
           <Form.Label>Name</Form.Label>
           <Form.Control
@@ -178,8 +188,8 @@ function NewUserForm({ setShowNewUserModal, setViewFeedback, setNewUser }) {
             value={fields.role}
             onChange={(e) => setFields({ ...fields, role: e.target.value })}
           >
-            <option value="manager">Manager</option>
-            <option value="admin">Admin</option>
+            <option value="Manager">Manager</option>
+            <option value="Admin">Admin</option>
           </Form.Select>
         </Form.Group>
         <div className="d-flex justify-content-between">
@@ -202,10 +212,12 @@ function NewUserForm({ setShowNewUserModal, setViewFeedback, setNewUser }) {
   );
 
   async function submitNewUserForm(
-    evt: React.FormEvent<HTMLFormElement>,
-    setShowNewUserModal
+    e: React.FormEvent<HTMLFormElement>,
+    setShowNewUserModal,
+    sortedUsers,
+    setSortedUsers
   ) {
-    evt.preventDefault();
+    e.preventDefault();
     const user: Partial<User> = Object.fromEntries(new FormData(e.target));
     const user_id = await addUser(user);
     if (!user_id) {
@@ -222,8 +234,8 @@ function NewUserForm({ setShowNewUserModal, setViewFeedback, setNewUser }) {
         isError: false,
       });
 
-    // TODO: add new user to top of list!
-    // setNewUser && setNewUser({ ...user, user_id });
+    const newUser: Partial<User> = { ...user, user_id };
+    setSortedUsers([newUser, ...sortedUsers]);
   }
 }
 

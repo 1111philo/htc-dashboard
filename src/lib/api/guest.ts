@@ -49,7 +49,7 @@ export async function getGuestsWithQuery(query): Promise<GuestsAPIResponse> {
   return guestsResponse;
 }
 
-// TODO: add debounce millisec as parameter
+// TODO: remove this function after implementing useDebouncedCallback in New Visit View
 /** Get guests with search query - first, last, dob, id -- debounced. */
 export const getGuestsWithQueryDebounced = debounce(
   (query) => getGuestsWithQuery(query),
