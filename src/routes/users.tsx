@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import { ArrowUpDown } from "lucide-react";
@@ -64,6 +64,7 @@ function UsersView() {
   const { users, totalUserCount, page, totalPages } = Route.useLoaderData();
 
   const [sortedUsers, setSortedUsers] = useState<User[]>(users);
+  useEffect(() => setSortedUsers(users), [users]);
 
   const [filterText, setFilterText] = useState("");
   const navigate = useNavigate();
@@ -112,10 +113,7 @@ function UsersView() {
         onChange={onChangeFilter}
       />
 
-      <UsersTable
-        rows={sortedUsers}
-        setSortedRows={setSortedUsers}
-      />
+      <UsersTable rows={sortedUsers} setSortedRows={setSortedUsers} />
       <TablePager
         queryRoute="/users"
         page={page}
@@ -169,7 +167,6 @@ function NewUserForm({ setShowNewUserModal, setViewFeedback, setNewUser }) {
             name="email"
             type="email"
             value={fields.email}
-            // TODO: WHY NO WORKIE?
             onChange={(e) => setFields({ ...fields, email: e.target.value })}
           />
         </Form.Group>

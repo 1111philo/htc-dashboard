@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Table, Button, Modal } from "react-bootstrap";
 import { ArrowUpDown } from "lucide-react";
@@ -69,7 +69,8 @@ export const Route = createFileRoute("/guests")({
 function GuestsView() {
   let { guests, totalGuestCount, page, totalPages } = Route.useLoaderData();
 
-  const [sortedGuests, setSortedGuests] = useState<Guest[]>(guests)
+  const [sortedGuests, setSortedGuests] = useState<Guest[]>(guests);
+  useEffect(() => setSortedGuests(guests), [guests]);
 
   const [filterText, setFilterText] = useState("");
   const navigate = useNavigate();
@@ -118,10 +119,7 @@ function GuestsView() {
         onChange={onChangeFilter}
       />
 
-      <GuestsTable
-        rows={sortedGuests}
-        setSortedRows={setSortedGuests}
-      />
+      <GuestsTable rows={sortedGuests} setSortedRows={setSortedGuests} />
       <TablePager
         queryRoute="/guests"
         page={page}
@@ -138,10 +136,9 @@ function GuestsView() {
   }
 }
 
-
 // !!! TODO: add guest to in-memory guests if successfully created
 function GuestsTable({ rows, setSortedRows }) {
-  let sortDirection = SORT_DIRECTION.DESCENDING
+  let sortDirection = SORT_DIRECTION.DESCENDING;
   const navigate = useNavigate();
   return (
     <Table className="mb-4 text-center table-sm" style={{ cursor: "pointer" }}>
@@ -149,31 +146,44 @@ function GuestsTable({ rows, setSortedRows }) {
         <tr>
           <th
             title="Sort by guest ID"
-            onClick={() => sortRowsBy("guest_id", !sortDirection, rows, setSortedRows)}
+            onClick={() =>
+              sortRowsBy("guest_id", !sortDirection, rows, setSortedRows)
+            }
           >
             ID <ArrowUpDown className="ms-2" size={16} />
           </th>
           <th
             title="Sort by first name"
-            onClick={() => sortRowsBy("first_name", )}
+            onClick={() =>
+              sortRowsBy("first_name", !sortDirection, rows, setSortedRows)
+            }
           >
             First <ArrowUpDown className="ms-2" size={16} />
           </th>
           <th
             title="Sort by last name"
-            onClick={() => sortRowsBy("last_name", !sortDirection, rows, setSortedRows)}
+            onClick={() =>
+              sortRowsBy("last_name", !sortDirection, rows, setSortedRows)
+            }
           >
             Last <ArrowUpDown className="ms-2" size={16} />
           </th>
           <th
             title="Sort by birthday"
-            onClick={() => sortRowsBy("dob", !sortDirection, rows, setSortedRows)}
+            onClick={() =>
+              sortRowsBy("dob", !sortDirection, rows, setSortedRows)
+            }
           >
             DOB <ArrowUpDown className="ms-2" size={16} />
           </th>
           <th
             onClick={() =>
-              sortRowsBy("guest_notifications", !sortDirection, rows, setSortedRows)
+              sortRowsBy(
+                "guest_notifications",
+                !sortDirection,
+                rows,
+                setSortedRows
+              )
             }
             className="overflow-hidden text-truncate"
             title="Sort by notification count"
