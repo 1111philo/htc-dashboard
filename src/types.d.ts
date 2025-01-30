@@ -74,6 +74,19 @@ interface GuestsAPIResponse {
   rows: Guest[];
 }
 
+interface AddUserAPIResponse {
+  user_id: number
+}
+
+// TODO: fix when API returns pagination data 
+type GetUsersAPIResponse = User[]
+// interface GetUsersAPIResponse {
+//   total: number;
+//   offset: number;
+//   limit: number;
+//   rows: User[];
+// }
+
 // END RESPONSE
 
 // MISC

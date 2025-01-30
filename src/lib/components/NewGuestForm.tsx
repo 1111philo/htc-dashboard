@@ -48,6 +48,7 @@ export default function NewGuestForm(props: NewGuestFormProps) {
             variant="danger"
             type="button"
             onClick={() => {
+              if (!confirm("Discard the new guest?")) return
               setShowNewGuestModal(false);
             }}
           >

@@ -5,7 +5,7 @@ import { ArrowUpDown } from "lucide-react";
 import NewGuestForm from "../lib/components/NewGuestForm";
 import FeedbackMessage from "../lib/components/FeedbackMessage";
 import TableFilter from "../lib/components/TableFilter";
-import TablePager from "../lib/components/TablePaging";
+import TablePager from "../lib/components/TablePager";
 import { getGuestData, getGuests, getGuestsWithQuery } from "../lib/api/guest";
 import { sortTableBy } from "../lib/utils";
 import { useDebouncedCallback } from "use-debounce";
@@ -94,8 +94,10 @@ function GuestsView() {
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h1>Guests</h1>
-        <Button onClick={() => setShowNewGuestModal(true)}>New Guest</Button>
+        <h1 className="mb-0">Guests</h1>
+        <Button className="m-2" onClick={() => setShowNewGuestModal(true)}>
+          New Guest
+        </Button>
       </div>
 
       <FeedbackMessage
@@ -108,6 +110,7 @@ function GuestsView() {
         <NewGuestForm
           setShowNewGuestModal={setShowNewGuestModal}
           setViewFeedback={setFeedback}
+          // setNewGuest={setNewGuest}
         />
       </Modal>
 
@@ -115,7 +118,7 @@ function GuestsView() {
         label="Filter Guests by ID, Name, Birthday, or Notification Count"
         placeholder="Filter guests..."
         filterText={filterText}
-        onChange={onChangeSearch}
+        onChange={onChangeFilter}
       />
 
       <GuestsTable
@@ -124,6 +127,7 @@ function GuestsView() {
         setSortConfig={setSortConfig}
       />
       <TablePager
+        queryRoute="/guests"
         page={page}
         totalPages={totalPages}
         paginatedDataLength={guests.length}
@@ -132,42 +136,9 @@ function GuestsView() {
     </>
   );
 
-  async function onChangeSearch(newVal) {
+  async function onChangeFilter(newVal) {
     setFilterText(newVal);
     executeSearch();
-  }
-
-  function filterAndSort(): Guest[] {
-    let sortedAndFiltered = guests;
-
-    if (filterText) {
-      sortedAndFiltered = sortedAndFiltered.filter((guest) =>
-        `${guest.first_name} ${guest.last_name}`
-          .toLowerCase()
-          .includes(filterText.toLowerCase())
-      );
-    }
-
-    if (sortConfig.key) {
-      sortedAndFiltered = [...sortedAndFiltered].sort((a, b) => {
-        let aValue = a[sortConfig.key as keyof Guest];
-        let bValue = b[sortConfig.key as keyof Guest];
-
-        if (sortConfig.key === "notifications") {
-          aValue = a.guest_notifications.length;
-          bValue = b.guest_notifications.length;
-        }
-
-        if (aValue < bValue) {
-          return sortConfig.direction === "ascending" ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === "ascending" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortedAndFiltered;
   }
 }
 
