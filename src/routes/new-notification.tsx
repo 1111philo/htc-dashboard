@@ -36,7 +36,7 @@ function NewNotificationView() {
     queryFn: getAllGuests
   });
 
-  if (isPending) {
+  if (isPending || isLoading) {
     return <span>Loading...</span>
   }
 
@@ -86,12 +86,11 @@ function AddNewNotificationForm({ allGuests }) {
         }
       }).response
     ).statusCode
+
     if (response === 200) {
       setCreationSuccess(true);
       setSelectedGuest(undefined);
       setMessage("");
-    } else {
-      setCreationWarning(true);
     }
   };
 
@@ -126,10 +125,10 @@ function AddNewNotificationForm({ allGuests }) {
         <Form.Group className="mb-3" controlId="message">
           <Form.Control
             type="text"
-            placeholder="Message (optional)"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleEnter}
+            placeholder="Message (optional)"
           />
         </Form.Group>
 
