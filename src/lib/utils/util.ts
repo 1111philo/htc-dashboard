@@ -10,12 +10,12 @@ export function readableDateTime(ISODateString: string): string {
   const ISODate = new Date(ISODateString);
   const options: Intl.DateTimeFormatOptions = {
     weekday: undefined,
-    year: 'numeric',
-    month: 'numeric',
-    day: 'numeric',
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
   };
 
-  return `${ISODate.toLocaleDateString('en-US', options)} ${ISODate.toLocaleTimeString('en-US')}`
+  return `${ISODate.toLocaleDateString("en-US", options)} ${ISODate.toLocaleTimeString("en-US")}`;
 }
 
 export function isEven(num) {
@@ -32,7 +32,7 @@ export function debounce<T>(func: (...args: any[]) => Promise<T>, delay = 500) {
     return new Promise((resolve) => {
       window.clearTimeout(timeoutId);
       timeoutId = window.setTimeout(async () => {
-        const result = await func(...args);  // This passes the search query through
+        const result = await func(...args); // This passes the search query through
         resolve(result);
       }, delay);
     });
@@ -42,4 +42,12 @@ export function debounce<T>(func: (...args: any[]) => Promise<T>, delay = 500) {
 /** Return an offset for use in API calls for paginated data. */
 export function pageOffset(pageNum: number): number {
   return pageNum * 10 - 10;
+}
+
+export function sortTableBy(key: keyof User | keyof Guest, sortConfig, setSortConfig) {
+  let direction = "ascending";
+  if (sortConfig.key === key && sortConfig.direction === "ascending") {
+    direction = "descending";
+  }
+  setSortConfig({ key, direction });
 }

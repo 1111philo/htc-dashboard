@@ -6,8 +6,8 @@ import { addGuest } from "../api/guest";
 
 interface NewGuestFormProps {
   setShowNewGuestModal: Dispatch<SetStateAction<boolean>>,
-  setViewFeedback?: (UserMessage) => void,
-  setNewGuest?: () => void
+  setViewFeedback?: (_: UserMessage) => void,
+  setNewGuest?: (_: Partial<Guest>) => void
 }
 
 export default function NewGuestForm(props: NewGuestFormProps) {
@@ -62,7 +62,7 @@ export default function NewGuestForm(props: NewGuestFormProps) {
   );
 
   // TODO: require at least 2 fields!
-  async function submitNewGuestForm(e: SubmitEvent) {
+  async function submitNewGuestForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
     const guest_id = await addGuest(guest);
