@@ -112,8 +112,8 @@ function GuestsView() {
       </Modal>
 
       <TableFilter
-        label="Search guests by ID, Name, Birthday, or Notification Count"
-        placeholder="I don't work yet. I'm not using the network"
+        label="Filter Guests by ID, Name, Birthday, or Notification Count"
+        placeholder="Filter guests..."
         filterText={filterText}
         onChange={onChangeSearch}
       />
