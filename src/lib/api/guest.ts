@@ -13,6 +13,22 @@ export async function addGuest(g: Partial<Guest>): Promise<number | null> {
   return guest_id;
 }
 
+export async function updateGuest(g: Partial<Guest>): Promise<boolean> {
+  debugger
+  try {
+    const response = await API.post({
+      apiName: "auth",
+      path: "/updateGuest",
+      options: { body: { ...(g as FormData) }},
+    }).response;
+    const { success } = (await response.body.json()) as SuccessResponse
+    return success;
+  } catch (err) {
+    console.error(err)
+    return false
+  }
+}
+
 export async function deleteGuest(id): Promise<boolean> {
   try {
     const response = await API.post({

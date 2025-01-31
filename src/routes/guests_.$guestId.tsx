@@ -4,7 +4,8 @@ import { Col, Row, Form, Button, InputGroup, Card } from "react-bootstrap";
 import FeedbackMessage from "../lib/components/FeedbackMessage2";
 import { Mail, MailOpen, PersonStanding } from "lucide-react";
 import { readableDateTime, today } from "../lib/utils";
-import { deleteGuest, getGuestData } from "../lib/api";
+import { deleteGuest, getGuestData, updateGuest } from "../lib/api";
+import { isResolvedRedirect } from "@tanstack/react-router/dist/esm/redirects";
 
 interface LoaderData {
   guest: Guest;
@@ -64,7 +65,7 @@ export default function GuestProfileView() {
     isError: false,
   });
 
-  const guestId = guest.guest_id.toString().padStart(5, "0")
+  const guestId = guest.guest_id.toString().padStart(5, "0");
 
   return (
     <>
@@ -86,7 +87,7 @@ export default function GuestProfileView() {
 
       <FeedbackMessage message={feedback} />
 
-      <GuestForm guest={guest} />
+      <GuestForm guest={guest} setViewFeedback={setFeedback} />
 
       <Notifications
         headerText={"Active Notifications"}
@@ -119,18 +120,18 @@ export default function GuestProfileView() {
         text: `Oops! The guest record couldn't be deleted. Try again in a few.`,
         isError: true,
       });
-      return
+      return;
     }
     navigate({ to: "/guests", replace: true });
   }
 }
 
-function GuestForm({ guest }) {
+function GuestForm({ guest, setViewFeedback }) {
   const initialFields: Partial<Guest> = {
-    first_name: guest.first_name,
-    last_name: guest.last_name,
-    dob: guest.dob,
-    case_manager: guest.case_manager,
+    first_name: guest.first_name ?? "",
+    last_name: guest.last_name ?? "",
+    dob: guest.dob ?? "",
+    case_manager: guest.case_manager ?? "",
   };
   const [fields, setFields] = useState(initialFields);
 
@@ -142,7 +143,7 @@ function GuestForm({ guest }) {
 
   return (
     <div className="mb-5">
-      <Form onSubmit={saveEditedGuest}>
+      <Form onSubmit={(e) => saveEditedGuest(e, guest)}>
         <Form.Group className="mb-3">
           <Row>
             <Col className="pe-0">
@@ -236,8 +237,10 @@ function GuestForm({ guest }) {
     setFields(initialFields);
   }
 
-  async function saveEditedGuest(evt: SubmitEvent) {
-    evt.preventDefault();
+  // TODO: circle back after api is fixed
+  /** NOTE: This api is broken -- returns success but guest is not altered. */
+  async function saveEditedGuest(e: React.FormEvent, guest) {
+    e.preventDefault();
     if (
       !confirm(`Save changes?
         ${guest.first_name} -> ${fields.first_name}
@@ -247,11 +250,18 @@ function GuestForm({ guest }) {
     ) {
       return;
     }
-    // TODO: fetch/POST new guest
-    const { success } = { success: true }; // placeholder
-    if (success) {
-      // TODO: report success with a toast (or anything, for now)
+    const updatedGuest: Partial<Guest> = Object.fromEntries(
+      new FormData(e.target)
+    );
+    const success = await updateGuest(updatedGuest); // placeholder
+    if (!success) {
+      setViewFeedback({
+        text: "Oops! The edits couldn't be saved. Try again in a few.",
+        isError: true,
+      });
+      return;
     }
+    setViewFeedback({ text: "Successfully updated.", isError: false });
   }
 }
 
@@ -263,9 +273,11 @@ function Notifications({ notifications, headerText }: NotificationsProps) {
   return (
     <div className="mb-5">
       <h2 className="mb-3">{headerText}</h2>
-      {notifications.map((n, i) => (
-        <NotificationCard key={i} n={n} i={i} />
-      ))}
+      {notifications.length
+        ? notifications.map((n, i) => (
+            <NotificationCard key={n.notification_id} n={n} />
+          ))
+        : "None"}
     </div>
   );
 }
@@ -301,9 +313,9 @@ function CompletedServices({ services }: ServicesProps) {
   return (
     <div>
       <h2 className="mb-3">Completed Services</h2>
-      {services.map((s) => {
-        return <ServiceCard key={s.guest_service_id} s={s} />;
-      })}
+      {services.length
+        ? services.map((s) => <ServiceCard key={s.guest_service_id} s={s} />)
+        : "None"}
     </div>
   );
 }
