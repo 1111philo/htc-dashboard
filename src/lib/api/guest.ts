@@ -13,6 +13,21 @@ export async function addGuest(g: Partial<Guest>): Promise<number | null> {
   return guest_id;
 }
 
+export async function deleteGuest(id): Promise<boolean> {
+  try {
+    const response = await API.post({
+      apiName: "auth",
+      path: "/deleteGuest",
+      options: { body: { guest_id: id }},
+    }).response;
+    const { success } = (await response.body.json()) as SuccessResponse
+    return success;
+  } catch (err) {
+    console.error(err)
+    return false
+  }
+}
+
 export async function getGuestData(id: number): Promise<GuestDataAPIResponse> {
   const response = await API.post({
     apiName: "auth",

@@ -1,16 +1,10 @@
 import { useState } from "react";
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { readableDateTime, today } from "../lib/utils";
-import {
-  Col,
-  Row,
-  Form,
-  Button,
-  InputGroup,
-  Card,
-} from "react-bootstrap";
-import { getGuestData } from "../lib/api";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { Col, Row, Form, Button, InputGroup, Card } from "react-bootstrap";
+import FeedbackMessage from "../lib/components/FeedbackMessage2";
 import { Mail, MailOpen, PersonStanding } from "lucide-react";
+import { readableDateTime, today } from "../lib/utils";
+import { deleteGuest, getGuestData } from "../lib/api";
 
 interface LoaderData {
   guest: Guest;
@@ -56,13 +50,21 @@ export const Route = createFileRoute("/guests_/$guestId")({
 export default function GuestProfileView() {
   const { guest, services, notifications } = Route.useLoaderData();
 
+  const navigate = useNavigate();
+
   const activeNotifications = notifications.filter(
     (n) => n.status === "Active"
   );
   const archivedNotifications = notifications.filter(
     (n) => n.status === "Archived"
   );
-  // const sortedNotifications = [...activeNotifications, ...archiveNotifications];
+
+  const [feedback, setFeedback] = useState<UserMessage>({
+    text: "",
+    isError: false,
+  });
+
+  const guestId = guest.guest_id.toString().padStart(5, "0")
 
   return (
     <>
@@ -72,168 +74,183 @@ export default function GuestProfileView() {
           variant="danger"
           size="sm"
           type="button"
-          onClick={async () => await deleteGuest()}
+          onClick={async () => {
+            await deleteGuestRecord(guest.guest_id);
+          }}
         >
           Delete Guest Record
         </Button>
       </div>
-      <GuestForm />
+
+      <h4>ID: {guestId}</h4>
+
+      <FeedbackMessage message={feedback} />
+
+      <GuestForm guest={guest} />
+
       <Notifications
         headerText={"Active Notifications"}
         notifications={activeNotifications}
       />
+
       <Notifications
         headerText={"Archived Notifications"}
         notifications={archivedNotifications}
       />
+
       <CompletedServices services={services} />
-      {/* <PastVisits /> */}
     </>
   );
 
-  function GuestForm() {
-    const initialFields: Partial<Guest> = {
-      first_name: guest.first_name,
-      last_name: guest.last_name,
-      dob: guest.dob,
-      case_manager: guest.case_manager,
-    };
-    const [fields, setFields] = useState(initialFields);
+  async function deleteGuestRecord(guestId) {
+    if (
+      !confirm(
+        `Are you sure you want to delete this guest?
+        ${guest.first_name} ${guest.last_name}, born ${guest.dob}`
+      )
+    ) {
+      return;
+    }
+    const success = await deleteGuest(guestId);
+    // NOTE: success is true if we delete a user that was already deleted
+    debugger;
+    if (!success) {
+      setFeedback({
+        text: `Oops! The guest record couldn't be deleted. Try again in a few.`,
+        isError: true,
+      });
+      return
+    }
+    navigate({ to: "/guests", replace: true });
+  }
+}
 
-    const isFormChanged =
-      guest.first_name !== fields.first_name ||
-      guest.last_name !== fields.last_name ||
-      guest.dob !== fields.dob ||
-      guest.case_manager !== fields.case_manager;
+function GuestForm({ guest }) {
+  const initialFields: Partial<Guest> = {
+    first_name: guest.first_name,
+    last_name: guest.last_name,
+    dob: guest.dob,
+    case_manager: guest.case_manager,
+  };
+  const [fields, setFields] = useState(initialFields);
 
-    return (
-      <div className="mb-5">
-        <Form onSubmit={saveEditedGuest}>
-          {/* TODO: add feedback message */}
-          <h4>ID: {guest.guest_id.toString().padStart(5, "0")}</h4>
-          <Form.Group className="mb-3">
-            <Row>
-              <Col className="pe-0">
-                <Form.Label className="fst-italic">First Name</Form.Label>
-              </Col>
-              <Col className="ps-0">
-                <Form.Label className="fst-italic ps-0">Last Name</Form.Label>
-              </Col>
-            </Row>
-            <InputGroup>
-              <Form.Control
-                id="input-first-name"
-                name="first_name"
-                size="lg"
-                aria-label="First name"
-                value={fields.first_name}
-                onChange={(e) =>
-                  setFields({ ...fields, first_name: e.target.value })
-                }
-                className={
-                  fields.first_name?.trim() !== guest.first_name
-                    ? "border-2 border-warning"
-                    : ""
-                }
-              />
-              <Form.Control
-                id="input-last-name"
-                size="lg"
-                name="last_name"
-                aria-label="Last name"
-                value={fields.last_name}
-                onChange={(e) =>
-                  setFields({ ...fields, last_name: e.target.value })
-                }
-                className={
-                  fields.last_name?.trim() !== guest.last_name
-                    ? "border-2 border-warning"
-                    : ""
-                }
-              />
-            </InputGroup>
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label className="fst-italic">Birthday</Form.Label>
+  const isFormChanged =
+    guest.first_name !== fields.first_name ||
+    guest.last_name !== fields.last_name ||
+    guest.dob !== fields.dob ||
+    guest.case_manager !== fields.case_manager;
+
+  return (
+    <div className="mb-5">
+      <Form onSubmit={saveEditedGuest}>
+        <Form.Group className="mb-3">
+          <Row>
+            <Col className="pe-0">
+              <Form.Label className="fst-italic">First Name</Form.Label>
+            </Col>
+            <Col className="ps-0">
+              <Form.Label className="fst-italic ps-0">Last Name</Form.Label>
+            </Col>
+          </Row>
+          <InputGroup>
             <Form.Control
-              id="input-dob"
-              name="dob"
-              type="date"
-              min="1911-11-11" // ✨
-              max={today()}
-              value={fields.dob}
-              onChange={(e) => setFields({ ...fields, dob: e.target.value })}
-              className={
-                fields.dob?.trim() !== guest.dob
-                  ? "border-2 border-warning"
-                  : ""
-              }
-            />
-          </Form.Group>
-          <Form.Group className="mb-3">
-            <Form.Label className="fst-italic">Case Manager</Form.Label>
-            <Form.Control
-              id="input-case-manager"
-              name="case_manager"
-              type="text"
-              value={fields.case_manager ?? ""}
+              id="input-first-name"
+              name="first_name"
+              size="lg"
+              aria-label="First name"
+              value={fields.first_name}
               onChange={(e) =>
-                setFields({ ...fields, case_manager: e.target.value })
+                setFields({ ...fields, first_name: e.target.value })
               }
               className={
-                fields.case_manager && // case manager is a nullable field
-                fields.case_manager?.trim() !== guest.case_manager
+                fields.first_name?.trim() !== guest.first_name
                   ? "border-2 border-warning"
                   : ""
               }
             />
-          </Form.Group>
-          {isFormChanged && (
-            <div className="d-flex gap-2 justify-content-between">
-              <Button variant="warning" type="button" onClick={cancelEdit}>
-                Discard Changes
-              </Button>
-              <Button variant="primary" type="submit">
-                Save Changes
-              </Button>
-            </div>
-          )}
-        </Form>
-      </div>
-    );
+            <Form.Control
+              id="input-last-name"
+              size="lg"
+              name="last_name"
+              aria-label="Last name"
+              value={fields.last_name}
+              onChange={(e) =>
+                setFields({ ...fields, last_name: e.target.value })
+              }
+              className={
+                fields.last_name?.trim() !== guest.last_name
+                  ? "border-2 border-warning"
+                  : ""
+              }
+            />
+          </InputGroup>
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label className="fst-italic">Birthday</Form.Label>
+          <Form.Control
+            id="input-dob"
+            name="dob"
+            type="date"
+            min="1911-11-11" // ✨
+            max={today()}
+            value={fields.dob}
+            onChange={(e) => setFields({ ...fields, dob: e.target.value })}
+            className={
+              fields.dob?.trim() !== guest.dob ? "border-2 border-warning" : ""
+            }
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label className="fst-italic">Case Manager</Form.Label>
+          <Form.Control
+            id="input-case-manager"
+            name="case_manager"
+            type="text"
+            value={fields.case_manager ?? ""}
+            onChange={(e) =>
+              setFields({ ...fields, case_manager: e.target.value })
+            }
+            className={
+              fields.case_manager && // case manager is a nullable field
+              fields.case_manager?.trim() !== guest.case_manager
+                ? "border-2 border-warning"
+                : ""
+            }
+          />
+        </Form.Group>
+        {isFormChanged && (
+          <div className="d-flex gap-2 justify-content-between">
+            <Button variant="warning" type="button" onClick={cancelEdit}>
+              Discard Changes
+            </Button>
+            <Button variant="primary" type="submit">
+              Save Changes
+            </Button>
+          </div>
+        )}
+      </Form>
+    </div>
+  );
 
-    function cancelEdit() {
-      setFields(initialFields);
+  function cancelEdit() {
+    setFields(initialFields);
+  }
+
+  async function saveEditedGuest(evt: SubmitEvent) {
+    evt.preventDefault();
+    if (
+      !confirm(`Save changes?
+        ${guest.first_name} -> ${fields.first_name}
+        ${guest.last_name} -> ${fields.last_name}
+        ${guest.dob} -> ${fields.dob}
+        ${guest.case_manager} -> ${fields.case_manager}`)
+    ) {
+      return;
     }
-
-    async function deleteGuest() {
-      if (
-        !confirm(
-          `Are you sure you want to delete guest:
-          ${guest.first_name} ${guest.last_name}, born ${guest.dob}`
-        )
-      ) {
-        return;
-      }
-      // delete the guest
-    }
-
-    async function saveEditedGuest(evt: SubmitEvent) {
-      evt.preventDefault();
-      if (
-        !confirm(`Save changes?
-          ${guest.first_name} -> ${fields.first_name}
-          ${guest.last_name} -> ${fields.last_name}
-          ${guest.dob} -> ${fields.dob}
-          ${guest.case_manager} -> ${fields.case_manager}`)
-      ) {
-        return;
-      }
-      // TODO: fetch/POST new guest
-      const { success } = { success: true }; // placeholder
-      if (success) {
-        // TODO: report success with a toast (or anything, for now)
-      }
+    // TODO: fetch/POST new guest
+    const { success } = { success: true }; // placeholder
+    if (success) {
+      // TODO: report success with a toast (or anything, for now)
     }
   }
 }
