@@ -39,7 +39,7 @@ type GuestServiceStatus = "Completed" | "Active" | "Queued"
 interface GuestService {
   guest_service_id: number;
   service_id: number;
-  service_name: string;
+  service_name?: string;
   status: "Completed" | "Active";
   slot_occupied: number;
   queued_at: string;

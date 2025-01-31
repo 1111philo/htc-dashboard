@@ -1,9 +1,16 @@
 import { useState } from "react";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { readableDateTime, today } from "../lib/utils";
-import StripedListRow from "../lib/components/StripedListRow";
-import { Col, ListGroup, Row, Form, Button, InputGroup } from "react-bootstrap";
+import {
+  Col,
+  Row,
+  Form,
+  Button,
+  InputGroup,
+  Card,
+} from "react-bootstrap";
 import { getGuestData } from "../lib/api";
+import { Mail, MailOpen, PersonStanding } from "lucide-react";
 
 interface LoaderData {
   guest: Guest;
@@ -18,6 +25,7 @@ export const Route = createFileRoute("/guests_/$guestId")({
     guestId: parseInt(params.guestId),
   }),
   loader: async ({ context, params }): Promise<LoaderData> => {
+    const { serviceTypes } = context;
     const { guestId } = params;
     const guestResponse = await getGuestData(guestId);
     if (!guestResponse) {
@@ -25,10 +33,22 @@ export const Route = createFileRoute("/guests_/$guestId")({
       // redirect({ to: "not-found" })
     }
     const { total, ...guest } = guestResponse;
-    const { guest_services: services, guest_notifications: notifications } =
+    let { guest_services: services, guest_notifications: notifications } =
       guest;
 
-    return { guest, services, notifications, /* visits: */ };
+    // NOTE: this is why service_name should be included in Guest.guest_services
+    // account for completed services that no longer exist in services types #test
+    services = services
+      .filter((s) => s.status === "Completed")
+      .map((s) => {
+        let { name: service_name } = serviceTypes!.find(
+          (t) => t.service_id === s.service_id
+        ) ?? { name: null };
+        !service_name && (service_name = "[Service No Longer Exists]");
+        return { ...s, service_name };
+      });
+
+    return { guest, services, notifications /* visits: */ };
   },
 });
 
@@ -39,16 +59,34 @@ export default function GuestProfileView() {
   const activeNotifications = notifications.filter(
     (n) => n.status === "Active"
   );
-  const archiveNotifications = notifications.filter(
+  const archivedNotifications = notifications.filter(
     (n) => n.status === "Archived"
   );
-  const sortedNotifications = [...activeNotifications, ...archiveNotifications];
+  // const sortedNotifications = [...activeNotifications, ...archiveNotifications];
 
   return (
     <>
-      <h1>Guest Profile</h1>
+      <div className="d-flex justify-content-between align-items-center">
+        <h1>Guest Profile</h1>
+        <Button
+          variant="danger"
+          size="sm"
+          type="button"
+          onClick={async () => await deleteGuest()}
+        >
+          Delete Guest Record
+        </Button>
+      </div>
       <GuestForm />
-      <Notifications notifications={sortedNotifications} />
+      <Notifications
+        headerText={"Active Notifications"}
+        notifications={activeNotifications}
+      />
+      <Notifications
+        headerText={"Archived Notifications"}
+        notifications={archivedNotifications}
+      />
+      <CompletedServices services={services} />
       {/* <PastVisits /> */}
     </>
   );
@@ -76,10 +114,10 @@ export default function GuestProfileView() {
           <Form.Group className="mb-3">
             <Row>
               <Col className="pe-0">
-                <Form.Label className="fst-italic">First</Form.Label>
+                <Form.Label className="fst-italic">First Name</Form.Label>
               </Col>
               <Col className="ps-0">
-                <Form.Label className="fst-italic ps-0">Last</Form.Label>
+                <Form.Label className="fst-italic ps-0">Last Name</Form.Label>
               </Col>
             </Row>
             <InputGroup>
@@ -150,25 +188,16 @@ export default function GuestProfileView() {
               }
             />
           </Form.Group>
-          <div className="d-flex gap-2 justify-content-between">
-            <Button
-              variant="danger"
-              type="button"
-              onClick={async () => await deleteGuest()}
-            >
-              Delete Guest
-            </Button>
-            {isFormChanged && (
-              <div className="d-flex gap-2">
-                <Button variant="warning" type="button" onClick={cancelEdit}>
-                  Cancel
-                </Button>
-                <Button variant="primary" type="submit">
-                  Save Changes
-                </Button>
-              </div>
-            )}
-          </div>
+          {isFormChanged && (
+            <div className="d-flex gap-2 justify-content-between">
+              <Button variant="warning" type="button" onClick={cancelEdit}>
+                Discard Changes
+              </Button>
+              <Button variant="primary" type="submit">
+                Save Changes
+              </Button>
+            </div>
+          )}
         </Form>
       </div>
     );
@@ -207,80 +236,74 @@ export default function GuestProfileView() {
       }
     }
   }
+}
 
-  function Notifications({ notifications }) {
-    return (
-      <div className="mb-5">
-        <h2>Notifications</h2>
-        <ListGroup>
-          {notifications.map((n, i) => (
-            <NotificationListItem key={i} n={n} i={i} />
-          ))}
-        </ListGroup>
-      </div>
-    );
+interface NotificationsProps {
+  notifications: GuestNotification[];
+  headerText: string;
+}
+function Notifications({ notifications, headerText }: NotificationsProps) {
+  return (
+    <div className="mb-5">
+      <h2 className="mb-3">{headerText}</h2>
+      {notifications.map((n, i) => (
+        <NotificationCard key={i} n={n} i={i} />
+      ))}
+    </div>
+  );
+}
 
-    interface NLIprops {
-      n: GuestNotification;
-      i: number;
-    }
-    function NotificationListItem({ n, i }: NLIprops) {
-      const [date, time] = readableDateTime(n.created_at).split(" ");
-      return (
-        <StripedListRow i={i}>
-          <Col className="text-center">
-            <div>{date}</div>
-            <div>{time}</div>
-          </Col>
+interface NCProps {
+  n: GuestNotification;
+}
+function NotificationCard({ n }: NCProps) {
+  const border = n.status === "Active" ? "border-danger border-2" : "";
+  const Icon = () => (n.status === "Active" ? <Mail /> : <MailOpen />);
+  const dateTime = readableDateTime(n.created_at);
+  return (
+    <Card className={"mb-3 shadow " + border}>
+      <Card.Header>
+        <div className="fst-italic">
+          <span className="me-2">
+            <Icon />
+          </span>
+          Created: {dateTime}
+        </div>
+      </Card.Header>
+      <Card.Body>
+        <Card.Text>{n.message}</Card.Text>
+      </Card.Body>
+    </Card>
+  );
+}
 
-          <Col>{n.message}</Col>
+interface ServicesProps {
+  services: GuestService[];
+}
+function CompletedServices({ services }: ServicesProps) {
+  return (
+    <div>
+      <h2 className="mb-3">Completed Services</h2>
+      {services.map((s) => {
+        return <ServiceCard key={s.guest_service_id} s={s} />;
+      })}
+    </div>
+  );
+}
 
-          <Col className="text-center">
-            <span
-              className={
-                "badge rounded-pill bg-opacity-100 " +
-                (n.status === "Active"
-                  ? "text-bg-warning"
-                  : "text-bg-secondary")
-              }
-            >
-              {n.status}
-            </span>
-          </Col>
-        </StripedListRow>
-      );
-    }
-  }
-
-  function PastVisits() {
-    return (
-      <div className="mb-5">
-        <h2>Past Visits</h2>
-        <ListGroup>
-          {visits.map((v, i) => (
-            <VisitListItem key={v.visit_id} v={v} i={i} />
-          ))}
-        </ListGroup>
-      </div>
-    );
-  }
-
-  interface VLIprops {
-    v: Visit;
-    i: number;
-  }
-  function VisitListItem({ v, i }: VLIprops) {
-    return (
-      <ListGroup.Item as={"li"} action href="#link1">
-        <StripedListRow i={i}>
-          <Col>{v.updated_at}</Col>
-          <Col xs={9} /* className="overflow-x-auto" */>
-            <div>
-              <span /* className="text-nowrap" */>{services.toString()}</span>
-            </div>
-          </Col>
-        </StripedListRow>
-      </ListGroup.Item>
-    );
-  }
+interface SCProps {
+  s: GuestService;
+}
+function ServiceCard({ s }: SCProps) {
+  return (
+    <Card className="mb-3 shadow">
+      <Card.Header className="fst-italic">
+        <PersonStanding className="m-0 me-1" /> Completed:{" "}
+        {s.completed_at ?? "MM/DD/YY"}
+      </Card.Header>
+      <Card.Body>
+        <Card.Title>{s.service_name}</Card.Title>
+      </Card.Body>
+    </Card>
+  );
 }
