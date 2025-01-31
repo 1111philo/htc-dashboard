@@ -4,7 +4,7 @@ import * as API from "aws-amplify/api";
 
 export async function toggleGuestNotificationStatus(
   notificationId: number
-): Promise<Boolean> {
+): Promise<boolean> {
   try {
     const response = await API.post({
       apiName: "auth",
