@@ -71,14 +71,17 @@ interface SuccessResponse {
   success: boolean;
 }
 
+interface PaginationInfo {
+  total: number;
+  offset: number;
+  limit: number;
+}
+
 interface GuestDataAPIResponse extends Guest {
   total: number;
 }
 
-interface GuestsAPIResponse {
-  total: number;
-  offset: number;
-  limit: number;
+interface GuestsAPIResponse extends PaginationInfo {
   rows: Guest[];
 }
 
@@ -94,6 +97,10 @@ type GetUsersAPIResponse = User[]
 //   limit: number;
 //   rows: User[];
 // }
+
+interface GetVisitsAPIResponse extends PaginationInfo {
+  rows: Visit[];
+}
 
 // END RESPONSE
 

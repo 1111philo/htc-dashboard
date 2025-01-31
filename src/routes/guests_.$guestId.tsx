@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { createFileRoute, PathParamError } from "@tanstack/react-router";
-import { today } from "../lib/utils";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { readableDateTime, today } from "../lib/utils";
 import StripedListRow from "../lib/components/StripedListRow";
 import { Col, ListGroup, Row, Form, Button, InputGroup } from "react-bootstrap";
+import { getGuestData } from "../lib/api";
 
 interface LoaderData {
   guest: Guest;
-  // guestServices: GuestService[];
-  guestServices: string;
-  guestVisits: Visit[];
+  services: GuestService[];
+  notifications: GuestNotification[];
+  // visits: Visit[];
 }
 
 export const Route = createFileRoute("/guests_/$guestId")({
@@ -17,68 +18,38 @@ export const Route = createFileRoute("/guests_/$guestId")({
     guestId: parseInt(params.guestId),
   }),
   loader: async ({ context, params }): Promise<LoaderData> => {
-    let response = await fetch(
-      "../../sample-data/get_guests__true_format.json"
-    );
-    const guests = await response.json();
     const { guestId } = params;
-    const guest = guestFromId(guestId, guests);
-    if (!guest) {
-      // TODO: why does /<non existent route> not go to custom 404?
-      throw new PathParamError(
-        `The page "${location.pathname}" does not exist`
-      );
+    const guestResponse = await getGuestData(guestId);
+    if (!guestResponse) {
+      // TODO: make sure this hits the 404 route
+      // redirect({ to: "not-found" })
     }
-    response = await fetch("../../sample-data/get_visits.json");
-    const literallyAllVisits: Visit[] = await response.json();
-    const guestVisits: Visit[] = literallyAllVisits.filter(
-      (v) => v.guest_id === guestId
-    );
+    const { total, ...guest } = guestResponse;
+    const { guest_services: services, guest_notifications: notifications } =
+      guest;
 
-    const guestServicesArr: GuestService[] = JSON.parse(
-      (guest?.services as string) ?? ""
-    );
-
-    const { serviceTypes } = context;
-
-    // build a string for the guest services
-    const separator = ", ";
-    const guestServices = guestServicesArr
-      .map((s) => {
-        const serviceName = serviceTypes.find(
-          (t) => t.service_id === s.service_id
-        )?.service_name;
-        return `${serviceName}`;
-      })
-      .join(separator);
-
-    return { guest, guestServices, guestVisits };
+    return { guest, services, notifications, /* visits: */ };
   },
 });
 
+// TODO: eventually revive the visits table
 export default function GuestProfileView() {
-  const { guest, guestVisits, guestServices } = Route.useLoaderData();
+  const { guest, services, notifications } = Route.useLoaderData();
 
-  let notifications: GuestNotification[] = JSON.parse(
-    guest.notifications as string
-  ).sort(
-    (a, b) =>
-      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-  );
   const activeNotifications = notifications.filter(
     (n) => n.status === "Active"
   );
   const archiveNotifications = notifications.filter(
     (n) => n.status === "Archived"
   );
-  notifications = [...activeNotifications, ...archiveNotifications];
+  const sortedNotifications = [...activeNotifications, ...archiveNotifications];
 
   return (
     <>
       <h1>Guest Profile</h1>
       <GuestForm />
-      <Notifications notifications={notifications} />
-      <PastVisits />
+      <Notifications notifications={sortedNotifications} />
+      {/* <PastVisits /> */}
     </>
   );
 
@@ -100,6 +71,8 @@ export default function GuestProfileView() {
     return (
       <div className="mb-5">
         <Form onSubmit={saveEditedGuest}>
+          {/* TODO: add feedback message */}
+          <h4>ID: {guest.guest_id.toString().padStart(5, "0")}</h4>
           <Form.Group className="mb-3">
             <Row>
               <Col className="pe-0">
@@ -165,11 +138,12 @@ export default function GuestProfileView() {
               id="input-case-manager"
               name="case_manager"
               type="text"
-              value={fields.case_manager}
+              value={fields.case_manager ?? ""}
               onChange={(e) =>
                 setFields({ ...fields, case_manager: e.target.value })
               }
               className={
+                fields.case_manager && // case manager is a nullable field
                 fields.case_manager?.trim() !== guest.case_manager
                   ? "border-2 border-warning"
                   : ""
@@ -251,10 +225,16 @@ export default function GuestProfileView() {
       i: number;
     }
     function NotificationListItem({ n, i }: NLIprops) {
+      const [date, time] = readableDateTime(n.created_at).split(" ");
       return (
         <StripedListRow i={i}>
-          <Col>{n.created_at}</Col>
-          <Col xs={6}>{n.message}</Col>
+          <Col className="text-center">
+            <div>{date}</div>
+            <div>{time}</div>
+          </Col>
+
+          <Col>{n.message}</Col>
+
           <Col className="text-center">
             <span
               className={
@@ -277,7 +257,7 @@ export default function GuestProfileView() {
       <div className="mb-5">
         <h2>Past Visits</h2>
         <ListGroup>
-          {guestVisits.map((v, i) => (
+          {visits.map((v, i) => (
             <VisitListItem key={v.visit_id} v={v} i={i} />
           ))}
         </ListGroup>
@@ -296,15 +276,11 @@ export default function GuestProfileView() {
           <Col>{v.updated_at}</Col>
           <Col xs={9} /* className="overflow-x-auto" */>
             <div>
-              <span /* className="text-nowrap" */>{guestServices}</span>
+              <span /* className="text-nowrap" */>{services.toString()}</span>
             </div>
           </Col>
         </StripedListRow>
       </ListGroup.Item>
     );
   }
-}
-
-function guestFromId(id: number, guests: Guest[]): Guest | null {
-  return guests?.find((g) => g.guest_id === id) ?? null;
 }

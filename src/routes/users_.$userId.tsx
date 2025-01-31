@@ -1,8 +1,7 @@
 import { createFileRoute, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button, Form } from "react-bootstrap";
-
-import * as API from "aws-amplify/api";
+import { getUser } from "../lib/api/user";
 
 interface LoaderData {
   user: User;
@@ -14,13 +13,9 @@ export const Route = createFileRoute("/users_/$userId")({
   }),
   loader: async ({ params }): Promise<LoaderData> => {
     const { userId } = params
-    const response = await (API.post({
-      apiName: "auth",
-      path: "/getUsers",
-      options: { queryParams: { user_id: String(userId) }}
-    }).response)
-    const [user,] = (await response.body.json()) as Array<User>
-    return { user }
+    // TODO: fix the hack in 👇🏽 this request func when API accepts a user_id key in req body
+    const user = await getUser(userId)
+    return { user: user! }
   }
 });
 
@@ -55,6 +50,7 @@ function UserProfileView() {
     return (
       <Form onSubmit={saveEditedUser}>
         <p className="text-danger">{errorMsg}</p>
+        <h4>ID: {user.user_id.toString().padStart(5, "0")}</h4> 
         <Form.Group className="mb-3">
           <Form.Label className="fst-italic">Name (First Last)</Form.Label>
           <Form.Control
@@ -62,6 +58,7 @@ function UserProfileView() {
             name="name"
             value={fields.name}
             onChange={(e) => setFields({ ...fields, name: e.target.value })}
+            size="lg"
             className={
               fields.name?.trim() !== user.name
                 ? "border-2 border-warning"
