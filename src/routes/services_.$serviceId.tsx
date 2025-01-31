@@ -96,6 +96,7 @@ function ServiceView() {
         />
       </Modal>
 
+      { quota ? (
         <>
           <h2>Slots</h2>
           <Table responsive={true}>
@@ -110,7 +111,8 @@ function ServiceView() {
             <tbody>
               {
                 // for every slot, display the guestSlotted or empty/available row
-                Array.from({ length: service.quota }).map((slot, slotIndex) => {
+                // TODO: Will quota work reliably? should there be a fallback? quota ? quota : service.quota
+                Array.from({ length: quota }).map((slot, slotIndex) => {
                   if (guestsSlottedState.length !== 0 && slotIndex < guestsSlottedState.length) {
                     const { guest_id, first_name, last_name } = guestsSlottedState[slotIndex];
                     const nameAndID = `${first_name} ${last_name} (${guest_id})`;
