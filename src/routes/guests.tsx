@@ -1,27 +1,55 @@
-import { useMemo, useState } from "react";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Table, Button, Modal } from "react-bootstrap";
-import { ArrowUpDown, Search as SearchIcon } from "lucide-react";
+import { ArrowUpDown as SortIcon } from "lucide-react";
 import NewGuestForm from "../lib/components/NewGuestForm";
 import FeedbackMessage from "../lib/components/FeedbackMessage";
-import SearchBar from "../lib/components/SearchBar";
-import TablePager from "../lib/components/TablePaging";
-import { getGuestData, getGuests } from "../lib/api/guest";
-import { sortTableBy } from "../lib/utils";
+import TableFilter from "../lib/components/TableFilter";
+import TablePager from "../lib/components/TablePager";
+import {
+  addGuest,
+  getGuestData,
+  getGuests,
+  getGuestsWithQuery,
+} from "../lib/api/guest";
+import { SORT_DIRECTION, sortRowsBy } from "../lib/utils";
+import { useDebouncedCallback } from "use-debounce";
+
+const ITEMS_PER_PAGE = 10;
 
 interface LoaderData {
   // TODO: request a route for this page -- when i query guests, i need active_notification_count!!! -- maybe stick this into getGuests - otherwise, I'm making a request for each guest in the table just to get notification counts
-  guestsDatas: Guest[]; // so these requests execute in parallel
+  guests: Guest[];
+  totalGuestCount: number;
+  page: number;
+  totalPages: number;
+}
+
+interface SearchParams {
+  query?: string;
+  page?: number;
 }
 
 export const Route = createFileRoute("/guests")({
   component: GuestsView,
-  validateSearch: (search: Record<string, unknown>): { page } => {
-    return { page: Number(search?.page ?? 1) };
+  validateSearch: (search: Record<string, unknown>): SearchParams => {
+    const { query, page: _page } = search;
+    const page = Number(_page ?? 1);
+    if (!query) return { page };
+    return {
+      query: String(query || ""),
+      page,
+    };
   },
-  loader: async (): Promise<LoaderData> => {
-    const guestsResponse = await getGuests(1); // page 1
-    const guestsDatas = await Promise.all(
+  loaderDeps: ({ search: { query, page } }) => {
+    return { query, page };
+  },
+  loader: async ({ deps: { query, page } }): Promise<LoaderData> => {
+    const guestsResponse = query
+      ? await getGuestsWithQuery(query)
+      : await getGuests(page ?? 1, ITEMS_PER_PAGE);
+    /** Filtered and sorted. */
+    const guests = await Promise.all(
       guestsResponse.rows.map((g) =>
         getGuestData(g.guest_id).then((guestResp) => {
           const { total, ...guest } = guestResp;
@@ -29,30 +57,35 @@ export const Route = createFileRoute("/guests")({
         })
       )
     );
-    debugger
-    return { guestsDatas };
+    // TODO: fix api -- need total user count (key 'total' = 0, always)
+    // BUG? NO! the page count remaining the same when a query returns 1 page of results is because we can't yet get total guest count from the api
+    /** TODO: WHEN API WORKS -- remove `|| 48` below */
+    const totalGuestCount = guestsResponse.total || 48;
+    const totalPages = Math.ceil(totalGuestCount / ITEMS_PER_PAGE);
+    return {
+      guests,
+      totalGuestCount,
+      page: page!,
+      totalPages,
+    };
   },
 });
 
 function GuestsView() {
-  const ITEMS_PER_PAGE = 5;
-  const { page } = Route.useSearch();
+  let { guests, totalGuestCount, page, totalPages } = Route.useLoaderData();
 
-  const { guestsDatas } = Route.useLoaderData();
-  const guests = guestsDatas;
+  const [sortedGuests, setSortedGuests] = useState<Guest[]>(guests);
+  useEffect(() => setSortedGuests(guests), [guests]);
 
   const [filterText, setFilterText] = useState("");
-  const [sortConfig, setSortConfig] = useState<{
-    key: string | null;
-    direction: string | null;
-  }>({ key: null, direction: null });
-  const filteredAndSortedData = useMemo(filterAndSort, [
-    sortConfig,
-    filterText,
-  ]);
-
-  const paginatedData = useMemo(paginated, [filteredAndSortedData, page]);
-  const totalPages = Math.ceil(filteredAndSortedData.length / ITEMS_PER_PAGE);
+  const navigate = useNavigate();
+  const executeSearch = useDebouncedCallback(() => {
+    if (!filterText) {
+      navigate({ to: "/guests" });
+      return;
+    }
+    navigate({ to: "/guests", search: { query: filterText } });
+  }, 500);
 
   const [showNewGuestModal, setShowNewGuestModal] = useState(false);
 
@@ -64,8 +97,10 @@ function GuestsView() {
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h1>Guests</h1>
-        <Button onClick={() => setShowNewGuestModal(true)}>New Guest</Button>
+        <h1 className="mb-0">Guests</h1>
+        <Button className="m-2" onClick={() => setShowNewGuestModal(true)}>
+          New Guest
+        </Button>
       </div>
 
       <FeedbackMessage
@@ -76,115 +111,88 @@ function GuestsView() {
 
       <Modal show={showNewGuestModal}>
         <NewGuestForm
-          setShowNewGuestModal={setShowNewGuestModal}
-          setViewFeedback={setFeedback}
+          onSubmit={onSubmitNewGuestForm}
+          onClose={onCloseNewGuestForm}
         />
       </Modal>
 
-      <SearchBar
-        placeholder="I don't work yet. I'm not using the network"
+      <TableFilter
+        label="Filter Guests by ID, Name, Birthday"
+        placeholder="Filter guests..."
         filterText={filterText}
-        setFilterText={setFilterText}
+        onChange={onChangeFilter}
       />
 
-      <GuestsTable
-        paginatedData={paginatedData}
-        sortConfig={sortConfig}
-        setSortConfig={setSortConfig}
-      />
+      <GuestsTable rows={sortedGuests} setSortedRows={setSortedGuests} />
       <TablePager
+        queryRoute="/guests"
         page={page}
         totalPages={totalPages}
-        paginatedDataLength={paginatedData.length}
-        filteredAndSortedDataLength={filteredAndSortedData.length}
+        paginatedDataLength={sortedGuests.length}
+        rowsCount={totalGuestCount}
       />
     </>
   );
 
-  function filterAndSort(): Guest[] {
-    let sortedAndFiltered = guests;
-
-    if (filterText) {
-      sortedAndFiltered = sortedAndFiltered.filter((guest) =>
-        `${guest.first_name} ${guest.last_name}`
-          .toLowerCase()
-          .includes(filterText.toLowerCase())
-      );
-    }
-
-    if (sortConfig.key) {
-      sortedAndFiltered = [...sortedAndFiltered].sort((a, b) => {
-        let aValue = a[sortConfig.key as keyof Guest];
-        let bValue = b[sortConfig.key as keyof Guest];
-
-        if (sortConfig.key === "notifications") {
-          aValue = a.guest_notifications.length;
-          bValue = b.guest_notifications.length;
-        }
-
-        if (aValue < bValue) {
-          return sortConfig.direction === "ascending" ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === "ascending" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortedAndFiltered;
+  async function onChangeFilter(newVal) {
+    setFilterText(newVal);
+    executeSearch();
   }
 
-  function paginated(): Guest[] {
-    const startIndex = (page - 1) * ITEMS_PER_PAGE;
-    return filteredAndSortedData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  // TODO: require at least 2 fields!
+  async function onSubmitNewGuestForm(
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<number | null> {
+    e.preventDefault();
+    const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
+    const guest_id = await addGuest(guest);
+    if (!guest_id) return null;
+    setShowNewGuestModal(false);
+    setFeedback({
+      text: `Guest created successfully! ID: ${guest_id}`,
+      isError: false,
+    });
+    const newGuest: Partial<Guest> = { ...guest, guest_id };
+    setSortedGuests && setSortedGuests([newGuest as Guest, ...sortedGuests]);
+    return guest_id;
+  }
+
+  function onCloseNewGuestForm() {
+    if (!confirm("Discard the new guest?")) return;
+    setShowNewGuestModal(false);
   }
 }
 
-// !!! TODO: add guest to in-memory guests if successfully created
-function GuestsTable({ paginatedData, sortConfig, setSortConfig }) {
+// TODO: Once api supports sorting, use navigate() with search key
+function GuestsTable({ rows /* setSortedRows */ }) {
   const navigate = useNavigate();
   return (
     <Table className="mb-4 text-center table-sm" style={{ cursor: "pointer" }}>
       <thead>
         <tr>
-          <th
-            title="Sort by guest ID"
-            onClick={() => sortTableBy("guest_id", sortConfig, setSortConfig)}
-          >
-            ID <ArrowUpDown className="ms-2" size={16} />
+          <th /* title="Sort by guest ID" onClick={} */>
+            ID {/* <SortIcon className="ms-2" size={16} /> */}
+          </th>
+          <th /* title="Sort by first name" onClick={} */>
+            First {/* <SortIcon className="ms-2" size={16} /> */}
+          </th>
+          <th /* title="Sort by last name" onClick={} */>
+            Last {/* <SortIcon className="ms-2" size={16} /> */}
+          </th>
+          <th /* title="Sort by birthday" onClick={} */>
+            DOB {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
           <th
-            title="Sort by first name"
-            onClick={() => sortTableBy("first_name", sortConfig, setSortConfig)}
-          >
-            First <ArrowUpDown className="ms-2" size={16} />
-          </th>
-          <th
-            title="Sort by last name"
-            onClick={() => sortTableBy("last_name", sortConfig, setSortConfig)}
-          >
-            Last <ArrowUpDown className="ms-2" size={16} />
-          </th>
-          <th
-            title="Sort by birthday"
-            onClick={() => sortTableBy("dob", sortConfig, setSortConfig)}
-          >
-            DOB <ArrowUpDown className="ms-2" size={16} />
-          </th>
-          <th
-            onClick={() =>
-              sortTableBy("guest_notifications", sortConfig, setSortConfig)
-            }
+            /* title="Sort by notification count" */
             className="overflow-hidden text-truncate"
-            title="Sort by notification count"
           >
-            Alerts <ArrowUpDown className="ms-2" size={16} />
+            Alerts {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
         </tr>
       </thead>
       <tbody>
-        {paginatedData.map((g) => {
-          const notificationCount = g.guest_notifications.length;
+        {rows.map((g) => {
+          const notificationCount = g.guest_notifications?.length ?? 0;
           return (
             <tr
               key={g.guest_id}

@@ -1,7 +1,6 @@
 /** Guest-related API calls */
 
 import * as API from "aws-amplify/api";
-import { debounce } from "../utils";
 import { pageOffset } from "../utils";
 
 export async function addGuest(g: Partial<Guest>): Promise<number | null> {
@@ -12,6 +11,37 @@ export async function addGuest(g: Partial<Guest>): Promise<number | null> {
   }).response;
   const { guest_id }: { guest_id: number } = await response.body.json();
   return guest_id;
+}
+
+export async function updateGuest(g: Partial<Guest>): Promise<boolean> {
+  debugger
+  try {
+    const response = await API.post({
+      apiName: "auth",
+      path: "/updateGuest",
+      options: { body: { ...(g as FormData) }},
+    }).response;
+    const { success } = (await response.body.json()) as SuccessResponse
+    return success;
+  } catch (err) {
+    console.error(err)
+    return false
+  }
+}
+
+export async function deleteGuest(id): Promise<boolean> {
+  try {
+    const response = await API.post({
+      apiName: "auth",
+      path: "/deleteGuest",
+      options: { body: { guest_id: id }},
+    }).response;
+    const { success } = (await response.body.json()) as SuccessResponse
+    return success;
+  } catch (err) {
+    console.error(err)
+    return false
+  }
 }
 
 export async function getGuestData(id: number): Promise<GuestDataAPIResponse> {
@@ -39,7 +69,7 @@ export async function getGuests(
 }
 
 /** Get guests with search query - first, last, dob, id. */
-async function getGuestsWithQuery(query): Promise<GuestsAPIResponse> {
+export async function getGuestsWithQuery(query): Promise<GuestsAPIResponse> {
   const response = await API.post({
     apiName: "auth",
     path: "/getGuests",
@@ -48,10 +78,3 @@ async function getGuestsWithQuery(query): Promise<GuestsAPIResponse> {
   const guestsResponse = (await response.body.json()) as GuestsAPIResponse;
   return guestsResponse;
 }
-
-// TODO: add debounce millisec as parameter
-/** Get guests with search query - first, last, dob, id -- debounced. */
-export const getGuestsWithQueryDebounced = debounce(
-  (query) => getGuestsWithQuery(query),
-  1500
-);

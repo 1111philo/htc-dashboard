@@ -23,19 +23,23 @@ interface Guest {
   guest_services: GuestService[];
 }
 
+type GuestNotificationStatus = "Archived" | "Active"
+
 interface GuestNotification {
   notification_id: number;
   guest_id: number;
   message: string;
-  status: "Archived" | "Active";
+  status: GuestNotificationStatus;
   created_at: string;
   updated_at: string;
 }
 
+type GuestServiceStatus = "Completed" | "Active" | "Queued"
+
 interface GuestService {
   guest_service_id: number;
   service_id: number;
-  service_name: string;
+  service_name?: string;
   status: "Completed" | "Active";
   slot_occupied: number;
   queued_at: string;
@@ -63,15 +67,39 @@ interface ServiceType {
 
 // RESPONSE
 
+interface SuccessResponse {
+  success: boolean;
+}
+
+interface PaginationInfo {
+  total: number;
+  offset: number;
+  limit: number;
+}
+
 interface GuestDataAPIResponse extends Guest {
   total: number;
 }
 
-interface GuestsAPIResponse {
-  total: number;
-  offset: number;
-  limit: number;
+interface GuestsAPIResponse extends PaginationInfo {
   rows: Guest[];
+}
+
+interface AddUserAPIResponse {
+  user_id: number
+}
+
+// TODO: fix when API returns pagination data 
+type GetUsersAPIResponse = User[]
+// interface GetUsersAPIResponse {
+//   total: number;
+//   offset: number;
+//   limit: number;
+//   rows: User[];
+// }
+
+interface GetVisitsAPIResponse extends PaginationInfo {
+  rows: Visit[];
 }
 
 // END RESPONSE

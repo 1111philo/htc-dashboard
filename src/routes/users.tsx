@@ -1,125 +1,146 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button, Form, Modal, Table } from "react-bootstrap";
-import { ArrowUpDown, Search } from "lucide-react";
-import SearchBar from "../lib/components/SearchBar";
-import TablePager from "../lib/components/TablePaging";
-import { sortTableBy } from "../lib/utils";
+import { ArrowUpDown as SortIcon } from "lucide-react";
+import FeedbackMessage from "../lib/components/FeedbackMessage";
+import TableFilter from "../lib/components/TableFilter";
+import TablePager from "../lib/components/TablePager";
+import { useDebouncedCallback } from "use-debounce";
+import { addUser, getUsers, getUsersWithQuery } from "../lib/api/user";
 
-import * as API from "aws-amplify/api";
+const ITEMS_PER_PAGE = 10;
 
 interface LoaderData {
+  /** Filtered and sorted */
   users: User[];
+  totalUserCount: number;
+  page: number;
+  totalPages: number;
+}
+
+interface SearchParams {
+  query?: string;
+  page?: number;
 }
 
 export const Route = createFileRoute("/users")({
   component: UsersView,
-  loader: async ({ params }): Promise<LoaderData> => {
-    const response = await API.post({
-      apiName: "auth",
-      path: "/getUsers",
-    }).response;
-    const users = (await response.body.json()) as Array<User>;
-    return { users };
+  validateSearch: (search: Record<string, unknown>): SearchParams => {
+    const { query, page: _page } = search;
+    const page = Number(_page ?? 1);
+    if (!query) return { page };
+    return {
+      query: String(query || ""),
+      page,
+    };
+  },
+  loaderDeps: ({ search: { query, page } }) => {
+    return { query, page };
+  },
+  loader: async ({ deps: { query, page } }): Promise<LoaderData> => {
+    const usersResponse = query
+      ? await getUsersWithQuery(query)
+      : await getUsers(page ?? 1, ITEMS_PER_PAGE);
+
+    // NOTE: pagination appears broken because api does not return pagination data
+    //    effect: all pages show the same data
+
+    // TODO: remove `userResponse.rows` when API returns pagination data
+    const users = usersResponse.rows ?? usersResponse;
+    // TODO: remove `|| 5` when API returns pagination data
+    const totalUserCount = usersResponse.total || 5;
+    const totalPages = Math.ceil(totalUserCount / ITEMS_PER_PAGE);
+    return {
+      users,
+      totalUserCount,
+      page: page!,
+      totalPages,
+    };
   },
 });
 
 function UsersView() {
-  const ITEMS_PER_PAGE = 5;
-  const [page, setPage] = useState(1);
+  const { users, totalUserCount, page, totalPages } = Route.useLoaderData();
 
-  const { users } = Route.useLoaderData();
+  const [sortedUsers, setSortedUsers] = useState<User[]>(users);
+  useEffect(() => setSortedUsers(users), [users]);
 
   const [filterText, setFilterText] = useState("");
-  const [sortConfig, setSortConfig] = useState<{
-    key: string | null;
-    direction: string | null;
-  }>({ key: null, direction: null });
-  const filteredAndSortedData = useMemo(filterAndSort, [
-    sortConfig,
-    filterText,
-  ]);
+  const navigate = useNavigate();
+  const executeSearch = useDebouncedCallback(() => {
+    if (!filterText) {
+      navigate({ to: "/users" });
+      return;
+    }
+    navigate({ to: "/users", search: { query: filterText } });
+  }, 500);
 
-  const paginatedData = useMemo(paginated, [filteredAndSortedData, page]);
-  const totalPages = Math.ceil(filteredAndSortedData.length / ITEMS_PER_PAGE);
+  const [showNewUserModal, setShowNewUserModal] = useState(false);
 
-  const [showUserModal, setShowNewUserModal] = useState(false);
-
-  // TODO: add FeedbackMessage
+  const [feedback, setFeedback] = useState<UserMessage>({
+    text: "",
+    isError: false,
+  });
 
   return (
-    <div>
+    <>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h1 className="mb-3">Staff</h1>
+        <h1 className="mb-0">Staff</h1>
         <Button className="m-2" onClick={() => setShowNewUserModal(true)}>
           New User
         </Button>
       </div>
 
-      {/* TODO: add FeedbackMessage */}
+      <FeedbackMessage
+        text={feedback.text}
+        isError={feedback.isError}
+        className="my-3"
+      />
 
-      <Modal show={showUserModal}>
-        <NewUserForm setShowNewUserModal={setShowNewUserModal} />
+      <Modal show={showNewUserModal}>
+        <NewUserForm
+          setShowNewUserModal={setShowNewUserModal}
+          setViewFeedback={setFeedback}
+          sortedUsers={sortedUsers}
+          setSortedUsers={setSortedUsers}
+        />
       </Modal>
 
-      <SearchBar
-        placeholder="Search users..."
+      <TableFilter
+        label="Filter Users by ID, Name, Birthday, or Notification Count"
+        placeholder="Oops, I don't work yet! Waiting for the API to support queries..."
         filterText={filterText}
-        setFilterText={setFilterText}
+        onChange={onChangeFilter}
       />
 
-      <UsersTable
-        paginatedData={paginatedData}
-        sortConfig={sortConfig}
-        setSortConfig={setSortConfig}
-      />
+      <UsersTable rows={sortedUsers} setSortedRows={setSortedUsers} />
       <TablePager
+        queryRoute="/users"
         page={page}
         totalPages={totalPages}
-        paginatedDataLength={paginatedData.length}
-        filteredAndSortedDataLength={filteredAndSortedData.length}
+        paginatedDataLength={sortedUsers.length}
+        rowsCount={totalUserCount}
       />
-    </div>
+    </>
   );
 
-  function filterAndSort(): User[] {
-    let sortedAndFiltered = users;
-
-    if (filterText) {
-      sortedAndFiltered = sortedAndFiltered.filter((user) =>
-        `${user.name} ${user.email} ${user.role}`
-          .toLowerCase()
-          .includes(filterText.toLowerCase())
-      );
-    }
-
-    if (sortConfig.key) {
-      sortedAndFiltered = [...sortedAndFiltered].sort((a, b) => {
-        let aValue = a[sortConfig.key as keyof User] as string;
-        let bValue = b[sortConfig.key as keyof User] as string;
-
-        aValue = aValue.toLowerCase();
-        bValue = bValue.toLowerCase();
-
-        if (aValue < bValue) {
-          return sortConfig.direction === "ascending" ? -1 : 1;
-        }
-        if (aValue > bValue) {
-          return sortConfig.direction === "ascending" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortedAndFiltered;
-  }
-
-  function paginated(): User[] {
-    const startIndex = (page - 1) * ITEMS_PER_PAGE;
-    return filteredAndSortedData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  async function onChangeFilter(newVal) {
+    setFilterText(newVal);
+    executeSearch();
   }
 }
 
-function NewUserForm({ setShowNewUserModal }) {
+function NewUserForm({
+  setShowNewUserModal,
+  setViewFeedback,
+  sortedUsers,
+  setSortedUsers,
+}) {
+  const [formFeedback, setFormFeedback] = useState<UserMessage>({
+    text: "",
+    isError: false,
+  });
+
   const initialFields: Partial<User> = {
     name: "",
     email: "",
@@ -129,7 +150,16 @@ function NewUserForm({ setShowNewUserModal }) {
   return (
     <div className="p-3">
       <h2 className="mb-3">New Staff User</h2>
-      <Form onSubmit={(e) => submitNewUserForm(e, setShowNewUserModal)}>
+      <FeedbackMessage
+        text={formFeedback.text}
+        isError={formFeedback.isError}
+        className="my-3"
+      />
+      <Form
+        onSubmit={(e) =>
+          submitNewUserForm(e, setShowNewUserModal, sortedUsers, setSortedUsers)
+        }
+      >
         <Form.Group className="mb-3">
           <Form.Label>Name</Form.Label>
           <Form.Control
@@ -146,7 +176,6 @@ function NewUserForm({ setShowNewUserModal }) {
             name="email"
             type="email"
             value={fields.email}
-            // TODO: WHY NO WORKIE?
             onChange={(e) => setFields({ ...fields, email: e.target.value })}
           />
         </Form.Group>
@@ -158,8 +187,8 @@ function NewUserForm({ setShowNewUserModal }) {
             value={fields.role}
             onChange={(e) => setFields({ ...fields, role: e.target.value })}
           >
-            <option value="manager">Manager</option>
-            <option value="admin">Admin</option>
+            <option value="Manager">Manager</option>
+            <option value="Admin">Admin</option>
           </Form.Select>
         </Form.Group>
         <div className="d-flex justify-content-between">
@@ -167,6 +196,7 @@ function NewUserForm({ setShowNewUserModal }) {
             variant="danger"
             type="button"
             onClick={() => {
+              if (!confirm("Discard the new user?")) return;
               setShowNewUserModal(false);
             }}
           >
@@ -180,45 +210,54 @@ function NewUserForm({ setShowNewUserModal }) {
     </div>
   );
 
-  function submitNewUserForm(evt: React.FormEvent<HTMLFormElement>, setShowNewUserModal) {
-    evt.preventDefault();
-    // TODO: fetch/POST new user
-    const { success } = { success: true }; // placeholder
-    if (success) {
-      setShowNewUserModal(false);
-      // TODO: report success with a toast (or anything, for now)
+  async function submitNewUserForm(
+    e: React.FormEvent<HTMLFormElement>,
+    setShowNewUserModal,
+    sortedUsers,
+    setSortedUsers
+  ) {
+    e.preventDefault();
+    const user: Partial<User> = Object.fromEntries(new FormData(e.target));
+    const user_id = await addUser(user);
+    if (!user_id) {
+      setFormFeedback({
+        text: "Failed to create user. Try again in a few.",
+        isError: true,
+      });
+      return;
     }
+    setShowNewUserModal(false);
+    setViewFeedback &&
+      setViewFeedback({
+        text: `User created successfully! ID: ${user_id}`,
+        isError: false,
+      });
+
+    const newUser: Partial<User> = { ...user, user_id };
+    setSortedUsers([newUser, ...sortedUsers]);
   }
 }
 
-function UsersTable({ paginatedData, sortConfig, setSortConfig }) {
+// TODO: Once api supports sorting, use navigate() with search key
+function UsersTable({ rows /* setSortedRows */ }) {
   const navigate = useNavigate();
   return (
     <Table className="mb-4 text-center table-sm" style={{ cursor: "pointer" }}>
       <thead>
         <tr>
-          <th
-            title="Sort by name"
-            onClick={() => sortTableBy("name", sortConfig, setSortConfig)}
-          >
-            Name <ArrowUpDown className="ms-2" size={16} />
+          <th /* title="Sort by name" */>
+            Name {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
-          <th
-            title="Sort by email"
-            onClick={() => sortTableBy("email", sortConfig, setSortConfig)}
-          >
-            Email <ArrowUpDown className="ms-2" size={16} />
+          <th /* title="Sort by email" */>
+            Email {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
-          <th
-            title="Sort by role"
-            onClick={() => sortTableBy("role", sortConfig, setSortConfig)}
-          >
-            Role <ArrowUpDown className="ms-2" size={16} />
+          <th /* title="Sort by role" */>
+            Role {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
         </tr>
       </thead>
       <tbody>
-        {paginatedData.map((u) => {
+        {rows.map((u) => {
           return (
             <tr
               key={u.user_id}
