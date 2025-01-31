@@ -5,7 +5,6 @@ import { ArrowUpDown as SortIcon } from "lucide-react";
 import FeedbackMessage from "../lib/components/FeedbackMessage";
 import TableFilter from "../lib/components/TableFilter";
 import TablePager from "../lib/components/TablePager";
-import { SORT_DIRECTION, sortRowsBy } from "../lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 import { addUser, getUsers, getUsersWithQuery } from "../lib/api/user";
 
