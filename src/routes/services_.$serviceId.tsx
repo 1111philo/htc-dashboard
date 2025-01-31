@@ -1,16 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
-import * as API from 'aws-amplify/api';
 import {
   fetchServiceByID,
   fetchServiceGuestsCompleted,
   fetchServiceGuestsQueued,
   fetchServiceGuestsSlotted,
+  fetchServices,
   updateGuestServiceStatus
 } from '../lib/api'
 
 import { Button, Modal, Form, Table } from "react-bootstrap";
+import EditServiceForm from "../lib/components/EditServiceForm";
 
 export const Route = createFileRoute("/services_/$serviceId")({
   component: ServiceView,
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/services_/$serviceId")({
   loader: async ({ params: { serviceId }}) => {
     let guestsSlotted;
 
+    const services = await fetchServices();
     const service = await fetchServiceByID(serviceId);
 
     if (service.quota) {
@@ -30,6 +32,7 @@ export const Route = createFileRoute("/services_/$serviceId")({
 
     return {
       service,
+      services,
       guestsSlotted,
       guestsQueued,
       guestsCompleted
@@ -41,16 +44,18 @@ function ServiceView() {
 
   const {
     service,
+    services,
     guestsSlotted,
     guestsQueued,
     guestsCompleted,
   } = Route.useLoaderData()
 
-  const [serviceName, setServiceName] = useState(service.name);
-  const [quota, setQuota] = useState(service.quota);
+  const [serviceName, setServiceName] = useState<String>(service.name);
+  const [quota, setQuota] = useState<Number | null>(service.quota);
   const [guestsSlottedState, setGuestsSlottedState] = useState(guestsSlotted)
   const [guestsQueuedState, setGuestsQueuedState] = useState(guestsQueued)
   const [guestsCompletedState, setGuestsCompletedState] = useState(guestsCompleted)
+  const [showEditServiceModal, setShowEditServiceModal] = useState(false)
 
   const handleMoveToNewStatus = async (
     guestId: number,
@@ -70,17 +75,27 @@ function ServiceView() {
     setGuestsCompletedState(await fetchServiceGuestsCompleted(service.service_id));
   };
 
+  const updateServiceName = (newName: String) => setServiceName(newName)
+  const updateQuota = (newQuota: Number | null) => setQuota(newQuota)
+
   return (
     <>
-      <h1>{ service.name }</h1>
-      <EditServiceModal
-        service={service}
-        serviceName={serviceName}
-        setServiceName={setServiceName}
-        quota={quota}
-        setQuota={setQuota}
-      />
-      { service.quota ? (
+      <h1>{ serviceName }</h1>
+      <Button onClick={() => setShowEditServiceModal(true)}
+      >
+        Edit Service
+      </Button>
+
+      <Modal show={showEditServiceModal}>
+        <EditServiceForm
+          service={service}
+          services={services}
+          updateServiceName={updateServiceName}
+          updateQuota={updateQuota}
+          setShowEditServiceModal={setShowEditServiceModal}
+        />
+      </Modal>
+
         <>
           <h2>Slots</h2>
           <Table responsive={true}>
@@ -203,90 +218,4 @@ function ServiceView() {
       </Table>
     </>
   );
-}
-
-function EditServiceModal({
-  service,
-  serviceName,
-  setServiceName,
-  quota,
-  setQuota
-}) {
-
-  const [show, setShow] = useState(false);
-  const [newServiceName, setNewServiceName] = useState<String>("");
-  const [newQuota, setNewQuota] = useState<Number>();
-
-  const handleClose = () => setShow(false)
-
-  const handleSaveService = async () => {
-
-    const updateResponse = await (
-      await API.post({
-        apiName: "auth",
-        path: "/updateService",
-        options: {
-          body: {
-            name: newServiceName,
-            quota: newQuota,
-            service_id: service.service_id
-          }
-        }
-      }).response
-    ).statusCode
-
-    if (updateResponse === 200) {
-      setQuota(newQuota);
-      setServiceName(newServiceName);
-      handleClose();
-    }
-  }
-
-  return (
-    <>
-      <Button onClick={() => setShow(true)}>Edit Service</Button>
-
-      <Modal show={show} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Service</Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          <Form>
-            <Form.Group className="mb-3" controlId="serviceName">
-              <Form.Control
-                type="email"
-                defaultValue={serviceName}
-                onChange={(e) => setNewServiceName(e.target.value)}
-                placeholder="New Service Name"
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="serviceQuota">
-              <Form.Control
-                type="number"
-                defaultValue={quota ?? 0}
-                onChange={(e) => setNewQuota(parseInt(e.target.value))}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button
-            variant="secondary"
-            onClick={handleClose}
-          >
-            Close
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleSaveService}
-          >
-            Save changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
-  )
 }
