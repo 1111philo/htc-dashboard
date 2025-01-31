@@ -106,7 +106,7 @@ export default function GuestProfileView() {
         onToggleStatus={onToggleNotificationStatus}
       />
 
-      <h2 className="mb-3">Completed Notifications</h2>
+      <h2 className="mb-3">Completed Services</h2>
       <CompletedServices services={services} />
     </>
   );
