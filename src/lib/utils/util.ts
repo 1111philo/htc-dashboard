@@ -36,3 +36,11 @@ export const SORT_DIRECTION = Object.freeze({
   ASCENDING: true,
   DESCENDING: false,
 });
+
+/** To be used when sending form data  */
+export function trimStringValues(entries: Object) {
+  for (const key in entries) {
+    const val = entries[key];
+    typeof val === "string" && (entries[key] = val.trim());
+  }
+}

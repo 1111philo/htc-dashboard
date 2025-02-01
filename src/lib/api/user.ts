@@ -1,16 +1,47 @@
 /** User-related API calls */
 
 import * as API from "aws-amplify/api";
-import { pageOffset } from "../utils";
+import { pageOffset, trimStringValues } from "../utils";
 
-export async function addUser(g: Partial<User>): Promise<number | null> {
+export async function addUser(u: Partial<User>): Promise<number | null> {
   const response = await API.post({
     apiName: "auth",
     path: "/addUser",
-    options: { body: { ...(g as FormData) } },
+    options: { body: { ...(u as FormData) } },
   }).response;
   const { user_id } = (await response.body.json()) as AddUserAPIResponse;
   return user_id;
+}
+
+export async function updateUser(u: Partial<User>): Promise<boolean> {
+  trimStringValues(u)
+  try {
+    const response = await API.post({
+      apiName: "auth",
+      path: "/updateUser",
+      options: { body: { ...(u) }},
+    }).response;
+    const { success } = (await response.body.json()) as SuccessResponse
+    return success;
+  } catch (err) {
+    console.error(err)
+    return false
+  }
+}
+
+export async function deleteUser(id): Promise<boolean> {
+  try {
+    const response = await API.post({
+      apiName: "auth",
+      path: "/deleteUser",
+      options: { body: { user_id: id }},
+    }).response;
+    const { success } = (await response.body.json()) as SuccessResponse
+    return success;
+  } catch (err) {
+    console.error(err)
+    return false
+  }
 }
 
 /** THIS WORKS DUE TO A HACK that compensates for the API not accepting user_id key in the request body */

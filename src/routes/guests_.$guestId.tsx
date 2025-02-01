@@ -50,7 +50,7 @@ export const Route = createFileRoute("/guests_/$guestId")({
       archived: guest_notifications.filter((n) => n.status === "Archived"),
     };
 
-    guest.case_manager = "[Case Manager name needed in API response.]"
+    guest.case_manager = "[Case Manager name needed in API response.]";
     return { guest, services, notifications /* visits: */ };
   },
 });
@@ -121,7 +121,6 @@ export default function GuestProfileView() {
       return;
     }
     const success = await deleteGuest(guestId);
-    // NOTE: success is true if we delete a user that was already deleted
     if (!success) {
       setFeedback({
         text: `Oops! The guest record couldn't be deleted. Try again in a few.`,
@@ -306,9 +305,8 @@ function GuestForm({ guest, onFeedback }) {
     ) {
       return;
     }
-    const updatedGuest: Partial<Guest> = Object.fromEntries(
-      new FormData(e.target)
-    );
+
+    const updatedGuest = { ...fields, guest_id: guest.guest_id };
     const success = await updateGuest(updatedGuest); // placeholder
     if (!success) {
       onFeedback({
