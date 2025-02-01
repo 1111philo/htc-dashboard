@@ -305,9 +305,8 @@ function GuestForm({ guest, onFeedback }) {
     ) {
       return;
     }
-    const updatedGuest: Partial<Guest> = Object.fromEntries(
-      new FormData(e.target)
-    );
+
+    const updatedGuest = { ...fields, guest_id: guest.guest_id };
     const success = await updateGuest(updatedGuest); // placeholder
     if (!success) {
       onFeedback({
