@@ -22,10 +22,9 @@ export async function login(email, password): Promise<boolean> {
   return true;
 }
 
-export async function logout(navigate) {
+export async function logout() {
   await Auth.signOut();
   useGlobalStore.setState({ authenticated: false });
-  navigate({ to: "/login" });
 }
 
 export async function isLoggedIn() {

@@ -6,10 +6,7 @@ import {
   useNavigate,
   useRouterState,
 } from "@tanstack/react-router";
-import {
-  QueryClient,
-  QueryClientProvider
-} from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
@@ -18,7 +15,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import { Container, Nav, NavDropdown } from "react-bootstrap";
 
 import * as auth from "./lib/api/auth";
-import { Route } from './routes/__root';
+import { Route } from "./routes/__root";
 
 auth.configure();
 
@@ -33,9 +30,9 @@ export default function App() {
           {
             !isLoginRoute && <AppNav /> // hide nav when user navigates to /login after login in (edge case)
           }
-            <main>
-              <Outlet />
-            </main>
+          <main>
+            <Outlet />
+          </main>
 
           {/* DEV */}
           <Suspense>
@@ -54,8 +51,7 @@ export default function App() {
 }
 
 function AppNav() {
-
-  const { serviceTypes } = Route.useLoaderData()
+  const { serviceTypes } = Route.useLoaderData();
   const navigate = useNavigate();
 
   return (
@@ -76,21 +72,19 @@ function AppNav() {
             Create Service
           </NavDropdown.Item>
           <NavDropdown.Divider />
-          {
-            serviceTypes?.map(({ name, service_id }) => {
-              return (
-                <NavDropdown.Item as="div" key={service_id}>
-                  <Link
-                    to="/services/$serviceId"
-                    params={{ serviceId: service_id }}
-                    className="text-decoration-none"
-                  >
-                    {name}
-                  </Link>
-                </NavDropdown.Item>
-              );
-            })
-          }
+          {serviceTypes?.map(({ name, service_id }) => {
+            return (
+              <NavDropdown.Item as="div" key={service_id}>
+                <Link
+                  to="/services/$serviceId"
+                  params={{ serviceId: service_id }}
+                  className="text-decoration-none"
+                >
+                  {name}
+                </Link>
+              </NavDropdown.Item>
+            );
+          })}
         </NavDropdown>
         <Nav.Item>
           <Nav.Link as={RouterNavLink} to="/guests" eventKey="6">
@@ -103,7 +97,14 @@ function AppNav() {
           </Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link onClick={() => auth.logout(navigate)}>Log Out</Nav.Link>
+          <Nav.Link
+            onClick={async () => {
+              await auth.logout();
+              location.pathname = "/"
+            }}
+          >
+            Log Out
+          </Nav.Link>
         </Nav.Item>
       </Nav>
     </div>
