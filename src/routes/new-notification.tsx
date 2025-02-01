@@ -4,72 +4,39 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import * as API from "aws-amplify/api";
 
+import FeedbackMessage from '../lib/components/FeedbackMessage2'
+import { GuestSelectSearch } from "../lib/components/GuestSelectSearch";
 import { Button, Form, Modal } from "react-bootstrap";
-import Select from "react-select";
 
 export const Route = createFileRoute("/new-notification")({
   component: NewNotificationView,
 });
 
-const getAllGuests = async () => {
-  // fetch all guests
-  const allGuests = await (
-    await API.post({
-      apiName: "auth",
-      path: "/getGuests",
-      options: {
-        body: {
-          limit: 10000
-        }
-      }
-    }).response
-  ).body.json();
-
-  return allGuests
-};
-
 function NewNotificationView() {
-  const queryClient = useQueryClient();
-
-  const { isPending, isError, isLoading, data, error } = useQuery({
-    queryKey: ['allGuests'],
-    queryFn: getAllGuests
-  });
-
-  if (isPending || isLoading) {
-    return <span>Loading...</span>
-  }
-
-  if (isError) {
-    return <span>Error: {error.message}</span>
-  }
 
   return (
     <>
       <h1>Add New Notification</h1>
-      <AddNewNotificationForm allGuests={data}/>
+      <AddNewNotificationForm />
     </>
   );
 }
 
-function AddNewNotificationForm({ allGuests }) {
+function AddNewNotificationForm() {
 
-  const [selectedGuest, setSelectedGuest] = useState<ReactSelectOption>();
+  const [selectedGuestOpt, setSelectedGuestOpt] = useState<ReactSelectOption | null>();
   const [message, setMessage] = useState("");
-  const [creationSuccess, setCreationSuccess] = useState(false);
-  const [creationWarning, setCreationWarning] = useState(false);
-
-  const guestOptions = allGuests.rows.map((g) => {
-    return {
-      ...g,
-      value: g.guest_id,
-      label: `(ID: ${g.guest_id}) ${g.first_name} ${g.last_name} - ${g.dob}`,
-    };
-  });
+  const [feedbackMessage, setFeedbackMessage] = useState({
+    text: "",
+    isError: false
+  })
 
   const handleCreateNotification = async (e) => {
-    if (selectedGuest === undefined) {
-      setCreationWarning(true);
+    if (selectedGuestOpt === undefined) {
+      setFeedbackMessage({
+        text: "Notification must include a guest",
+        isError: true
+      });
       return;
     }
 
@@ -79,7 +46,7 @@ function AddNewNotificationForm({ allGuests }) {
         path: "/addGuestNotification",
         options: {
           body: {
-            guest_id: selectedGuest.guest_id,
+            guest_id: +selectedGuestOpt.value,
             message: message,
             status: "Active"
           }
@@ -88,40 +55,35 @@ function AddNewNotificationForm({ allGuests }) {
     ).statusCode
 
     if (response === 200) {
-      setCreationSuccess(true);
-      setSelectedGuest(undefined);
+      setFeedbackMessage({
+        text: "Notification created!",
+        isError: false
+      });
+      setSelectedGuestOpt(null);
       setMessage("");
     }
   };
 
   const handleEnter = (e) => {
     if (e.key === "Enter") {
+      e.preventDefault()
       handleCreateNotification(e)
     }
   };
 
-  const handleClose = () => {
-    setCreationSuccess(false);
-    setCreationWarning(false);
-  }
-
   return (
     <>
-      <Form id="new-notification">
-        <Form.Group className="mb-3" controlId="guest">
-          <Form.Label>
-            <i>Search by UID, Name, or Birthday (YYYY-MM-DD):</i>
-          </Form.Label>
-          <Select
-            id="guest-dropdown"
-            key={`reset-key-${selectedGuest}`}
-            options={guestOptions}
-            value={selectedGuest}
-            onChange={(searchInput) => setSelectedGuest(searchInput)}
-            placeholder="Search for a guest..."
-          />
-        </Form.Group>
+      <FeedbackMessage
+        message={feedbackMessage}
+      />
 
+      <GuestSelectSearch
+        newGuest={undefined}
+        selectedGuestOpt={selectedGuestOpt}
+        setSelectedGuestOpt={setSelectedGuestOpt}
+      />
+
+      <Form id="new-notification">
         <Form.Group className="mb-3" controlId="message">
           <Form.Control
             type="text"
@@ -136,26 +98,6 @@ function AddNewNotificationForm({ allGuests }) {
           Create Notification
         </Button>
       </Form>
-
-      <Modal show={creationSuccess} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>Success</Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          <p>Notification created!</p>
-        </Modal.Body>
-      </Modal>
-
-      <Modal show={creationWarning} onHide={handleClose}>
-        <Modal.Header closeButton>
-          <Modal.Title>⚠️ Warning ⚠️</Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          <p>Notification must include a guest.</p>
-        </Modal.Body>
-      </Modal>
     </>
   );
 }
