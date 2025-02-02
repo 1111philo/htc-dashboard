@@ -7,13 +7,10 @@ import * as API from "aws-amplify/api";
 
 /* NOTE: auth state is handled by useGlobalStore (zustand) */
 
-interface AppContext {
-  // needed by: new visit view, guest profile view, services nav dropdown
-  serviceTypes: ServiceType[];
-}
-
 export const appContext: AppContext = {
   serviceTypes: [],
+  authUser: null,
+  authUserIsAdmin: false,
 };
 
 export const Route = createRootRouteWithContext<AppContext>()({

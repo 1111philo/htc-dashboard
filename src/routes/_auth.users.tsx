@@ -7,11 +7,11 @@ import TableFilter from "../lib/components/TableFilter";
 import TablePager from "../lib/components/TablePager";
 import { useDebouncedCallback } from "use-debounce";
 import { addUser, getUsers, getUsersWithQuery } from "../lib/api/user";
-import { useGlobalStore } from "../lib/utils";
 
 const ITEMS_PER_PAGE = 10;
 
 interface LoaderData {
+  authUserIsAdmin: boolean;
   /** Filtered and sorted */
   users: User[];
   totalUserCount: number;
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/_auth/users")({
   loaderDeps: ({ search: { query, page } }) => {
     return { query, page };
   },
-  loader: async ({ deps: { query, page } }): Promise<LoaderData> => {
+  loader: async ({ context, deps: { query, page } }): Promise<LoaderData> => {
     const usersResponse = query
       ? await getUsersWithQuery(query)
       : await getUsers(page ?? 1, ITEMS_PER_PAGE);
@@ -51,7 +51,11 @@ export const Route = createFileRoute("/_auth/users")({
     // TODO: remove `|| 5` when API returns pagination data
     const totalUserCount = usersResponse.total || 5;
     const totalPages = Math.ceil(totalUserCount / ITEMS_PER_PAGE);
+
+    const authUserIsAdmin = context.authUserIsAdmin ?? false
+
     return {
+      authUserIsAdmin,
       users,
       totalUserCount,
       page: page!,
@@ -61,10 +65,8 @@ export const Route = createFileRoute("/_auth/users")({
 });
 
 function UsersView() {
-  const { users, totalUserCount, page, totalPages } = Route.useLoaderData();
-
-  const isAdmin =
-    (useGlobalStore((state) => state.authUser) as AuthUser)?.role === "admin";
+  const { authUserIsAdmin, users, totalUserCount, page, totalPages } =
+    Route.useLoaderData();
 
   const [sortedUsers, setSortedUsers] = useState<User[]>(users);
   useEffect(() => setSortedUsers(users), [users]);
@@ -90,7 +92,7 @@ function UsersView() {
     <>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className="mb-0">Staff</h1>
-        {isAdmin && (
+        {authUserIsAdmin && (
           <Button className="m-2" onClick={() => setShowNewUserModal(true)}>
             New User
           </Button>

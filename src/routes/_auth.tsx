@@ -1,10 +1,11 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { isLoggedIn } from "../lib/api";
+import { useGlobalStore } from "../lib/utils";
 
 export const Route = createFileRoute("/_auth")({
   component: RouteComponent,
-  beforeLoad: async ({ location }) => {
-    if (!(await isLoggedIn())) {
+  beforeLoad: ({ location }): Partial<AppContext> => {
+    const { authUser } = useGlobalStore.getState()
+    if (!authUser) {
       throw redirect({
         to: "/login",
         search: {
@@ -13,6 +14,8 @@ export const Route = createFileRoute("/_auth")({
         },
       });
     }
+    const authUserIsAdmin = authUser.role === "admin"
+    return { authUser, authUserIsAdmin }
   },
 });
 
