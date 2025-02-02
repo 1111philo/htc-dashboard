@@ -16,8 +16,7 @@ import { Container, Nav, NavDropdown } from "react-bootstrap";
 
 import * as auth from "./lib/api/auth";
 import { Route } from "./routes/__root";
-
-auth.configure();
+import { useGlobalStore } from "./lib/utils";
 
 const queryClient = new QueryClient();
 
@@ -100,7 +99,8 @@ function AppNav() {
           <Nav.Link
             onClick={async () => {
               await auth.logout();
-              location.href = "/"
+              useGlobalStore.setState({ authenticated: false });
+              location.replace("/login")
             }}
           >
             Log Out

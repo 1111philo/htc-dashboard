@@ -63,7 +63,6 @@ export default function EditServiceForm({
 
     if (updateResponse === 200) {
       console.log("gets here!!!!!!")
-      debugger
       updateQuota(newQuota);
       updateServiceName(newServiceName);
       handleClose();

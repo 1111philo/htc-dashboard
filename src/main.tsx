@@ -10,6 +10,8 @@ declare module '@tanstack/react-router' {
   }
 }
 
+auth.configure(); 
+
 const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
@@ -18,4 +20,5 @@ if (!rootElement.innerHTML) {
   root.render(
     !isLoggedIn ? <LoginView /> : <RouterProvider router={router} />
   );
+  // root.render(<RouterProvider router={router} />)
 }
