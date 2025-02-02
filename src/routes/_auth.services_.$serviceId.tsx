@@ -18,19 +18,21 @@ export const Route = createFileRoute('/_auth/services_/$serviceId')({
   parseParams: (params): { serviceId: number } => ({
     serviceId: parseInt(params.serviceId),
   }),
-  loader: async ({ params: { serviceId } }) => {
+  loader: async ({ context, params: { serviceId } }) => {
     let guestsSlotted
 
     const services = await fetchServices()
     const service = await fetchServiceByID(serviceId)
-
     if (service.quota) {
       guestsSlotted = await fetchServiceGuestsSlotted(serviceId)
     }
     const guestsQueued = await fetchServiceGuestsQueued(serviceId)
     const guestsCompleted = await fetchServiceGuestsCompleted(serviceId)
 
+    const authUserIsAdmin = context.authUserIsAdmin ?? false
+
     return {
+      authUserIsAdmin,
       service,
       services,
       guestsSlotted,
@@ -42,6 +44,7 @@ export const Route = createFileRoute('/_auth/services_/$serviceId')({
 
 function ServiceView() {
   const {
+    authUserIsAdmin,
     service,
     services,
     guestsSlotted,
@@ -72,11 +75,15 @@ function ServiceView() {
 
   return (
     <>
-      <h1>{ service.name }</h1>
-      <Button onClick={() => setShowEditServiceModal(true)}
-      >
-        Edit Service
-      </Button>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h1 className='mb-0'>{ service.name }</h1>
+        { authUserIsAdmin &&
+          (<Button onClick={() => setShowEditServiceModal(true)}
+          >
+            Edit Service
+          </Button>
+        )}
+      </div>
 
       <Modal show={showEditServiceModal}>
         <EditServiceForm
