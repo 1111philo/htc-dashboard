@@ -4,7 +4,6 @@ import { isLoggedIn } from "../lib/api";
 export const Route = createFileRoute("/_auth")({
   component: RouteComponent,
   beforeLoad: async ({ location }) => {
-    await new Promise(resolve => setTimeout(resolve, 100));
     if (!(await isLoggedIn())) {
       throw redirect({
         to: "/login",

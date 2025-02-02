@@ -2,12 +2,13 @@
 
 // DB -- Keep updated
 // TODO: where is the source of truth?
+type UserRole = "admin" | "manager"
 
 interface User {
   user_id: number;
   name: string;
   email: string;
-  role: "Admin" | "Manager";
+  role: UserRole;
   created_at: string;
   updated_at: string;
   sub: string; // Amplify auth ID, not used
