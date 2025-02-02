@@ -100,7 +100,7 @@ function AppNav() {
           <Nav.Link
             onClick={async () => {
               await auth.logout();
-              location.pathname = "/"
+              location.href = "/"
             }}
           >
             Log Out
