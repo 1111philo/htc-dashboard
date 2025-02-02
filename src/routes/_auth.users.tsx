@@ -11,7 +11,6 @@ import { addUser, getUsers, getUsersWithQuery } from "../lib/api/user";
 const ITEMS_PER_PAGE = 10;
 
 interface LoaderData {
-  authUserIsAdmin: boolean;
   /** Filtered and sorted */
   users: User[];
   totalUserCount: number;
@@ -52,10 +51,7 @@ export const Route = createFileRoute("/_auth/users")({
     const totalUserCount = usersResponse.total || 5;
     const totalPages = Math.ceil(totalUserCount / ITEMS_PER_PAGE);
 
-    const authUserIsAdmin = context.authUserIsAdmin ?? false
-
     return {
-      authUserIsAdmin,
       users,
       totalUserCount,
       page: page!,
@@ -65,8 +61,7 @@ export const Route = createFileRoute("/_auth/users")({
 });
 
 function UsersView() {
-  const { authUserIsAdmin, users, totalUserCount, page, totalPages } =
-    Route.useLoaderData();
+  const { users, totalUserCount, page, totalPages } = Route.useLoaderData();
 
   const [sortedUsers, setSortedUsers] = useState<User[]>(users);
   useEffect(() => setSortedUsers(users), [users]);
@@ -92,11 +87,9 @@ function UsersView() {
     <>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className="mb-0">Staff</h1>
-        {authUserIsAdmin && (
-          <Button className="m-2" onClick={() => setShowNewUserModal(true)}>
-            New User
-          </Button>
-        )}
+        <Button className="m-2" onClick={() => setShowNewUserModal(true)}>
+          New User
+        </Button>
       </div>
 
       <FeedbackMessage
@@ -121,7 +114,7 @@ function UsersView() {
         onChange={onChangeFilter}
       />
 
-      <UsersTable rows={sortedUsers} setSortedRows={setSortedUsers} />
+      <UsersTable rows={sortedUsers} /* setSortedRows={setSortedUsers} */ />
       <TablePager
         queryRoute="/users"
         page={page}

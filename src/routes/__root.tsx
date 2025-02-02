@@ -4,6 +4,7 @@ import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import App from "../App";
 
 import * as API from "aws-amplify/api";
+import { useGlobalStore } from "../lib/utils";
 
 /* NOTE: auth state is handled by useGlobalStore (zustand) */
 
@@ -18,7 +19,9 @@ export const Route = createRootRouteWithContext<AppContext>()({
   // this poorly named function returns ctx that gets mixed into the parent ctx (no parent here cuz root)
   beforeLoad: async (): Promise<Partial<AppContext>> => {
     const { serviceTypes } = await fetchGlobalData();
-    return { serviceTypes };
+    const { authUser } = useGlobalStore.getState()
+    const authUserIsAdmin = authUser?.role === "admin"
+    return { serviceTypes, authUser, authUserIsAdmin };
   },
   loader: ({ context }) => {
     return context;

@@ -21,14 +21,12 @@ import { useGlobalStore } from "./lib/utils";
 const queryClient = new QueryClient();
 
 export default function App() {
-  const isLoginRoute = useRouterState().location.pathname === "/login";
+  const { authUserIsAdmin } = Route.useLoaderData();
   return (
     <>
       <Container className="mt-4">
         <QueryClientProvider client={queryClient}>
-          {
-            !isLoginRoute && <AppNav /> // hide nav when user navigates to /login after login in (edge case)
-          }
+          <AppNav authUserIsAdmin={authUserIsAdmin} />
           <main>
             <Outlet />
           </main>
@@ -49,12 +47,9 @@ export default function App() {
   );
 }
 
-function AppNav() {
+function AppNav({ authUserIsAdmin }) {
   const { serviceTypes } = Route.useLoaderData();
-  const navigate = useNavigate();
-
-  const setAuthUser = useGlobalStore(state => state.setAuthUser)
-
+  const setAuthUser = useGlobalStore((state) => state.setAuthUser);
   return (
     <div className="d-flex justify-content-center">
       <Nav variant="tabs" className="mb-4 m-auto">
@@ -69,9 +64,15 @@ function AppNav() {
           </Nav.Link>
         </Nav.Item>
         <NavDropdown title="Services">
-          <NavDropdown.Item as={RouterNavLink} to="/add-service" eventKey="5.1">
-            Create Service
-          </NavDropdown.Item>
+          {authUserIsAdmin && (
+            <NavDropdown.Item
+              as={RouterNavLink}
+              to="/add-service"
+              eventKey="5.1"
+            >
+              Create Service
+            </NavDropdown.Item>
+          )}
           <NavDropdown.Divider />
           {serviceTypes?.map(({ name, service_id }) => {
             return (
@@ -93,16 +94,18 @@ function AppNav() {
           </Nav.Link>
         </Nav.Item>
         <Nav.Item>
-          <Nav.Link as={RouterNavLink} to="/users" eventKey="7">
-            Users
-          </Nav.Link>
+          {authUserIsAdmin && (
+            <Nav.Link as={RouterNavLink} to="/users" eventKey="7">
+              Users
+            </Nav.Link>
+          )}
         </Nav.Item>
         <Nav.Item>
           <Nav.Link
             onClick={async () => {
               await auth.logout();
-              setAuthUser(null)
-              location.replace("/login")
+              setAuthUser(null);
+              location.replace("/login");
             }}
           >
             Log Out
