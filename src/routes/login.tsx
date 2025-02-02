@@ -1,18 +1,17 @@
 import { useState } from "react";
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
 import * as auth from "../lib/api/auth";
 
 export const Route = createFileRoute("/login")({
   component: LoginView,
   beforeLoad: async ({}) => {
-    // if (await auth.isLoggedIn()) throw redirect({ to: "/" });
+    if (await auth.isLoggedIn()) throw redirect({ to: "/" });
   },
 });
 
 export function LoginView() {
   const [errorMsg, setErrorMsg] = useState("");
-  // const navigate = useNavigate()
   return (
     <Container className="vh-100 d-flex align-items-center justify-content-center">
       <Row>
@@ -61,7 +60,6 @@ export function LoginView() {
       setErrorMsg("Incorrect username or password.")
       return
     };
-    // navigate({ to: "/" })
     location.replace("/")
   }
 }
