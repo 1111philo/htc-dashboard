@@ -1,17 +1,25 @@
 /** App-wide types */
 
-// DB -- Keep updated
-// TODO: where is the source of truth?
+// AUTH
+
 type UserRole = "admin" | "manager"
 
-interface User {
-  user_id: number;
+interface AuthUser {
   name: string;
   email: string;
   role: UserRole;
+  sub: string; // Amplify auth ID, not used
+}
+
+// END AUTH
+
+// DB -- Keep updated
+// TODO: where is the source of truth?
+
+interface User extends AuthUser {
+  user_id: number;
   created_at: string;
   updated_at: string;
-  sub: string; // Amplify auth ID, not used
 }
 
 interface Guest {

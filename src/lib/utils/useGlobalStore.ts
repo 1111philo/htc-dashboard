@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface GlobalStore {
-  authUser: Partial<User> | null;
+  authUser: AuthUser | null;
   setAuthUser: (authUser: any) => void;
 }
 
