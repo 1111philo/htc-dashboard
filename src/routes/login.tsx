@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Container, Row, Col, Form, Button, Card } from "react-bootstrap";
 import * as auth from "../lib/api/auth";
+import { useGlobalStore } from "../lib/utils";
 
 export const Route = createFileRoute("/login")({
   component: LoginView,
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/login")({
 
 export function LoginView() {
   const [errorMsg, setErrorMsg] = useState("");
+  const setAuthUser = useGlobalStore((state) => state.setAuthUser)
   return (
     <Container className="vh-100 d-flex align-items-center justify-content-center">
       <Row>
@@ -50,16 +52,17 @@ export function LoginView() {
     </Container>
   );
 
-  async function onSubmit(evt) {
-    evt.preventDefault();
-    const success = await auth.login(
-      evt.target.email.value.trim(),
-      evt.target.password.value.trim()
+  async function onSubmit(e) {
+    e.preventDefault();
+    const authUser = await auth.login(
+      e.target.email.value.trim(),
+      e.target.password.value.trim()
     );
-    if (!success) {
+    if (!authUser) {
       setErrorMsg("Incorrect username or password.")
       return
     };
+    setAuthUser(authUser)
     location.replace("/")
   }
 }

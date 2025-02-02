@@ -8,18 +8,20 @@ the nav or flashing any views before rendering login.
 
 There's definitely a better way to do this. */
 
-export async function login(email, password): Promise<boolean> {
+export async function login(
+  email: string,
+  password: string
+): Promise<Partial<User> | null> {
   try {
-    await Auth.signIn({ username: email, password: password });
+    const signInOutput = await Auth.signIn({ username: email, password });
+    const { name, profile: role, sub } = await Auth.fetchUserAttributes();
+    return { email: email!, name: name!, role: role! as UserRole, sub: sub! };
   } catch (err) {
     if (err.name === "NotAuthorizedException") {
-      return false;
+      return null;
     }
     throw err; // throw if unexpected error
   }
-  useGlobalStore.setState({ authenticated: true });
-  // location.pathname = "/";
-  return true;
 }
 
 export async function logout() {
@@ -36,11 +38,6 @@ export async function isLoggedIn() {
 }
 
 export function configure() {
-  console.log("ENV vars check:", {
-    userPoolId: import.meta.env.VITE_USERPOOLID,
-    clientId: import.meta.env.VITE_USERPOOLWEBCLIENTID,
-    apiUrl: import.meta.env.VITE_API_URL,
-  });
   Amplify.configure(
     {
       Auth: {

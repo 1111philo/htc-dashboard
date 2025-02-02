@@ -53,6 +53,8 @@ function AppNav() {
   const { serviceTypes } = Route.useLoaderData();
   const navigate = useNavigate();
 
+  const setAuthUser = useGlobalStore(state => state.setAuthUser)
+
   return (
     <div className="d-flex justify-content-center">
       <Nav variant="tabs" className="mb-4 m-auto">
@@ -99,7 +101,7 @@ function AppNav() {
           <Nav.Link
             onClick={async () => {
               await auth.logout();
-              useGlobalStore.setState({ authenticated: false });
+              setAuthUser(null)
               location.replace("/login")
             }}
           >

@@ -1,17 +1,20 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export const useGlobalStore = create(
+interface GlobalStore {
+  authUser: Partial<User> | null;
+  setAuthUser: (authUser: any) => void;
+}
+
+export const useGlobalStore = create<GlobalStore>()(
   persist(
     (set) => ({
-      authenticated: false,
-      setAuthenticated: (value) => set(() => ({ authenticated: value })),
+      authUser: null,
+      setAuthUser: (authUser) => set({ authUser }),
     }),
     {
       name: "apolis-storage",
-      partialize: (state) => ({
-        authenticated: state.authenticated,
-      }),
+      partialize: (state) => ({ authUser: state.authUser }),
     }
   )
 );

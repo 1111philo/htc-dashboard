@@ -1,27 +1,19 @@
-import {
-  createRootRouteWithContext,
-  Outlet,
-  redirect,
-  useRouteContext,
-  useRouter,
-} from "@tanstack/react-router";
+import { createRootRouteWithContext } from "@tanstack/react-router";
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import App from "../App";
 
-import * as API from 'aws-amplify/api';
+import * as API from "aws-amplify/api";
 
 /* NOTE: auth state is handled by useGlobalStore (zustand) */
 
 interface AppContext {
   // needed by: new visit view, guest profile view, services nav dropdown
   serviceTypes: ServiceType[];
-  hideNav: boolean;
 }
 
 export const appContext: AppContext = {
   serviceTypes: [],
-  hideNav: false,
 };
 
 export const Route = createRootRouteWithContext<AppContext>()({
@@ -33,17 +25,15 @@ export const Route = createRootRouteWithContext<AppContext>()({
   },
   loader: ({ context }) => {
     return context;
-  }
+  },
 });
 
 async function fetchGlobalData() {
   // get the current list of service types
-  let response = await (
-    API.post({
-      apiName: "auth",
-      path: "/getServices",
-    }).response
-  )
+  let response = await API.post({
+    apiName: "auth",
+    path: "/getServices",
+  }).response;
   const serviceTypes: ServiceType[] = (await response.body.json())!.rows;
   return { serviceTypes };
 }
