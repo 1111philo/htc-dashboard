@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import Select from 'react-select'
-import { Button, Form, Modal, Table } from 'react-bootstrap'
-import FeedbackMessage from '../lib/components/FeedbackMessage'
-import NewGuestForm from '../lib/components/NewGuestForm'
-import { addGuest, getGuestData, getGuestsWithQuery } from '../lib/api/guest'
-import { addVisit } from '../lib/api/visit'
-import { useDebouncedCallback } from 'use-debounce'
-import { toggleGuestNotificationStatus } from '../lib/api/notification'
+import { useEffect, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import Select from "react-select";
+import { Button, Form, Modal, Table } from "react-bootstrap";
+import FeedbackMessage from "../lib/components/FeedbackMessage";
+import NewGuestForm from "../lib/components/NewGuestForm";
+import { GuestSelectSearch } from "../lib/components/GuestSelectSearch";
+import { addGuest, getGuestData, getGuestsWithQuery } from "../lib/api/guest";
+import { addVisit } from "../lib/api/visit";
+import { toggleGuestNotificationStatus } from "../lib/api/notification";
+import { guestOptLabel } from '../lib/utils';
 
 interface LoaderData {
   serviceTypes: ServiceType[]
@@ -87,7 +88,7 @@ function NewVisitView() {
         />
       </Modal>
 
-      <SignInGuestForm
+      <GuestSelectSearch
         newGuest={newGuest}
         selectedGuestOpt={selectedGuestOpt}
         setSelectedGuestOpt={setSelectedGuestOpt}
@@ -236,60 +237,3 @@ function NewVisitView() {
   }
 }
 
-function SignInGuestForm({ newGuest, selectedGuestOpt, setSelectedGuestOpt }) {
-  const [guestSelectOpts, setGuestSelectOpts] = useState<
-    { value: string; label: string }[]
-  >([])
-
-  const [searchText, setSearchText] = useState('')
-
-  const executeSearch = useDebouncedCallback((searchText) => {
-    getGuestsWithQuery(searchText.trim()).then((guestsResponse) => {
-      setGuestSelectOpts(guestLookupOpts(guestsResponse.rows))
-    })
-  }, 500)
-
-  return (
-    <Form className="mt-3 my-5">
-      <Form.Group className="mb-3" controlId="formUID">
-        <Form.Label>
-          <i>Search by UID, Name, or Birthday (YYYY/MM/DD):</i>
-        </Form.Label>
-        <Select
-          id="user-dropdown"
-          options={
-            newGuest
-              ? [{ value: newGuest.guest_id, label: guestOptLabel(newGuest) }]
-              : guestSelectOpts
-          }
-          defaultValue={selectedGuestOpt}
-          defaultInputValue={searchText}
-          value={selectedGuestOpt}
-          onChange={(newVal) => setSelectedGuestOpt(newVal)}
-          onInputChange={onChangeInput}
-          menuIsOpen={!!searchText}
-          placeholder={'Search for a guest...'}
-        />
-      </Form.Group>
-    </Form>
-  )
-
-  function onChangeInput(val) {
-    setSearchText(val)
-    val && executeSearch(val.trim())
-  }
-}
-
-function guestOptLabel(g: Guest) {
-  return `${g.guest_id} : ${g.first_name} ${g.last_name} : ${g.dob}`
-}
-
-/** Map guests to `Select` options */
-function guestLookupOpts(guests: Guest[]): ReactSelectOption[] {
-  return guests.map((g) => {
-    return {
-      value: g.guest_id.toString(),
-      label: guestOptLabel(g),
-    }
-  })
-}

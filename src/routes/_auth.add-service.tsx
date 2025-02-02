@@ -1,14 +1,10 @@
-import { useState } from 'react'
-import {
-  createFileRoute,
-  useLoaderData,
-  useNavigate,
-} from '@tanstack/react-router'
-import * as API from 'aws-amplify/api'
-import { fetchServices } from '../lib/api'
-import FeedbackMessage from '../lib/components/FeedbackMessage'
+import { useState } from 'react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import * as API from 'aws-amplify/api';
+import { fetchServices } from '../lib/api';
+import FeedbackMessage from '../lib/components/FeedbackMessage';
 
-import { Button, Form, Modal } from 'react-bootstrap'
+import { Button, Form } from 'react-bootstrap';
 
 export const Route = createFileRoute('/_auth/add-service')({
   component: AddServiceView,

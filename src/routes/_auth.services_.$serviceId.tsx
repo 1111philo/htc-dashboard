@@ -41,11 +41,14 @@ export const Route = createFileRoute('/_auth/services_/$serviceId')({
 })
 
 function ServiceView() {
-  const { service, services, guestsSlotted, guestsQueued, guestsCompleted } =
-    Route.useLoaderData()
+  const {
+    service,
+    services,
+    guestsSlotted,
+    guestsQueued,
+    guestsCompleted,
+  } = Route.useLoaderData()
 
-  const [serviceName, setServiceName] = useState<String>(service.name)
-  const [quota, setQuota] = useState<Number | null>(service.quota)
   const [guestsSlottedState, setGuestsSlottedState] = useState(guestsSlotted)
   const [guestsQueuedState, setGuestsQueuedState] = useState(guestsQueued)
   const [guestsCompletedState, setGuestsCompletedState] =
@@ -67,13 +70,11 @@ function ServiceView() {
     )
   }
 
-  const updateServiceName = (newName: String) => setServiceName(newName)
-  const updateQuota = (newQuota: Number | null) => setQuota(newQuota)
-
   return (
     <>
-      <h1>{serviceName}</h1>
-      <Button onClick={() => setShowEditServiceModal(true)}>
+      <h1>{ service.name }</h1>
+      <Button onClick={() => setShowEditServiceModal(true)}
+      >
         Edit Service
       </Button>
 
@@ -81,13 +82,11 @@ function ServiceView() {
         <EditServiceForm
           service={service}
           services={services}
-          updateServiceName={updateServiceName}
-          updateQuota={updateQuota}
           setShowEditServiceModal={setShowEditServiceModal}
         />
       </Modal>
 
-      {quota ? (
+      { service.quota ? (
         <>
           <h2>Slots</h2>
           <Table responsive={true}>
@@ -103,14 +102,10 @@ function ServiceView() {
               {
                 // for every slot, display the guestSlotted or empty/available row
                 // TODO: Will quota work reliably? should there be a fallback? quota ? quota : service.quota
-                Array.from({ length: quota }).map((slot, slotIndex) => {
-                  if (
-                    guestsSlottedState.length !== 0 &&
-                    slotIndex < guestsSlottedState.length
-                  ) {
-                    const { guest_id, first_name, last_name } =
-                      guestsSlottedState[slotIndex]
-                    const nameAndID = `${first_name} ${last_name} (${guest_id})`
+                Array.from({ length: service.quota }).map((slot, slotIndex) => {
+                  if (guestsSlottedState.length !== 0 && slotIndex < guestsSlottedState.length) {
+                    const { guest_id, first_name, last_name } = guestsSlottedState[slotIndex];
+                    const nameAndID = `${first_name} ${last_name} (${guest_id})`;
 
                     return (
                       <tr key={slotIndex}>

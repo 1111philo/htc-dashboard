@@ -3,23 +3,20 @@ import * as API from "aws-amplify/api";
 import FeedbackMessage from "./FeedbackMessage";
 
 import { Button, Form } from "react-bootstrap";
+import { useNavigate } from "@tanstack/react-router";
 
 interface EditServiceFormProps {
   service: ServiceType;
   services: ServiceType[];
-  updateServiceName: (_: String) => void;
-  updateQuota: (_: Number | null | undefined) => void;
   setShowEditServiceModal: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function EditServiceForm({
   service,
   services,
-  updateServiceName,
-  updateQuota,
   setShowEditServiceModal
 } : EditServiceFormProps) {
-
+  const navigate = useNavigate();
   const [newServiceName, setNewServiceName] = useState<String>("");
   const [newQuota, setNewQuota] = useState<Number>();
   const [feedback, setFeedback] = useState({
@@ -62,10 +59,8 @@ export default function EditServiceForm({
     ).statusCode
 
     if (updateResponse === 200) {
-      console.log("gets here!!!!!!")
-      updateQuota(newQuota);
-      updateServiceName(newServiceName);
       handleClose();
+      navigate({ to: location.pathname, replace: true })
     }
   }
 
