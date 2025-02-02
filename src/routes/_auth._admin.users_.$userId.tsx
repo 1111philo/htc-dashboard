@@ -7,7 +7,7 @@ import { deleteUser, getUser, updateUser } from '../lib/api/user'
 interface LoaderData {
   user: User
 }
-export const Route = createFileRoute('/_auth/users_/$userId')({
+export const Route = createFileRoute('/_auth/_admin/users_/$userId')({
   component: UserProfileView,
   parseParams: (params): { userId: number } => ({
     userId: parseInt(params.userId),
