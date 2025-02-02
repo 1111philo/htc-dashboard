@@ -5,7 +5,7 @@ import * as auth from "../lib/api/auth";
 
 export const Route = createFileRoute("/login")({
   component: LoginView,
-  beforeLoad: async () => {
+  beforeLoad: async ({}) => {
     if (await auth.isLoggedIn()) throw redirect({ to: "/" });
   },
 });
@@ -56,6 +56,10 @@ export function LoginView() {
       evt.target.email.value.trim(),
       evt.target.password.value.trim()
     );
-    !success && setErrorMsg("Incorrect username or password.");
+    if (!success) {
+      setErrorMsg("Incorrect username or password.")
+      return
+    };
+    location.replace("/")
   }
 }

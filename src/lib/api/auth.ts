@@ -18,21 +18,29 @@ export async function login(email, password): Promise<boolean> {
     throw err; // throw if unexpected error
   }
   useGlobalStore.setState({ authenticated: true });
-  location.pathname = "/";
+  // location.pathname = "/";
   return true;
 }
 
 export async function logout() {
   await Auth.signOut();
-  useGlobalStore.setState({ authenticated: false });
 }
 
 export async function isLoggedIn() {
-  if ((await Auth.fetchAuthSession()).tokens?.idToken?.payload) return true;
-  return false;
+  try {
+    await Auth.getCurrentUser();
+    return true;
+  } catch (err) {
+    return false;
+  }
 }
 
 export function configure() {
+  console.log("ENV vars check:", {
+    userPoolId: import.meta.env.VITE_USERPOOLID,
+    clientId: import.meta.env.VITE_USERPOOLWEBCLIENTID,
+    apiUrl: import.meta.env.VITE_API_URL,
+  });
   Amplify.configure(
     {
       Auth: {

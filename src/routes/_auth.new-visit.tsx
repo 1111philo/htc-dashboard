@@ -11,58 +11,58 @@ import { toggleGuestNotificationStatus } from "../lib/api/notification";
 import { guestOptLabel } from '../lib/utils';
 
 interface LoaderData {
-  serviceTypes: ServiceType[];
+  serviceTypes: ServiceType[]
 }
 
-export const Route = createFileRoute("/new-visit")({
+export const Route = createFileRoute('/_auth/new-visit')({
   component: NewVisitView,
   loader: async ({ context }): Promise<LoaderData> => {
-    let { serviceTypes } = context;
-    serviceTypes = serviceTypes ?? [];
-    return { serviceTypes };
+    let { serviceTypes } = context
+    serviceTypes = serviceTypes ?? []
+    return { serviceTypes }
   },
-});
+})
 
 function NewVisitView() {
-  const { serviceTypes } = Route.useLoaderData();
+  const { serviceTypes } = Route.useLoaderData()
 
   const [feedback, setFeedback] = useState<UserMessage>({
-    text: "",
+    text: '',
     isError: false,
-  });
+  })
 
-  const [showNewGuestModal, setShowNewGuestModal] = useState(false);
-  const [newGuest, setNewGuest] = useState<Partial<Guest> | null>(null);
+  const [showNewGuestModal, setShowNewGuestModal] = useState(false)
+  const [newGuest, setNewGuest] = useState<Partial<Guest> | null>(null)
 
   const [selectedGuestOpt, setSelectedGuestOpt] =
-    useState<ReactSelectOption | null>(null);
+    useState<ReactSelectOption | null>(null)
   const [selectedServicesOpt, setSelectedServicesOpt] = useState<
     ReactSelectOption[]
-  >([]); // array bc this Select is set to multi
+  >([]) // array bc this Select is set to multi
 
-  const [notifications, setNotifications] = useState<GuestNotification[]>([]);
+  const [notifications, setNotifications] = useState<GuestNotification[]>([])
 
   // set selected guest to new guest if exists
   useEffect(() => {
-    if (!newGuest) return;
+    if (!newGuest) return
     setSelectedGuestOpt({
       value: newGuest.guest_id?.toString()!,
       label: guestOptLabel(newGuest),
-    });
-  }, [newGuest]);
+    })
+  }, [newGuest])
 
   // get notifications from selected guest
   useEffect(() => {
-    if (!selectedGuestOpt) return;
+    if (!selectedGuestOpt) return
     getGuestData(+selectedGuestOpt.value).then((g) => {
-      if (!g.guest_notifications) return; // new guest is partial, so no notifications key
+      if (!g.guest_notifications) return // new guest is partial, so no notifications key
       setNotifications(
         (g.guest_notifications as GuestNotification[]).filter(
-          (n: GuestNotification) => n.status === "Active"
-        )
-      );
-    });
-  }, [selectedGuestOpt]);
+          (n: GuestNotification) => n.status === 'Active',
+        ),
+      )
+    })
+  }, [selectedGuestOpt])
 
   return (
     <>
@@ -98,30 +98,30 @@ function NewVisitView() {
 
       <RequestedServices data={serviceTypes} />
     </>
-  );
+  )
 
   // TODO: require at least 2 fields!
   async function onSubmitNewGuestForm(
-    e: React.FormEvent<HTMLFormElement>
+    e: React.FormEvent<HTMLFormElement>,
   ): Promise<number | null> {
-    e.preventDefault();
-    const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
-    const guest_id = await addGuest(guest);
-    if (!guest_id) return null;
-    setShowNewGuestModal(false);
+    e.preventDefault()
+    const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target))
+    const guest_id = await addGuest(guest)
+    if (!guest_id) return null
+    setShowNewGuestModal(false)
     setFeedback &&
       setFeedback({
         text: `Guest created successfully! ID: ${guest_id}`,
         isError: false,
-      });
-    const newGuest: Partial<Guest> = { ...guest, guest_id };
-    setNewGuest(newGuest);
-    return guest_id;
+      })
+    const newGuest: Partial<Guest> = { ...guest, guest_id }
+    setNewGuest(newGuest)
+    return guest_id
   }
 
   function onCloseNewGuestForm() {
-    if (!confirm("Discard the new guest?")) return;
-    setShowNewGuestModal(false);
+    if (!confirm('Discard the new guest?')) return
+    setShowNewGuestModal(false)
   }
 
   function Notifications({ data }) {
@@ -138,9 +138,12 @@ function NewVisitView() {
                   <td>
                     <Form.Select
                       onChange={async () =>
-                        await updateNotificationStatus(n.notification_id, n.status)
+                        await updateNotificationStatus(
+                          n.notification_id,
+                          n.status,
+                        )
                       }
-                      style={{ minWidth: "11ch" }}
+                      style={{ minWidth: '11ch' }}
                       data-notification-id={n.notification_id}
                     >
                       <option value="Active">ACTIVE</option>
@@ -148,23 +151,23 @@ function NewVisitView() {
                     </Form.Select>
                   </td>
                 </tr>
-              );
+              )
             })}
           </tbody>
         </Table>
       </div>
-    );
+    )
 
     async function updateNotificationStatus(
       notificationId: number,
-      status: GuestNotificationStatus
+      status: GuestNotificationStatus,
     ) {
-      const success = await toggleGuestNotificationStatus(notificationId);
-      if (success) return;
+      const success = await toggleGuestNotificationStatus(notificationId)
+      if (success) return
       // unsuccessful -> revert value
       const notificationSelect = document.querySelector(
-        `[data-notification-id="${notificationId}"]`
-      ) as HTMLSelectElement | null;
+        `[data-notification-id="${notificationId}"]`,
+      ) as HTMLSelectElement | null
       notificationSelect!.value = status
     }
   }
@@ -181,7 +184,7 @@ function NewVisitView() {
           options={servicesOpts()}
           value={selectedServicesOpt}
           onChange={(newVal: []) => {
-            setSelectedServicesOpt(newVal);
+            setSelectedServicesOpt(newVal)
           }}
         />
         <Button
@@ -192,7 +195,7 @@ function NewVisitView() {
           Log Visit
         </Button>
       </div>
-    );
+    )
 
     /** Map services to `Select` options */
     function servicesOpts() {
@@ -201,36 +204,36 @@ function NewVisitView() {
           value: s.service_id.toString(),
           label: s.name,
         })) ?? []
-      );
+      )
     }
 
     async function logVisit(e) {
-      e.preventDefault();
+      e.preventDefault()
       // TODO validate "form"
       const v: Partial<Visit> = {
         guest_id: +selectedGuestOpt!.value,
         service_ids: selectedServicesOpt.map(({ value }) => +value),
-      };
-      const visitId = await addVisit(v);
+      }
+      const visitId = await addVisit(v)
       if (!visitId) {
         setFeedback({
-          text: "Failed to create the visit. Try again in a few.",
+          text: 'Failed to create the visit. Try again in a few.',
           isError: true,
-        });
-        return;
+        })
+        return
       }
-      setShowNewGuestModal(false);
+      setShowNewGuestModal(false)
       setFeedback({
         text: `Visit created successfully! ID: ${visitId}`,
         isError: false,
-      });
-      clearInputs();
+      })
+      clearInputs()
     }
   }
 
   function clearInputs() {
-    setSelectedGuestOpt(null);
-    setSelectedServicesOpt([]);
+    setSelectedGuestOpt(null)
+    setSelectedServicesOpt([])
   }
 }
 

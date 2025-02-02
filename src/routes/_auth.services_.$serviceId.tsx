@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
 
 import {
   fetchServiceByID,
@@ -7,22 +7,22 @@ import {
   fetchServiceGuestsQueued,
   fetchServiceGuestsSlotted,
   fetchServices,
-  updateGuestServiceStatus
+  updateGuestServiceStatus,
 } from '../lib/api'
 
-import { Button, Modal, Form, Table } from "react-bootstrap";
-import EditServiceForm from "../lib/components/EditServiceForm";
+import { Button, Modal, Form, Table } from 'react-bootstrap'
+import EditServiceForm from '../lib/components/EditServiceForm'
 
-export const Route = createFileRoute("/services_/$serviceId")({
+export const Route = createFileRoute('/_auth/services_/$serviceId')({
   component: ServiceView,
   parseParams: (params): { serviceId: number } => ({
     serviceId: parseInt(params.serviceId),
   }),
-  loader: async ({ params: { serviceId }}) => {
-    let guestsSlotted;
+  loader: async ({ params: { serviceId } }) => {
+    let guestsSlotted
 
-    const services = await fetchServices();
-    const service = await fetchServiceByID(serviceId);
+    const services = await fetchServices()
+    const service = await fetchServiceByID(serviceId)
 
     if (service.quota) {
       guestsSlotted = await fetchServiceGuestsSlotted(serviceId)
@@ -35,13 +35,12 @@ export const Route = createFileRoute("/services_/$serviceId")({
       services,
       guestsSlotted,
       guestsQueued,
-      guestsCompleted
+      guestsCompleted,
     }
-  }
-});
+  },
+})
 
 function ServiceView() {
-
   const {
     service,
     services,
@@ -52,26 +51,24 @@ function ServiceView() {
 
   const [guestsSlottedState, setGuestsSlottedState] = useState(guestsSlotted)
   const [guestsQueuedState, setGuestsQueuedState] = useState(guestsQueued)
-  const [guestsCompletedState, setGuestsCompletedState] = useState(guestsCompleted)
+  const [guestsCompletedState, setGuestsCompletedState] =
+    useState(guestsCompleted)
   const [showEditServiceModal, setShowEditServiceModal] = useState(false)
 
   const handleMoveToNewStatus = async (
     guestId: number,
     newStatus: string,
-    slotNum: number | null
+    slotNum: number | null,
   ) => {
-    updateGuestServiceStatus(
-      service,
-      newStatus,
-      guestId,
-      slotNum
-    )
+    updateGuestServiceStatus(service, newStatus, guestId, slotNum)
     if (service.quota) {
-      setGuestsSlottedState(await fetchServiceGuestsSlotted(service.service_id));
+      setGuestsSlottedState(await fetchServiceGuestsSlotted(service.service_id))
     }
-    setGuestsQueuedState(await fetchServiceGuestsQueued(service.service_id));
-    setGuestsCompletedState(await fetchServiceGuestsCompleted(service.service_id));
-  };
+    setGuestsQueuedState(await fetchServiceGuestsQueued(service.service_id))
+    setGuestsCompletedState(
+      await fetchServiceGuestsCompleted(service.service_id),
+    )
+  }
 
   return (
     <>
@@ -116,15 +113,23 @@ function ServiceView() {
                         <td>{nameAndID}</td>
                         <td>Occupied</td>
                         <td>
-                          <Button onClick={() => handleMoveToNewStatus(guest_id, "Completed", null)}>
+                          <Button
+                            onClick={() =>
+                              handleMoveToNewStatus(guest_id, 'Completed', null)
+                            }
+                          >
                             Move to Completed
                           </Button>
-                          <Button onClick={() => handleMoveToNewStatus(guest_id, "Queued", null)}>
+                          <Button
+                            onClick={() =>
+                              handleMoveToNewStatus(guest_id, 'Queued', null)
+                            }
+                          >
                             Move to Queue
                           </Button>
                         </td>
                       </tr>
-                    );
+                    )
                   } else {
                     return (
                       <tr key={slotIndex}>
@@ -133,7 +138,7 @@ function ServiceView() {
                         <td>Available</td>
                         <td></td>
                       </tr>
-                    );
+                    )
                   }
                 })
               }
@@ -141,7 +146,7 @@ function ServiceView() {
           </Table>
         </>
       ) : (
-        ""
+        ''
       )}
       <h2>Queue</h2>
       <Table responsive={true}>
@@ -153,36 +158,47 @@ function ServiceView() {
           </tr>
         </thead>
         <tbody>
-          { guestsQueuedState!.map(({ guest_id, first_name, last_name, created_at }, i) => {
-            const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
+          {guestsQueuedState!.map(
+            ({ guest_id, first_name, last_name, created_at }, i) => {
+              const nameAndID = first_name + ' ' + last_name + ` (${guest_id})`
 
               return (
                 <tr key={`${guest_id}-${i}`}>
                   <td>{created_at}</td>
                   <td>{nameAndID}</td>
                   <td>
-                    { service.quota ? (
+                    {service.quota ? (
                       <Form.Select
                         aria-label="Select which slot to assign"
-                        onChange={(e) => handleMoveToNewStatus(guest_id, "Slotted", parseInt(e.target.value))}
+                        onChange={(e) =>
+                          handleMoveToNewStatus(
+                            guest_id,
+                            'Slotted',
+                            parseInt(e.target.value),
+                          )
+                        }
                       >
                         <option>Assign Slot</option>
                         {Array.from({ length: service.quota }).map((_, i) => {
                           // TODO: need array of available slots for these options
-                          return <option key={i}>{i + 1}</option>;
+                          return <option key={i}>{i + 1}</option>
                         })}
                       </Form.Select>
                     ) : (
-                      ""
+                      ''
                     )}
-                    <Button onClick={() => handleMoveToNewStatus(guest_id, "Completed", null)}>
+                    <Button
+                      onClick={() =>
+                        handleMoveToNewStatus(guest_id, 'Completed', null)
+                      }
+                    >
                       Move to Completed
                     </Button>
                   </td>
                 </tr>
-              );
-            })
-          }
+              )
+            },
+          )}
         </tbody>
       </Table>
       <h2>Completed</h2>
@@ -195,22 +211,29 @@ function ServiceView() {
           </tr>
         </thead>
         <tbody>
-          { guestsCompletedState!.map(({ guest_id, first_name, last_name, created_at }, i) => {
-            const nameAndID = first_name + " " + last_name + ` (${guest_id})`;
+          {guestsCompletedState!.map(
+            ({ guest_id, first_name, last_name, created_at }, i) => {
+              const nameAndID = first_name + ' ' + last_name + ` (${guest_id})`
 
               return (
                 <tr key={`${guest_id}-${i}`}>
                   <td>{created_at}</td>
                   <td>{nameAndID}</td>
                   <td>
-                    <Button onClick={() => handleMoveToNewStatus(guest_id, "Queued", null)}>Move to Queue</Button>
+                    <Button
+                      onClick={() =>
+                        handleMoveToNewStatus(guest_id, 'Queued', null)
+                      }
+                    >
+                      Move to Queue
+                    </Button>
                   </td>
                 </tr>
-              );
-            })
-          }
+              )
+            },
+          )}
         </tbody>
       </Table>
     </>
-  );
+  )
 }

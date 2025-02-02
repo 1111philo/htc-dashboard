@@ -11,43 +11,20 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as VisitsImport } from './routes/visits'
-import { Route as UsersImport } from './routes/users'
-import { Route as NewVisitImport } from './routes/new-visit'
-import { Route as NewNotificationImport } from './routes/new-notification'
 import { Route as LoginImport } from './routes/login'
-import { Route as GuestsImport } from './routes/guests'
-import { Route as AddServiceImport } from './routes/add-service'
+import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
-import { Route as UsersUserIdImport } from './routes/users_.$userId'
-import { Route as ServicesServiceIdImport } from './routes/services_.$serviceId'
-import { Route as GuestsGuestIdImport } from './routes/guests_.$guestId'
+import { Route as AuthVisitsImport } from './routes/_auth.visits'
+import { Route as AuthUsersImport } from './routes/_auth.users'
+import { Route as AuthNewVisitImport } from './routes/_auth.new-visit'
+import { Route as AuthNewNotificationImport } from './routes/_auth.new-notification'
+import { Route as AuthGuestsImport } from './routes/_auth.guests'
+import { Route as AuthAddServiceImport } from './routes/_auth.add-service'
+import { Route as AuthUsersUserIdImport } from './routes/_auth.users_.$userId'
+import { Route as AuthServicesServiceIdImport } from './routes/_auth.services_.$serviceId'
+import { Route as AuthGuestsGuestIdImport } from './routes/_auth.guests_.$guestId'
 
 // Create/Update Routes
-
-const VisitsRoute = VisitsImport.update({
-  id: '/visits',
-  path: '/visits',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const UsersRoute = UsersImport.update({
-  id: '/users',
-  path: '/users',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const NewVisitRoute = NewVisitImport.update({
-  id: '/new-visit',
-  path: '/new-visit',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const NewNotificationRoute = NewNotificationImport.update({
-  id: '/new-notification',
-  path: '/new-notification',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const LoginRoute = LoginImport.update({
   id: '/login',
@@ -55,15 +32,8 @@ const LoginRoute = LoginImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const GuestsRoute = GuestsImport.update({
-  id: '/guests',
-  path: '/guests',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const AddServiceRoute = AddServiceImport.update({
-  id: '/add-service',
-  path: '/add-service',
+const AuthRoute = AuthImport.update({
+  id: '/_auth',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -73,22 +43,58 @@ const IndexRoute = IndexImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const UsersUserIdRoute = UsersUserIdImport.update({
+const AuthVisitsRoute = AuthVisitsImport.update({
+  id: '/visits',
+  path: '/visits',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthUsersRoute = AuthUsersImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthNewVisitRoute = AuthNewVisitImport.update({
+  id: '/new-visit',
+  path: '/new-visit',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthNewNotificationRoute = AuthNewNotificationImport.update({
+  id: '/new-notification',
+  path: '/new-notification',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthGuestsRoute = AuthGuestsImport.update({
+  id: '/guests',
+  path: '/guests',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthAddServiceRoute = AuthAddServiceImport.update({
+  id: '/add-service',
+  path: '/add-service',
+  getParentRoute: () => AuthRoute,
+} as any)
+
+const AuthUsersUserIdRoute = AuthUsersUserIdImport.update({
   id: '/users_/$userId',
   path: '/users/$userId',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => AuthRoute,
 } as any)
 
-const ServicesServiceIdRoute = ServicesServiceIdImport.update({
+const AuthServicesServiceIdRoute = AuthServicesServiceIdImport.update({
   id: '/services_/$serviceId',
   path: '/services/$serviceId',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => AuthRoute,
 } as any)
 
-const GuestsGuestIdRoute = GuestsGuestIdImport.update({
+const AuthGuestsGuestIdRoute = AuthGuestsGuestIdImport.update({
   id: '/guests_/$guestId',
   path: '/guests/$guestId',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => AuthRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -102,18 +108,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/add-service': {
-      id: '/add-service'
-      path: '/add-service'
-      fullPath: '/add-service'
-      preLoaderRoute: typeof AddServiceImport
-      parentRoute: typeof rootRoute
-    }
-    '/guests': {
-      id: '/guests'
-      path: '/guests'
-      fullPath: '/guests'
-      preLoaderRoute: typeof GuestsImport
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthImport
       parentRoute: typeof rootRoute
     }
     '/login': {
@@ -123,110 +122,154 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
     }
-    '/new-notification': {
-      id: '/new-notification'
+    '/_auth/add-service': {
+      id: '/_auth/add-service'
+      path: '/add-service'
+      fullPath: '/add-service'
+      preLoaderRoute: typeof AuthAddServiceImport
+      parentRoute: typeof AuthImport
+    }
+    '/_auth/guests': {
+      id: '/_auth/guests'
+      path: '/guests'
+      fullPath: '/guests'
+      preLoaderRoute: typeof AuthGuestsImport
+      parentRoute: typeof AuthImport
+    }
+    '/_auth/new-notification': {
+      id: '/_auth/new-notification'
       path: '/new-notification'
       fullPath: '/new-notification'
-      preLoaderRoute: typeof NewNotificationImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthNewNotificationImport
+      parentRoute: typeof AuthImport
     }
-    '/new-visit': {
-      id: '/new-visit'
+    '/_auth/new-visit': {
+      id: '/_auth/new-visit'
       path: '/new-visit'
       fullPath: '/new-visit'
-      preLoaderRoute: typeof NewVisitImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthNewVisitImport
+      parentRoute: typeof AuthImport
     }
-    '/users': {
-      id: '/users'
+    '/_auth/users': {
+      id: '/_auth/users'
       path: '/users'
       fullPath: '/users'
-      preLoaderRoute: typeof UsersImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthUsersImport
+      parentRoute: typeof AuthImport
     }
-    '/visits': {
-      id: '/visits'
+    '/_auth/visits': {
+      id: '/_auth/visits'
       path: '/visits'
       fullPath: '/visits'
-      preLoaderRoute: typeof VisitsImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthVisitsImport
+      parentRoute: typeof AuthImport
     }
-    '/guests_/$guestId': {
-      id: '/guests_/$guestId'
+    '/_auth/guests_/$guestId': {
+      id: '/_auth/guests_/$guestId'
       path: '/guests/$guestId'
       fullPath: '/guests/$guestId'
-      preLoaderRoute: typeof GuestsGuestIdImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthGuestsGuestIdImport
+      parentRoute: typeof AuthImport
     }
-    '/services_/$serviceId': {
-      id: '/services_/$serviceId'
+    '/_auth/services_/$serviceId': {
+      id: '/_auth/services_/$serviceId'
       path: '/services/$serviceId'
       fullPath: '/services/$serviceId'
-      preLoaderRoute: typeof ServicesServiceIdImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthServicesServiceIdImport
+      parentRoute: typeof AuthImport
     }
-    '/users_/$userId': {
-      id: '/users_/$userId'
+    '/_auth/users_/$userId': {
+      id: '/_auth/users_/$userId'
       path: '/users/$userId'
       fullPath: '/users/$userId'
-      preLoaderRoute: typeof UsersUserIdImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthUsersUserIdImport
+      parentRoute: typeof AuthImport
     }
   }
 }
 
 // Create and export the route tree
 
+interface AuthRouteChildren {
+  AuthAddServiceRoute: typeof AuthAddServiceRoute
+  AuthGuestsRoute: typeof AuthGuestsRoute
+  AuthNewNotificationRoute: typeof AuthNewNotificationRoute
+  AuthNewVisitRoute: typeof AuthNewVisitRoute
+  AuthUsersRoute: typeof AuthUsersRoute
+  AuthVisitsRoute: typeof AuthVisitsRoute
+  AuthGuestsGuestIdRoute: typeof AuthGuestsGuestIdRoute
+  AuthServicesServiceIdRoute: typeof AuthServicesServiceIdRoute
+  AuthUsersUserIdRoute: typeof AuthUsersUserIdRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthAddServiceRoute: AuthAddServiceRoute,
+  AuthGuestsRoute: AuthGuestsRoute,
+  AuthNewNotificationRoute: AuthNewNotificationRoute,
+  AuthNewVisitRoute: AuthNewVisitRoute,
+  AuthUsersRoute: AuthUsersRoute,
+  AuthVisitsRoute: AuthVisitsRoute,
+  AuthGuestsGuestIdRoute: AuthGuestsGuestIdRoute,
+  AuthServicesServiceIdRoute: AuthServicesServiceIdRoute,
+  AuthUsersUserIdRoute: AuthUsersUserIdRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/add-service': typeof AddServiceRoute
-  '/guests': typeof GuestsRoute
+  '': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
-  '/new-notification': typeof NewNotificationRoute
-  '/new-visit': typeof NewVisitRoute
-  '/users': typeof UsersRoute
-  '/visits': typeof VisitsRoute
-  '/guests/$guestId': typeof GuestsGuestIdRoute
-  '/services/$serviceId': typeof ServicesServiceIdRoute
-  '/users/$userId': typeof UsersUserIdRoute
+  '/add-service': typeof AuthAddServiceRoute
+  '/guests': typeof AuthGuestsRoute
+  '/new-notification': typeof AuthNewNotificationRoute
+  '/new-visit': typeof AuthNewVisitRoute
+  '/users': typeof AuthUsersRoute
+  '/visits': typeof AuthVisitsRoute
+  '/guests/$guestId': typeof AuthGuestsGuestIdRoute
+  '/services/$serviceId': typeof AuthServicesServiceIdRoute
+  '/users/$userId': typeof AuthUsersUserIdRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/add-service': typeof AddServiceRoute
-  '/guests': typeof GuestsRoute
+  '': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
-  '/new-notification': typeof NewNotificationRoute
-  '/new-visit': typeof NewVisitRoute
-  '/users': typeof UsersRoute
-  '/visits': typeof VisitsRoute
-  '/guests/$guestId': typeof GuestsGuestIdRoute
-  '/services/$serviceId': typeof ServicesServiceIdRoute
-  '/users/$userId': typeof UsersUserIdRoute
+  '/add-service': typeof AuthAddServiceRoute
+  '/guests': typeof AuthGuestsRoute
+  '/new-notification': typeof AuthNewNotificationRoute
+  '/new-visit': typeof AuthNewVisitRoute
+  '/users': typeof AuthUsersRoute
+  '/visits': typeof AuthVisitsRoute
+  '/guests/$guestId': typeof AuthGuestsGuestIdRoute
+  '/services/$serviceId': typeof AuthServicesServiceIdRoute
+  '/users/$userId': typeof AuthUsersUserIdRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/add-service': typeof AddServiceRoute
-  '/guests': typeof GuestsRoute
+  '/_auth': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
-  '/new-notification': typeof NewNotificationRoute
-  '/new-visit': typeof NewVisitRoute
-  '/users': typeof UsersRoute
-  '/visits': typeof VisitsRoute
-  '/guests_/$guestId': typeof GuestsGuestIdRoute
-  '/services_/$serviceId': typeof ServicesServiceIdRoute
-  '/users_/$userId': typeof UsersUserIdRoute
+  '/_auth/add-service': typeof AuthAddServiceRoute
+  '/_auth/guests': typeof AuthGuestsRoute
+  '/_auth/new-notification': typeof AuthNewNotificationRoute
+  '/_auth/new-visit': typeof AuthNewVisitRoute
+  '/_auth/users': typeof AuthUsersRoute
+  '/_auth/visits': typeof AuthVisitsRoute
+  '/_auth/guests_/$guestId': typeof AuthGuestsGuestIdRoute
+  '/_auth/services_/$serviceId': typeof AuthServicesServiceIdRoute
+  '/_auth/users_/$userId': typeof AuthUsersUserIdRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | ''
+    | '/login'
     | '/add-service'
     | '/guests'
-    | '/login'
     | '/new-notification'
     | '/new-visit'
     | '/users'
@@ -237,9 +280,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | ''
+    | '/login'
     | '/add-service'
     | '/guests'
-    | '/login'
     | '/new-notification'
     | '/new-visit'
     | '/users'
@@ -250,45 +294,30 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/add-service'
-    | '/guests'
+    | '/_auth'
     | '/login'
-    | '/new-notification'
-    | '/new-visit'
-    | '/users'
-    | '/visits'
-    | '/guests_/$guestId'
-    | '/services_/$serviceId'
-    | '/users_/$userId'
+    | '/_auth/add-service'
+    | '/_auth/guests'
+    | '/_auth/new-notification'
+    | '/_auth/new-visit'
+    | '/_auth/users'
+    | '/_auth/visits'
+    | '/_auth/guests_/$guestId'
+    | '/_auth/services_/$serviceId'
+    | '/_auth/users_/$userId'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AddServiceRoute: typeof AddServiceRoute
-  GuestsRoute: typeof GuestsRoute
+  AuthRoute: typeof AuthRouteWithChildren
   LoginRoute: typeof LoginRoute
-  NewNotificationRoute: typeof NewNotificationRoute
-  NewVisitRoute: typeof NewVisitRoute
-  UsersRoute: typeof UsersRoute
-  VisitsRoute: typeof VisitsRoute
-  GuestsGuestIdRoute: typeof GuestsGuestIdRoute
-  ServicesServiceIdRoute: typeof ServicesServiceIdRoute
-  UsersUserIdRoute: typeof UsersUserIdRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AddServiceRoute: AddServiceRoute,
-  GuestsRoute: GuestsRoute,
+  AuthRoute: AuthRouteWithChildren,
   LoginRoute: LoginRoute,
-  NewNotificationRoute: NewNotificationRoute,
-  NewVisitRoute: NewVisitRoute,
-  UsersRoute: UsersRoute,
-  VisitsRoute: VisitsRoute,
-  GuestsGuestIdRoute: GuestsGuestIdRoute,
-  ServicesServiceIdRoute: ServicesServiceIdRoute,
-  UsersUserIdRoute: UsersUserIdRoute,
 }
 
 export const routeTree = rootRoute
@@ -302,50 +331,65 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/add-service",
-        "/guests",
-        "/login",
-        "/new-notification",
-        "/new-visit",
-        "/users",
-        "/visits",
-        "/guests_/$guestId",
-        "/services_/$serviceId",
-        "/users_/$userId"
+        "/_auth",
+        "/login"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/add-service": {
-      "filePath": "add-service.tsx"
-    },
-    "/guests": {
-      "filePath": "guests.tsx"
+    "/_auth": {
+      "filePath": "_auth.tsx",
+      "children": [
+        "/_auth/add-service",
+        "/_auth/guests",
+        "/_auth/new-notification",
+        "/_auth/new-visit",
+        "/_auth/users",
+        "/_auth/visits",
+        "/_auth/guests_/$guestId",
+        "/_auth/services_/$serviceId",
+        "/_auth/users_/$userId"
+      ]
     },
     "/login": {
       "filePath": "login.tsx"
     },
-    "/new-notification": {
-      "filePath": "new-notification.tsx"
+    "/_auth/add-service": {
+      "filePath": "_auth.add-service.tsx",
+      "parent": "/_auth"
     },
-    "/new-visit": {
-      "filePath": "new-visit.tsx"
+    "/_auth/guests": {
+      "filePath": "_auth.guests.tsx",
+      "parent": "/_auth"
     },
-    "/users": {
-      "filePath": "users.tsx"
+    "/_auth/new-notification": {
+      "filePath": "_auth.new-notification.tsx",
+      "parent": "/_auth"
     },
-    "/visits": {
-      "filePath": "visits.tsx"
+    "/_auth/new-visit": {
+      "filePath": "_auth.new-visit.tsx",
+      "parent": "/_auth"
     },
-    "/guests_/$guestId": {
-      "filePath": "guests_.$guestId.tsx"
+    "/_auth/users": {
+      "filePath": "_auth.users.tsx",
+      "parent": "/_auth"
     },
-    "/services_/$serviceId": {
-      "filePath": "services_.$serviceId.tsx"
+    "/_auth/visits": {
+      "filePath": "_auth.visits.tsx",
+      "parent": "/_auth"
     },
-    "/users_/$userId": {
-      "filePath": "users_.$userId.tsx"
+    "/_auth/guests_/$guestId": {
+      "filePath": "_auth.guests_.$guestId.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/services_/$serviceId": {
+      "filePath": "_auth.services_.$serviceId.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/users_/$userId": {
+      "filePath": "_auth.users_.$userId.tsx",
+      "parent": "/_auth"
     }
   }
 }

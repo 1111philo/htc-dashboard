@@ -6,13 +6,13 @@ import FeedbackMessage from '../lib/components/FeedbackMessage';
 
 import { Button, Form } from 'react-bootstrap';
 
-export const Route = createFileRoute("/add-service")({
+export const Route = createFileRoute('/_auth/add-service')({
   component: AddServiceView,
   loader: async () => {
-    const services = await fetchServices();
+    const services = await fetchServices()
     return { services }
-  }
-});
+  },
+})
 
 function AddServiceView() {
   return (
@@ -25,61 +25,61 @@ function AddServiceView() {
 
 function AddNewServiceForm() {
   const { services } = Route.useLoaderData()
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  const [newServiceName, setNewServiceName] = useState("")
+  const [newServiceName, setNewServiceName] = useState('')
   const [optionalQuota, setOptionalQuota] = useState(0)
   const [feedback, setFeedback] = useState<UserMessage>({
-    text: "",
+    text: '',
     isError: false,
-  });
+  })
 
   const handleCreateNewService = async () => {
     // check if new service has a name
     if (!newServiceName) {
       setFeedback({
-        text: "Service must be named",
-        isError: true
+        text: 'Service must be named',
+        isError: true,
       })
-      return;
+      return
     }
     // check if new service is unique
-    let duplicateService = services.some((service) => service.name === newServiceName)
+    let duplicateService = services.some(
+      (service) => service.name === newServiceName,
+    )
     if (duplicateService) {
       setFeedback({
-        text: "Service already exists.",
-        isError: true
+        text: 'Service already exists.',
+        isError: true,
       })
-      return;
+      return
     }
 
     // send new service name and quota to api
-    const response = await (
-      await API.post({
-        apiName: "auth",
-        path: "/addService",
-        options: {
-          body: {
-            name: newServiceName,
-            quota: optionalQuota ? optionalQuota : 0
-          }
-        }
-      }).response
-    )
+    const response = await await API.post({
+      apiName: 'auth',
+      path: '/addService',
+      options: {
+        body: {
+          name: newServiceName,
+          quota: optionalQuota ? optionalQuota : 0,
+        },
+      },
+    }).response
 
     if (response!.statusCode === 200) {
       setFeedback({ text: 'Success', isError: false })
-      const newService = (await response.body.json())
+      const newService = await response.body.json()
       // route user to view for new service
       navigate({ to: `/services/${newService!.service_id}` })
     }
   }
 
   const handleEnter = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       handleCreateNewService()
     }
-  };
+  }
 
   return (
     <>
@@ -108,13 +108,10 @@ function AddNewServiceForm() {
           />
         </Form.Group>
 
-        <Button
-          variant="primary"
-          onClick={handleCreateNewService}
-        >
+        <Button variant="primary" onClick={handleCreateNewService}>
           Create New Service
         </Button>
       </Form>
     </>
-  );
+  )
 }

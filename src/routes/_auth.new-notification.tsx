@@ -1,16 +1,16 @@
-import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
-import * as API from "aws-amplify/api";
+import * as API from 'aws-amplify/api'
 
 import FeedbackMessage from '../lib/components/FeedbackMessage2'
 import { GuestSelectSearch } from "../lib/components/GuestSelectSearch";
 import { Button, Form, Modal } from "react-bootstrap";
 
-export const Route = createFileRoute("/new-notification")({
+export const Route = createFileRoute('/_auth/new-notification')({
   component: NewNotificationView,
-});
+})
 
 function NewNotificationView() {
 
@@ -19,7 +19,7 @@ function NewNotificationView() {
       <h1>Add New Notification</h1>
       <AddNewNotificationForm />
     </>
-  );
+  )
 }
 
 function AddNewNotificationForm() {
@@ -42,15 +42,15 @@ function AddNewNotificationForm() {
 
     const response = await (
       await API.post({
-        apiName: "auth",
-        path: "/addGuestNotification",
+        apiName: 'auth',
+        path: '/addGuestNotification',
         options: {
           body: {
             guest_id: +selectedGuestOpt.value,
             message: message,
-            status: "Active"
-          }
-        }
+            status: 'Active',
+          },
+        },
       }).response
     ).statusCode
 
@@ -62,14 +62,14 @@ function AddNewNotificationForm() {
       setSelectedGuestOpt(null);
       setMessage("");
     }
-  };
+  }
 
   const handleEnter = (e) => {
     if (e.key === "Enter") {
       e.preventDefault()
       handleCreateNotification(e)
     }
-  };
+  }
 
   return (
     <>
@@ -99,5 +99,5 @@ function AddNewNotificationForm() {
         </Button>
       </Form>
     </>
-  );
+  )
 }
