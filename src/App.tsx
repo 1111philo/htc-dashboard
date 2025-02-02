@@ -65,15 +65,17 @@ function AppNav({ authUserIsAdmin }) {
         </Nav.Item>
         <NavDropdown title="Services">
           {authUserIsAdmin && (
-            <NavDropdown.Item
-              as={RouterNavLink}
-              to="/add-service"
-              eventKey="5.1"
-            >
-              Create Service
-            </NavDropdown.Item>
+            <>
+              <NavDropdown.Item
+                as={RouterNavLink}
+                to="/add-service"
+                eventKey="5.1"
+              >
+                Create Service
+              </NavDropdown.Item>
+              <NavDropdown.Divider />
+            </>
           )}
-          <NavDropdown.Divider />
           {serviceTypes?.map(({ name, service_id }) => {
             return (
               <NavDropdown.Item as="div" key={service_id}>
