@@ -1,40 +1,40 @@
-import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
-import * as API from "aws-amplify/api";
+import * as API from 'aws-amplify/api'
 
-import { Button, Form, Modal } from "react-bootstrap";
-import Select from "react-select";
+import { Button, Form, Modal } from 'react-bootstrap'
+import Select from 'react-select'
 
-export const Route = createFileRoute("/new-notification")({
+export const Route = createFileRoute('/_auth/new-notification')({
   component: NewNotificationView,
-});
+})
 
 const getAllGuests = async () => {
   // fetch all guests
   const allGuests = await (
     await API.post({
-      apiName: "auth",
-      path: "/getGuests",
+      apiName: 'auth',
+      path: '/getGuests',
       options: {
         body: {
-          limit: 10000
-        }
-      }
+          limit: 10000,
+        },
+      },
     }).response
-  ).body.json();
+  ).body.json()
 
   return allGuests
-};
+}
 
 function NewNotificationView() {
-  const queryClient = useQueryClient();
+  const queryClient = useQueryClient()
 
   const { isPending, isError, isLoading, data, error } = useQuery({
     queryKey: ['allGuests'],
-    queryFn: getAllGuests
-  });
+    queryFn: getAllGuests,
+  })
 
   if (isPending || isLoading) {
     return <span>Loading...</span>
@@ -47,62 +47,61 @@ function NewNotificationView() {
   return (
     <>
       <h1>Add New Notification</h1>
-      <AddNewNotificationForm allGuests={data}/>
+      <AddNewNotificationForm allGuests={data} />
     </>
-  );
+  )
 }
 
 function AddNewNotificationForm({ allGuests }) {
-
-  const [selectedGuest, setSelectedGuest] = useState<ReactSelectOption>();
-  const [message, setMessage] = useState("");
-  const [creationSuccess, setCreationSuccess] = useState(false);
-  const [creationWarning, setCreationWarning] = useState(false);
+  const [selectedGuest, setSelectedGuest] = useState<ReactSelectOption>()
+  const [message, setMessage] = useState('')
+  const [creationSuccess, setCreationSuccess] = useState(false)
+  const [creationWarning, setCreationWarning] = useState(false)
 
   const guestOptions = allGuests.rows.map((g) => {
     return {
       ...g,
       value: g.guest_id,
       label: `(ID: ${g.guest_id}) ${g.first_name} ${g.last_name} - ${g.dob}`,
-    };
-  });
+    }
+  })
 
   const handleCreateNotification = async (e) => {
     if (selectedGuest === undefined) {
-      setCreationWarning(true);
-      return;
+      setCreationWarning(true)
+      return
     }
 
     const response = await (
       await API.post({
-        apiName: "auth",
-        path: "/addGuestNotification",
+        apiName: 'auth',
+        path: '/addGuestNotification',
         options: {
           body: {
             guest_id: selectedGuest.guest_id,
             message: message,
-            status: "Active"
-          }
-        }
+            status: 'Active',
+          },
+        },
       }).response
     ).statusCode
 
     if (response === 200) {
-      setCreationSuccess(true);
-      setSelectedGuest(undefined);
-      setMessage("");
+      setCreationSuccess(true)
+      setSelectedGuest(undefined)
+      setMessage('')
     }
-  };
+  }
 
   const handleEnter = (e) => {
-    if (e.key === "Enter") {
+    if (e.key === 'Enter') {
       handleCreateNotification(e)
     }
-  };
+  }
 
   const handleClose = () => {
-    setCreationSuccess(false);
-    setCreationWarning(false);
+    setCreationSuccess(false)
+    setCreationWarning(false)
   }
 
   return (
@@ -157,5 +156,5 @@ function AddNewNotificationForm({ allGuests }) {
         </Modal.Body>
       </Modal>
     </>
-  );
+  )
 }

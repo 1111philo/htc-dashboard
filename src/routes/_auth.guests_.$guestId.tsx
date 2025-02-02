@@ -1,59 +1,59 @@
-import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Col, Row, Form, Button, InputGroup, Card } from "react-bootstrap";
-import FeedbackMessage from "../lib/components/FeedbackMessage2";
-import { Mail, MailOpen, PersonStanding } from "lucide-react";
-import { readableDateTime, today } from "../lib/utils";
-import { deleteGuest, getGuestData, updateGuest } from "../lib/api";
-import { toggleGuestNotificationStatus } from "../lib/api/notification";
+import { useState } from 'react'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Col, Row, Form, Button, InputGroup, Card } from 'react-bootstrap'
+import FeedbackMessage from '../lib/components/FeedbackMessage2'
+import { Mail, MailOpen, PersonStanding } from 'lucide-react'
+import { readableDateTime, today } from '../lib/utils'
+import { deleteGuest, getGuestData, updateGuest } from '../lib/api'
+import { toggleGuestNotificationStatus } from '../lib/api/notification'
 
 interface NotificationGroups {
-  active: GuestNotification[];
-  archived: GuestNotification[];
+  active: GuestNotification[]
+  archived: GuestNotification[]
 }
 interface LoaderData {
-  guest: Guest;
-  services: GuestService[];
-  notifications: NotificationGroups;
+  guest: Guest
+  services: GuestService[]
+  notifications: NotificationGroups
 }
 
-export const Route = createFileRoute("/guests_/$guestId")({
+export const Route = createFileRoute('/_auth/guests_/$guestId')({
   component: GuestProfileView,
   parseParams: (params): { guestId: number } => ({
     guestId: parseInt(params.guestId),
   }),
   loader: async ({ context, params }): Promise<LoaderData> => {
-    const { serviceTypes } = context;
-    const { guestId } = params;
-    const guestResponse = await getGuestData(guestId);
+    const { serviceTypes } = context
+    const { guestId } = params
+    const guestResponse = await getGuestData(guestId)
     if (!guestResponse) {
       // TODO: make sure this hits the 404 route
       // redirect({ to: "not-found" })
     }
-    const { total, ...guest } = guestResponse;
-    let { guest_services: services, guest_notifications } = guest;
+    const { total, ...guest } = guestResponse
+    let { guest_services: services, guest_notifications } = guest
 
     // NOTE: this is why service_name should be included in Guest.guest_services
     // account for completed services that no longer exist in services types #test
     services = services
-      .filter((s) => s.status === "Completed")
+      .filter((s) => s.status === 'Completed')
       .map((s) => {
         let { name: service_name } = serviceTypes!.find(
-          (t) => t.service_id === s.service_id
-        ) ?? { name: null };
-        !service_name && (service_name = "[Service No Longer Exists]");
-        return { ...s, service_name };
-      });
+          (t) => t.service_id === s.service_id,
+        ) ?? { name: null }
+        !service_name && (service_name = '[Service No Longer Exists]')
+        return { ...s, service_name }
+      })
 
     const notifications = {
-      active: guest_notifications.filter((n) => n.status === "Active"),
-      archived: guest_notifications.filter((n) => n.status === "Archived"),
-    };
+      active: guest_notifications.filter((n) => n.status === 'Active'),
+      archived: guest_notifications.filter((n) => n.status === 'Archived'),
+    }
 
-    guest.case_manager = "[Case Manager name needed in API response.]";
-    return { guest, services, notifications /* visits: */ };
+    guest.case_manager = '[Case Manager name needed in API response.]'
+    return { guest, services, notifications /* visits: */ }
   },
-});
+})
 
 // TODO: eventually revive the visits table
 export default function GuestProfileView() {
@@ -61,18 +61,18 @@ export default function GuestProfileView() {
     guest,
     services,
     notifications: _notifications,
-  } = Route.useLoaderData();
+  } = Route.useLoaderData()
 
-  const [notifications, setNotifications] = useState(_notifications);
+  const [notifications, setNotifications] = useState(_notifications)
 
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   const [feedback, setFeedback] = useState<UserMessage>({
-    text: "",
+    text: '',
     isError: false,
-  });
+  })
 
-  const guestId = guest.guest_id.toString().padStart(5, "0");
+  const guestId = guest.guest_id.toString().padStart(5, '0')
 
   return (
     <>
@@ -109,92 +109,92 @@ export default function GuestProfileView() {
       <h2 className="mb-3">Completed Services</h2>
       <CompletedServices services={services} />
     </>
-  );
+  )
 
   async function deleteGuestRecord(guestId) {
     if (
       !confirm(
         `Are you sure you want to delete this guest?
-        ${guest.first_name} ${guest.last_name}, born ${guest.dob}`
+        ${guest.first_name} ${guest.last_name}, born ${guest.dob}`,
       )
     ) {
-      return;
+      return
     }
-    const success = await deleteGuest(guestId);
+    const success = await deleteGuest(guestId)
     if (!success) {
       setFeedback({
         text: `Oops! The guest record couldn't be deleted. Try again in a few.`,
         isError: true,
-      });
-      return;
+      })
+      return
     }
-    navigate({ to: "/guests", replace: true });
+    navigate({ to: '/guests', replace: true })
   }
 
   function onToggleNotificationStatus(
     success: boolean,
     notificationId: number,
-    initialStatus: GuestNotificationStatus
+    initialStatus: GuestNotificationStatus,
   ) {
-    if (!success) return;
+    if (!success) return
     // move the item to the other notifications array
     // (if we want to move to the TOP of the other array, remove both `.sort()`s)
-    let active: GuestNotification[];
-    let archived: GuestNotification[];
-    let moved: GuestNotification;
-    if (initialStatus === "Active") {
+    let active: GuestNotification[]
+    let archived: GuestNotification[]
+    let moved: GuestNotification
+    if (initialStatus === 'Active') {
       active = notifications.active.filter(
-        (n) => n.notification_id !== notificationId
-      );
+        (n) => n.notification_id !== notificationId,
+      )
       moved = {
         ...notifications.active.find(
-          (n) => n.notification_id === notificationId
+          (n) => n.notification_id === notificationId,
         )!,
-        status: "Archived",
-      };
+        status: 'Archived',
+      }
       archived = [moved, ...notifications.archived].sort((a, b) => {
-        const aTime = new Date(a.created_at);
-        const bTime = new Date(b.created_at);
-        if (aTime < bTime) return -1;
-        if (aTime > bTime) return 1;
-        return 0;
-      });
+        const aTime = new Date(a.created_at)
+        const bTime = new Date(b.created_at)
+        if (aTime < bTime) return -1
+        if (aTime > bTime) return 1
+        return 0
+      })
     } else {
       archived = notifications.archived.filter(
-        (n) => n.notification_id !== notificationId
-      );
+        (n) => n.notification_id !== notificationId,
+      )
       moved = {
         ...notifications.archived.find(
-          (n) => n.notification_id === notificationId
+          (n) => n.notification_id === notificationId,
         )!,
-        status: "Active",
-      };
+        status: 'Active',
+      }
       active = [moved, ...notifications.active].sort((a, b) => {
-        const aTime = new Date(a.created_at);
-        const bTime = new Date(b.created_at);
-        if (aTime < bTime) return -1;
-        if (aTime > bTime) return 1;
-        return 0;
-      });
+        const aTime = new Date(a.created_at)
+        const bTime = new Date(b.created_at)
+        if (aTime < bTime) return -1
+        if (aTime > bTime) return 1
+        return 0
+      })
     }
-    setNotifications({ active, archived });
+    setNotifications({ active, archived })
   }
 }
 
 function GuestForm({ guest, onFeedback }) {
   const initialFields: Partial<Guest> = {
-    first_name: guest.first_name ?? "",
-    last_name: guest.last_name ?? "",
-    dob: guest.dob ?? "",
-    case_manager: guest.case_manager ?? "",
-  };
-  const [fields, setFields] = useState(initialFields);
+    first_name: guest.first_name ?? '',
+    last_name: guest.last_name ?? '',
+    dob: guest.dob ?? '',
+    case_manager: guest.case_manager ?? '',
+  }
+  const [fields, setFields] = useState(initialFields)
 
   const isFormChanged =
     guest.first_name !== fields.first_name ||
     guest.last_name !== fields.last_name ||
     guest.dob !== fields.dob ||
-    guest.case_manager !== fields.case_manager;
+    guest.case_manager !== fields.case_manager
 
   return (
     <div className="mb-5">
@@ -220,8 +220,8 @@ function GuestForm({ guest, onFeedback }) {
               }
               className={
                 fields.first_name?.trim() !== guest.first_name
-                  ? "border-2 border-warning"
-                  : ""
+                  ? 'border-2 border-warning'
+                  : ''
               }
             />
             <Form.Control
@@ -235,8 +235,8 @@ function GuestForm({ guest, onFeedback }) {
               }
               className={
                 fields.last_name?.trim() !== guest.last_name
-                  ? "border-2 border-warning"
-                  : ""
+                  ? 'border-2 border-warning'
+                  : ''
               }
             />
           </InputGroup>
@@ -252,7 +252,7 @@ function GuestForm({ guest, onFeedback }) {
             value={fields.dob}
             onChange={(e) => setFields({ ...fields, dob: e.target.value })}
             className={
-              fields.dob?.trim() !== guest.dob ? "border-2 border-warning" : ""
+              fields.dob?.trim() !== guest.dob ? 'border-2 border-warning' : ''
             }
           />
         </Form.Group>
@@ -262,15 +262,15 @@ function GuestForm({ guest, onFeedback }) {
             id="input-case-manager"
             name="case_manager"
             type="text"
-            value={fields.case_manager ?? ""}
+            value={fields.case_manager ?? ''}
             onChange={(e) =>
               setFields({ ...fields, case_manager: e.target.value })
             }
             className={
               fields.case_manager && // case manager is a nullable field
               fields.case_manager?.trim() !== guest.case_manager
-                ? "border-2 border-warning"
-                : ""
+                ? 'border-2 border-warning'
+                : ''
             }
           />
         </Form.Group>
@@ -286,16 +286,16 @@ function GuestForm({ guest, onFeedback }) {
         )}
       </Form>
     </div>
-  );
+  )
 
   function cancelEdit() {
-    setFields(initialFields);
+    setFields(initialFields)
   }
 
   // TODO: circle back after api is fixed
   /** NOTE: This api is broken -- returns success but guest is not altered. */
   async function saveEditedGuest(e: React.FormEvent, guest: Partial<Guest>) {
-    e.preventDefault();
+    e.preventDefault()
     if (
       !confirm(`Save changes?
         ${guest.first_name} -> ${fields.first_name}
@@ -303,31 +303,31 @@ function GuestForm({ guest, onFeedback }) {
         ${guest.dob} -> ${fields.dob}
         ${guest.case_manager} -> ${fields.case_manager}`)
     ) {
-      return;
+      return
     }
 
-    const updatedGuest = { ...fields, guest_id: guest.guest_id };
-    const success = await updateGuest(updatedGuest); // placeholder
+    const updatedGuest = { ...fields, guest_id: guest.guest_id }
+    const success = await updateGuest(updatedGuest) // placeholder
     if (!success) {
       onFeedback({
         text: "Oops! The edits couldn't be saved. Try again in a few.",
         isError: true,
-      });
-      return;
+      })
+      return
     }
-    onFeedback({ text: "Successfully updated.", isError: false });
+    onFeedback({ text: 'Successfully updated.', isError: false })
   }
 }
 
 type OnToggleNotificationStatus = (
   success: boolean,
   notificationId: number,
-  initialStatus: GuestNotificationStatus
-) => void;
+  initialStatus: GuestNotificationStatus,
+) => void
 
 interface NotificationsProps {
-  notifications: GuestNotification[];
-  onToggleStatus: OnToggleNotificationStatus;
+  notifications: GuestNotification[]
+  onToggleStatus: OnToggleNotificationStatus
 }
 function Notifications({ notifications, onToggleStatus }: NotificationsProps) {
   return (
@@ -340,21 +340,21 @@ function Notifications({ notifications, onToggleStatus }: NotificationsProps) {
               onToggleStatus={onToggleStatus}
             />
           ))
-        : "None"}
+        : 'None'}
     </Cards>
-  );
+  )
 }
 
 interface NCProps {
-  n: GuestNotification;
-  onToggleStatus: OnToggleNotificationStatus;
+  n: GuestNotification
+  onToggleStatus: OnToggleNotificationStatus
 }
 function NotificationCard({ n, onToggleStatus }: NCProps) {
-  const border = n.status === "Active" ? "border-danger border-2" : "";
-  const Icon = () => (n.status === "Active" ? <Mail /> : <MailOpen />);
-  const dateTime = readableDateTime(n.created_at);
+  const border = n.status === 'Active' ? 'border-danger border-2' : ''
+  const Icon = () => (n.status === 'Active' ? <Mail /> : <MailOpen />)
+  const dateTime = readableDateTime(n.created_at)
   return (
-    <Card className={"mb-3 shadow " + border}>
+    <Card className={'mb-3 shadow ' + border}>
       <Card.Header>
         <div className="d-flex justify-content-between align-items-center">
           <div className="fst-italic">
@@ -366,11 +366,11 @@ function NotificationCard({ n, onToggleStatus }: NCProps) {
           <Button
             size="sm"
             variant={
-              n.status === "Active" ? "outline-primary" : "outline-primary"
+              n.status === 'Active' ? 'outline-primary' : 'outline-primary'
             }
             onClick={async () => await toggleNotificationStatus(onToggleStatus)}
           >
-            {n.status === "Active" ? "Mark Read" : "Unarchive"}
+            {n.status === 'Active' ? 'Mark Read' : 'Unarchive'}
           </Button>
         </div>
       </Card.Header>
@@ -378,46 +378,46 @@ function NotificationCard({ n, onToggleStatus }: NCProps) {
         <Card.Text>{n.message}</Card.Text>
       </Card.Body>
     </Card>
-  );
+  )
 
   async function toggleNotificationStatus(
-    onToggleStatus: OnToggleNotificationStatus
+    onToggleStatus: OnToggleNotificationStatus,
   ) {
-    const success = await toggleGuestNotificationStatus(n.notification_id);
-    onToggleStatus(success, n.notification_id, n.status);
+    const success = await toggleGuestNotificationStatus(n.notification_id)
+    onToggleStatus(success, n.notification_id, n.status)
   }
 }
 
 interface ServicesProps {
-  services: GuestService[];
+  services: GuestService[]
 }
 function CompletedServices({ services }: ServicesProps) {
   return (
     <Cards>
       {services.length
         ? services.map((s) => <ServiceCard key={s.guest_service_id} s={s} />)
-        : "None"}
+        : 'None'}
     </Cards>
-  );
+  )
 }
 
 interface SCProps {
-  s: GuestService;
+  s: GuestService
 }
 function ServiceCard({ s }: SCProps) {
   return (
     <Card className="mb-3 shadow">
       <Card.Header className="fst-italic">
-        <PersonStanding className="m-0 me-1" /> Completed:{" "}
-        {s.completed_at ?? "MM/DD/YY"}
+        <PersonStanding className="m-0 me-1" /> Completed:{' '}
+        {s.completed_at ?? 'MM/DD/YY'}
       </Card.Header>
       <Card.Body>
         <Card.Title>{s.service_name}</Card.Title>
       </Card.Body>
     </Card>
-  );
+  )
 }
 
 function Cards({ children }) {
-  return <div className="mb-5">{children}</div>;
+  return <div className="mb-5">{children}</div>
 }
