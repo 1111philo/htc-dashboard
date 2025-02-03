@@ -9,6 +9,7 @@ import {
   fetchServices,
   updateGuestServiceStatus,
 } from '../lib/api'
+import { EditServiceForm, Timer } from '../lib/components'
 import { readableDateTime } from '../lib/utils'
 
 import { Button, Modal, Form, Table, Card, Container, Row, Col } from 'react-bootstrap'
@@ -64,6 +65,7 @@ function ServiceView() {
   const [guestsCompletedState, setGuestsCompletedState] =
     useState(guestsCompleted)
   const [showEditServiceModal, setShowEditServiceModal] = useState(false)
+  const [isExpired, setIsExpired] = useState<boolean>(false)
 
   const handleMoveToNewStatus = async (
     guestId: number,
@@ -115,9 +117,12 @@ function ServiceView() {
               const slotNum = slotIndex + 1
               const guest = showerGuestsSlotted.find((g) => g.slot_number === slotNum)
 
-
+              const slotStart = guest?.slotted_at
               const slotStatus = guest ? 'occupied' : 'available'
-              const slotStatusColor = slotStatus === 'occupied' ? 'warning' : 'success'
+              let slotStatusColor = slotStatus === 'occupied' ? 'warning' : 'success'
+              // if (isExpired) {
+              //   slotStatusColor = 'danger'
+              // }
               const slotIndicatorStyle = `bg-${slotStatusColor} rounded d-flex justify-content-center align-items-center`
               const nameAndID = `${guest?.first_name} ${guest?.last_name} (${guest?.guest_id})`;
 
@@ -136,7 +141,18 @@ function ServiceView() {
                             </Col>
                             <Col xs={7} className="d-flex flex-column justify-content-between">
                               <span>{ nameAndID }</span>
-                              <span>Time Left: [TIMER]</span>
+                              { service.name === 'Shower' && (
+                                  <>
+                                    {/* Default length of shower is 20min */}
+                                    <Timer
+                                      slotStart={slotStart!}
+                                      slotTimeLength={20}
+                                      setIsExpired={setIsExpired}
+                                    >
+                                    </Timer>
+                                  </>
+                                )
+                              }
                             </Col>
                             <Col xs={4}>
                               <Button variant="outline-primary"
