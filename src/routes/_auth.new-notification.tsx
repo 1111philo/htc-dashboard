@@ -72,7 +72,7 @@ function AddNewNotificationForm() {
 
   return (
     <>
-      <FeedbackMessage
+      <FeedbackMessage2
         message={feedbackMessage}
       />
 
