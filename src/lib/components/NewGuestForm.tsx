@@ -19,8 +19,7 @@ export default function NewGuestForm(props: NewGuestFormProps) {
     <div className="p-3">
       <h2 className="mb-3">Add New Guest</h2>
       <FeedbackMessage
-        text={formFeedback.text}
-        isError={formFeedback.isError}
+        message={formFeedback} 
         className="my-3"
       />
       <Form onSubmit={async (e) => await submitForm(e)}>

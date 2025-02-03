@@ -1,7 +1,6 @@
 export { default as Chart } from './Chart'
 export { default as EditServiceForm } from './EditServiceForm'
 export { default as FeedbackMessage } from './FeedbackMessage'
-export { default as FeedbackMessage2 } from './FeedbackMessage2'
 export { default as GuestSelectSearch } from './GuestSelectSearch'
 export { default as NewGuestForm } from './NewGuestForm'
 export { default as StripedListRow } from './StripedListRow'

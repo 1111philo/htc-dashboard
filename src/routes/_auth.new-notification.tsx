@@ -4,7 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import * as API from 'aws-amplify/api'
 
-import { FeedbackMessage2, GuestSelectSearch } from '../lib/components'
+import { FeedbackMessage, GuestSelectSearch } from '../lib/components'
 import { Button, Form, Modal } from "react-bootstrap";
 
 export const Route = createFileRoute('/_auth/new-notification')({
@@ -72,7 +72,7 @@ function AddNewNotificationForm() {
 
   return (
     <>
-      <FeedbackMessage2
+      <FeedbackMessage
         message={feedbackMessage}
       />
 

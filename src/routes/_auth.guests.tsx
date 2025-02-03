@@ -106,8 +106,7 @@ function GuestsView() {
       </div>
 
       <FeedbackMessage
-        text={feedback.text}
-        isError={feedback.isError}
+        message={feedback}
         className="my-3"
       />
 
