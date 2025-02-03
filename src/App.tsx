@@ -88,9 +88,9 @@ function AppNav({ authUserIsAdmin, authUser }) {
             <NavLink to="/guests">Guests</NavLink>
             {authUserIsAdmin && <NavLink to="/users">Users</NavLink>}
             {/* My Account is broken until we can fetch a single user */}
-            <NavDropdown title={"My Account"} id="services-dropdown">
+            <NavDropdown title="My Account" id="my-account-dropdown">
               <NavDropdown.Item as="div">
-                <NavLink to="/users/$userId" params={{ userId: authUser.sub }}>
+                <NavLink to="/me">
                   <UserCard
                     authUser={authUser}
                     authUserIsAdmin={authUserIsAdmin}

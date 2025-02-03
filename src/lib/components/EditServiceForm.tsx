@@ -70,8 +70,7 @@ export default function EditServiceForm({
         <h2 className="mb-3">Edit Service</h2>
 
         <FeedbackMessage
-          text={feedback.text}
-          isError={feedback.isError}
+          message={feedback} 
           className="my-3"
         />
 

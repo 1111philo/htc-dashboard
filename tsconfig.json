@@ -3,7 +3,6 @@
     "typeRoots": [
       "./src/types.d.ts"
     ],
-    "baseUrl": ".",
     "jsx": "react-jsx",
     "lib": ["DOM", "ES2019"],
     "resolveJsonModule": true,
