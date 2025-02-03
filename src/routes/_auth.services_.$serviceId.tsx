@@ -12,6 +12,7 @@ import {
 
 import { Button, Modal, Form, Table } from 'react-bootstrap'
 import EditServiceForm from '../lib/components/EditServiceForm'
+import { readableDateTime } from '../lib/utils'
 
 export const Route = createFileRoute('/_auth/services_/$serviceId')({
   component: ServiceView,
@@ -168,10 +169,11 @@ function ServiceView() {
           {guestsQueuedState!.map(
             ({ guest_id, first_name, last_name, created_at }, i) => {
               const nameAndID = first_name + ' ' + last_name + ` (${guest_id})`
+              const timeRequested = readableDateTime(created_at)
 
               return (
                 <tr key={`${guest_id}-${i}`}>
-                  <td>{created_at}</td>
+                  <td>{timeRequested}</td>
                   <td>{nameAndID}</td>
                   <td>
                     {service.quota ? (
@@ -221,10 +223,11 @@ function ServiceView() {
           {guestsCompletedState!.map(
             ({ guest_id, first_name, last_name, created_at }, i) => {
               const nameAndID = first_name + ' ' + last_name + ` (${guest_id})`
+              const timeRequested = readableDateTime(created_at)
 
               return (
                 <tr key={`${guest_id}-${i}`}>
-                  <td>{created_at}</td>
+                  <td>{timeRequested}</td>
                   <td>{nameAndID}</td>
                   <td>
                     <Button
