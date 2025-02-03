@@ -124,7 +124,9 @@ function GuestsView() {
         onChange={onChangeFilter}
       />
 
-      <GuestsTable rows={sortedGuests} setSortedRows={setSortedGuests} />
+      <HScroll>
+        <GuestsTable rows={sortedGuests} /* setSortedRows={setSortedGuests} */ />
+      </HScroll>
       <TablePager
         queryRoute="/guests"
         page={page}
@@ -192,7 +194,7 @@ function GuestsTable({ rows /* setSortedRows */ }) {
         </tr>
       </thead>
       <tbody>
-        {rows.map((g) => {
+        {rows.map((g: Guest) => {
           const notificationCount = g.guest_notifications?.length ?? 0
           return (
             <tr
