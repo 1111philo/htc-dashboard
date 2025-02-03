@@ -10,7 +10,7 @@ import {
 import { addGuest, getGuestData, getGuestsWithQuery } from "../lib/api/guest";
 import { addVisit } from "../lib/api/visit";
 import { toggleGuestNotificationStatus } from "../lib/api/notification";
-import { guestOptLabel } from '../lib/utils';
+import { guestOptLabel, readableDateTime } from '../lib/utils';
 
 interface LoaderData {
   serviceTypes: ServiceType[]
@@ -95,7 +95,7 @@ function NewVisitView() {
         setSelectedGuestOpt={setSelectedGuestOpt}
       />
 
-      <Notifications data={notifications} />
+      {!!notifications.length && <Notifications data={notifications} />}
 
       <RequestedServices data={serviceTypes} />
     </>
@@ -132,9 +132,10 @@ function NewVisitView() {
         <Table>
           <tbody>
             {notifications.map((n: GuestNotification) => {
+              const [date, time] = readableDateTime(n.created_at).split(" ")
               return (
-                <tr key={n.notification_id}>
-                  <td>{n.updated_at}</td>
+                <tr key={n.notification_id} className="align-middle">
+                  <td>{date} <br /> {time}</td>
                   <td>{n.message}</td>
                   <td>
                     <Form.Select
@@ -192,6 +193,7 @@ function NewVisitView() {
           type="submit"
           onClick={logVisit}
           className="mt-4 d-block m-auto"
+          disabled={!selectedServicesOpt.length}
         >
           Log Visit
         </Button>
@@ -210,6 +212,7 @@ function NewVisitView() {
 
     async function logVisit(e) {
       e.preventDefault()
+      if (!selectedServicesOpt.length) return
       // TODO validate "form"
       const v: Partial<Visit> = {
         guest_id: +selectedGuestOpt!.value,
