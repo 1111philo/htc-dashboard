@@ -15,5 +15,5 @@ export const Route = createFileRoute("/_auth/me")({
 function MyAccount() {
   const { user } = Route.useLoaderData()
   if (!user) return "This page won't work until we can query"
-  return <UserProfile user={user!} />
+  return <UserProfile user={user} isOwnAccount={true} />
 }

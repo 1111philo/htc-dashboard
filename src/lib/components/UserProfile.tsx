@@ -4,7 +4,12 @@ import { Button, Form } from "react-bootstrap"
 import FeedbackMessage from "./FeedbackMessage2"
 import { deleteUser, updateUser } from "../api"
 
-export default function UserProfile({ user }: { user: User }) {
+interface Props {
+  user: User;
+  /** Different for User Profile View and My Account View */
+  isOwnAccount: boolean;
+}
+export default function UserProfile({ user, isOwnAccount }: Props) {
   const navigate = useNavigate()
 
   const blankFeedback: UserMessage = { text: '', isError: false }
@@ -13,7 +18,7 @@ export default function UserProfile({ user }: { user: User }) {
   return (
     <>
       <div className="d-flex justify-content-between align-items-center">
-        <h1>Staff Profile</h1>
+        <h1>{isOwnAccount ? "My Account" : "Staff Profile"}</h1>
         <Button
           variant="danger"
           type="button"

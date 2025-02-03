@@ -1,24 +1,26 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { UserProfile } from '../lib/components'
-import { getUser } from '../lib/api'
+import { createFileRoute } from "@tanstack/react-router";
+import { UserProfile } from "../lib/components";
+import { getUser } from "../lib/api";
 
 interface LoaderData {
-  user: User
+  user: User;
+  isOwnAccount: boolean;
 }
-export const Route = createFileRoute('/_auth/_admin/users_/$userId')({
+export const Route = createFileRoute("/_auth/_admin/users_/$userSub")({
   component: UserProfileView,
-  parseParams: (params): { userId: string } => ({
-    userId: params.userId
+  parseParams: (params): { userSub: string } => ({
+    userSub: params.userSub,
   }),
-  loader: async ({ params }): Promise<LoaderData> => {
-    const { userId } = params
+  loader: async ({ context, params }): Promise<LoaderData> => {
+    const { userSub } = params;
     // TODO: fix the hack in 👇🏽 this request func when API accepts a user_id key in req body
-    const user = await getUser(userId)
-    return { user: user! }
+    const user = (await getUser(userSub))!;
+    const isOwnAccount = context.authUser!.sub === user?.sub
+    return { user, isOwnAccount };
   },
-})
+});
 
 function UserProfileView() {
-  const { user } = Route.useLoaderData()
-  return <UserProfile user={user} />
+  const { user, isOwnAccount } = Route.useLoaderData();
+  return <UserProfile user={user} isOwnAccount={isOwnAccount} />;
 }
