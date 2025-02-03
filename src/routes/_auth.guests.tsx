@@ -7,6 +7,7 @@ import {
   FeedbackMessage,
   TableFilter,
   TablePager,
+  HScroll,
 } from "../lib/components";
 import {
   addGuest,
@@ -169,7 +170,7 @@ function GuestsView() {
 function GuestsTable({ rows /* setSortedRows */ }) {
   const navigate = useNavigate();
   return (
-    <Table className="mb-4 text-center table-sm" style={{ cursor: "pointer" }}>
+    <Table className="mb-4 text-center table-sm text-nowrap" style={{ cursor: "pointer" }}>
       <thead>
         <tr>
           <th /* title="Sort by guest ID" onClick={} */>
