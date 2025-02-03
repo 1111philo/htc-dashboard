@@ -9,10 +9,12 @@ import {
   fetchServices,
   updateGuestServiceStatus,
 } from '../lib/api'
-
-import { Button, Modal, Form, Table } from 'react-bootstrap'
 import EditServiceForm from '../lib/components/EditServiceForm'
 import { readableDateTime } from '../lib/utils'
+
+import { Button, Modal, Form, Table, Card, Container, Row, Col } from 'react-bootstrap'
+
+import ShowerGuests from '../../public/sample-data/get_slotted_shower_guests.json'
 
 export const Route = createFileRoute('/_auth/services_/$serviceId')({
   component: ServiceView,
@@ -25,12 +27,15 @@ export const Route = createFileRoute('/_auth/services_/$serviceId')({
     const services = await fetchServices()
     const service = await fetchServiceByID(serviceId)
     if (service.quota) {
-      guestsSlotted = await fetchServiceGuestsSlotted(serviceId)
+      // guestsSlotted = await fetchServiceGuestsSlotted(serviceId)
     }
     const guestsQueued = await fetchServiceGuestsQueued(serviceId)
     const guestsCompleted = await fetchServiceGuestsCompleted(serviceId)
 
     const authUserIsAdmin = context.authUserIsAdmin ?? false
+
+    // filter for guests with shower slot
+    const showerGuestsSlotted = ShowerGuests.filter((g) => g.slot_number !== null)
 
     return {
       authUserIsAdmin,
@@ -39,6 +44,7 @@ export const Route = createFileRoute('/_auth/services_/$serviceId')({
       guestsSlotted,
       guestsQueued,
       guestsCompleted,
+      showerGuestsSlotted
     }
   },
 })
@@ -51,6 +57,7 @@ function ServiceView() {
     guestsSlotted,
     guestsQueued,
     guestsCompleted,
+    showerGuestsSlotted
   } = Route.useLoaderData()
 
   const [guestsSlottedState, setGuestsSlottedState] = useState(guestsSlotted)
@@ -66,7 +73,7 @@ function ServiceView() {
   ) => {
     updateGuestServiceStatus(service, newStatus, guestId, slotNum)
     if (service.quota) {
-      setGuestsSlottedState(await fetchServiceGuestsSlotted(service.service_id))
+      // setGuestsSlottedState(await fetchServiceGuestsSlotted(service.service_id))
     }
     setGuestsQueuedState(await fetchServiceGuestsQueued(service.service_id))
     setGuestsCompletedState(
@@ -78,6 +85,7 @@ function ServiceView() {
     <>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className='mb-0'>{ service.name }</h1>
+        <span>**Slots simulated until /serviceGuestsSlotted is stable**</span>
         { authUserIsAdmin &&
           (<Button onClick={() => setShowEditServiceModal(true)}
           >
@@ -93,65 +101,82 @@ function ServiceView() {
           setShowEditServiceModal={setShowEditServiceModal}
         />
       </Modal>
-
       { service.quota ? (
         <>
           <h2>Slots</h2>
-          <Table responsive={true}>
-            <thead>
-              <tr>
-                <th>Slot #</th>
-                <th>Guest Name (ID)</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                // for every slot, display the guestSlotted or empty/available row
-                // TODO: Will quota work reliably? should there be a fallback? quota ? quota : service.quota
-                Array.from({ length: service.quota }).map((slot, slotIndex) => {
-                  if (guestsSlottedState.length !== 0 && slotIndex < guestsSlottedState.length) {
-                    const { guest_id, first_name, last_name } = guestsSlottedState[slotIndex];
-                    const nameAndID = `${first_name} ${last_name} (${guest_id})`;
+          <Cards>
+          {
+            // for every slot, display the guestSlotted or empty/available row
+            // TODO: Will quota work reliably? should there be a fallback? quota ? quota : service.quota
+            // TODO: change 10 back to service.quota when API live
+            Array.from({ length: 10 }).map((slot, slotIndex) => {
+              // if (guestsSlottedState.length !== 0 && slotIndex < guestsSlottedState.length) {
+              //   const { guest_id, first_name, last_name } = guestsSlottedState[slotIndex];
 
-                    return (
-                      <tr key={slotIndex}>
-                        <td>{slotIndex + 1}</td>
-                        <td>{nameAndID}</td>
-                        <td>Occupied</td>
-                        <td>
-                          <Button
-                            onClick={() =>
-                              handleMoveToNewStatus(guest_id, 'Completed', null)
-                            }
-                          >
-                            Move to Completed
-                          </Button>
-                          <Button
-                            onClick={() =>
-                              handleMoveToNewStatus(guest_id, 'Queued', null)
-                            }
-                          >
-                            Move to Queue
-                          </Button>
-                        </td>
-                      </tr>
-                    )
-                  } else {
-                    return (
-                      <tr key={slotIndex}>
-                        <td>{slotIndex + 1}</td>
-                        <td>Empty</td>
-                        <td>Available</td>
-                        <td></td>
-                      </tr>
-                    )
-                  }
-                })
-              }
-            </tbody>
-          </Table>
+              const slotNum = slotIndex + 1
+              const guest = showerGuestsSlotted.find((g) => g.slot_number === slotNum)
+
+
+              const slotStatus = guest ? 'occupied' : 'available'
+              const slotStatusColor = slotStatus === 'occupied' ? 'warning' : 'success'
+              const slotIndicatorStyle = `bg-${slotStatusColor} rounded d-flex justify-content-center align-items-center`
+              const nameAndID = `${guest?.first_name} ${guest?.last_name} (${guest?.guest_id})`;
+
+              return (
+                <Card
+                  className={`border border-${slotStatusColor} border-2 mb-3 shadow`}
+                  key={`${slotIndex}-${slotNum}`}
+                >
+                  <Card.Body className="mh-100" style={{ height: '120px'}}>
+                    <Container className="h-100">
+                      { guest ?
+                        (
+                          <Row>
+                            <Col className={slotIndicatorStyle}>
+                              { slotNum }
+                            </Col>
+                            <Col xs={7} className="d-flex flex-column justify-content-between">
+                              <span>{ nameAndID }</span>
+                              <span>Time Left: [TIMER]</span>
+                            </Col>
+                            <Col xs={4}>
+                              <Button variant="outline-primary"
+                                onClick={() =>
+                                  // handleMoveToNewStatus(guest_id, 'Completed', null)
+                                  console.log("move to Completed clicked")
+                                }
+                                className="mb-2"
+                              >
+                                Completed
+                              </Button>
+                              <Button variant="outline-primary"
+                                onClick={() =>
+                                  // handleMoveToNewStatus(guest_id, 'Queued', null)
+                                  console.log("move to queued clicked")
+                                }
+                              >
+                                Move to Queue
+                              </Button>
+                            </Col>
+                          </Row>
+                        ) : (
+                          <Row className='h-100 align-items-center'>
+                            <Col className={slotIndicatorStyle + ' h-100'}>
+                              { slotNum }
+                            </Col>
+                            <Col xs={11} className="d-flex justify-content-center">
+                              Available
+                            </Col>
+                          </Row>
+                        )
+                      }
+                    </Container>
+                  </Card.Body>
+                </Card>
+              )
+            })
+          }
+          </Cards>
         </>
       ) : (
         ''
@@ -246,4 +271,8 @@ function ServiceView() {
       </Table>
     </>
   )
+}
+
+function Cards({ children }) {
+  return <div className="mb-5">{children}</div>
 }
