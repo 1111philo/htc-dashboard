@@ -196,12 +196,12 @@ function ServiceView() {
                     ) : (
                       ''
                     )}
-                    <Button
+                    <Button variant="outline-primary"
                       onClick={() =>
                         handleMoveToNewStatus(guest_id, 'Completed', null)
                       }
                     >
-                      Move to Completed
+                      Completed
                     </Button>
                   </td>
                 </tr>
@@ -230,7 +230,7 @@ function ServiceView() {
                   <td>{timeRequested}</td>
                   <td>{nameAndID}</td>
                   <td>
-                    <Button
+                    <Button variant="outline-primary"
                       onClick={() =>
                         handleMoveToNewStatus(guest_id, 'Queued', null)
                       }
