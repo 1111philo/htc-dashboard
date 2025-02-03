@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Table, Button, Modal } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 import { ArrowUpDown as SortIcon } from "lucide-react";
 import {
   NewGuestForm,
@@ -8,6 +8,7 @@ import {
   TableFilter,
   TablePager,
   HScroll,
+  DataTable,
 } from "../lib/components";
 import {
   addGuest,
@@ -15,7 +16,6 @@ import {
   getGuests,
   getGuestsWithQuery,
 } from "../lib/api/guest";
-import { SORT_DIRECTION, sortRowsBy } from "../lib/utils";
 import { useDebouncedCallback } from "use-debounce";
 
 const ITEMS_PER_PAGE = 10;
@@ -170,7 +170,7 @@ function GuestsView() {
 function GuestsTable({ rows /* setSortedRows */ }) {
   const navigate = useNavigate();
   return (
-    <Table className="mb-4 text-center table-sm text-nowrap" style={{ cursor: "pointer" }}>
+    <DataTable>
       <thead>
         <tr>
           <th /* title="Sort by guest ID" onClick={} */>
@@ -219,6 +219,6 @@ function GuestsTable({ rows /* setSortedRows */ }) {
           );
         })}
       </tbody>
-    </Table>
+    </DataTable>
   );
 }

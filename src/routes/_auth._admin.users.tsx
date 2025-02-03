@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Button, Form, Modal, Table } from 'react-bootstrap'
-import { ArrowUpDown as SortIcon } from 'lucide-react'
-import { FeedbackMessage, TableFilter, TablePager } from '../lib/components'
+import { Button, Form, Modal } from 'react-bootstrap'
+// import { ArrowUpDown as SortIcon } from 'lucide-react'
+import { DataTable, FeedbackMessage, HScroll, TableFilter, TablePager } from '../lib/components'
 import { useDebouncedCallback } from 'use-debounce'
 import { addUser, getUsers, getUsersWithQuery } from '../lib/api/user'
 
@@ -111,7 +111,9 @@ function UsersView() {
         onChange={onChangeFilter}
       />
 
-      <UsersTable rows={sortedUsers} /* setSortedRows={setSortedUsers} */ />
+      <HScroll>
+        <UsersTable rows={sortedUsers} /* setSortedRows={setSortedUsers} */ />
+      </HScroll>
       <TablePager
         queryRoute="/users"
         page={page}
@@ -239,7 +241,7 @@ function NewUserForm({
 function UsersTable({ rows /* setSortedRows */ }) {
   const navigate = useNavigate()
   return (
-    <Table className="mb-4 text-center table-sm" style={{ cursor: 'pointer' }}>
+    <DataTable>
       <thead>
         <tr>
           <th /* title="Sort by name" */>
@@ -268,6 +270,6 @@ function UsersTable({ rows /* setSortedRows */ }) {
           )
         })}
       </tbody>
-    </Table>
+    </DataTable>
   )
 }
