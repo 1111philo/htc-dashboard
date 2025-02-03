@@ -17,13 +17,14 @@ import { Route as IndexImport } from './routes/index'
 import { Route as AuthVisitsImport } from './routes/_auth.visits'
 import { Route as AuthNewVisitImport } from './routes/_auth.new-visit'
 import { Route as AuthNewNotificationImport } from './routes/_auth.new-notification'
+import { Route as AuthMeImport } from './routes/_auth.me'
 import { Route as AuthGuestsImport } from './routes/_auth.guests'
 import { Route as AuthAdminImport } from './routes/_auth._admin'
 import { Route as AuthServicesServiceIdImport } from './routes/_auth.services_.$serviceId'
 import { Route as AuthGuestsGuestIdImport } from './routes/_auth.guests_.$guestId'
 import { Route as AuthAdminUsersImport } from './routes/_auth._admin.users'
 import { Route as AuthAdminAddServiceImport } from './routes/_auth._admin.add-service'
-import { Route as AuthAdminUsersUserIdImport } from './routes/_auth._admin.users_.$userId'
+import { Route as AuthAdminUsersUserSubImport } from './routes/_auth._admin.users_.$userSub'
 
 // Create/Update Routes
 
@@ -62,6 +63,12 @@ const AuthNewNotificationRoute = AuthNewNotificationImport.update({
   getParentRoute: () => AuthRoute,
 } as any)
 
+const AuthMeRoute = AuthMeImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => AuthRoute,
+} as any)
+
 const AuthGuestsRoute = AuthGuestsImport.update({
   id: '/guests',
   path: '/guests',
@@ -97,9 +104,9 @@ const AuthAdminAddServiceRoute = AuthAdminAddServiceImport.update({
   getParentRoute: () => AuthAdminRoute,
 } as any)
 
-const AuthAdminUsersUserIdRoute = AuthAdminUsersUserIdImport.update({
-  id: '/users_/$userId',
-  path: '/users/$userId',
+const AuthAdminUsersUserSubRoute = AuthAdminUsersUserSubImport.update({
+  id: '/users_/$userSub',
+  path: '/users/$userSub',
   getParentRoute: () => AuthAdminRoute,
 } as any)
 
@@ -140,6 +147,13 @@ declare module '@tanstack/react-router' {
       path: '/guests'
       fullPath: '/guests'
       preLoaderRoute: typeof AuthGuestsImport
+      parentRoute: typeof AuthImport
+    }
+    '/_auth/me': {
+      id: '/_auth/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof AuthMeImport
       parentRoute: typeof AuthImport
     }
     '/_auth/new-notification': {
@@ -191,11 +205,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthServicesServiceIdImport
       parentRoute: typeof AuthImport
     }
-    '/_auth/_admin/users_/$userId': {
-      id: '/_auth/_admin/users_/$userId'
-      path: '/users/$userId'
-      fullPath: '/users/$userId'
-      preLoaderRoute: typeof AuthAdminUsersUserIdImport
+    '/_auth/_admin/users_/$userSub': {
+      id: '/_auth/_admin/users_/$userSub'
+      path: '/users/$userSub'
+      fullPath: '/users/$userSub'
+      preLoaderRoute: typeof AuthAdminUsersUserSubImport
       parentRoute: typeof AuthAdminImport
     }
   }
@@ -206,13 +220,13 @@ declare module '@tanstack/react-router' {
 interface AuthAdminRouteChildren {
   AuthAdminAddServiceRoute: typeof AuthAdminAddServiceRoute
   AuthAdminUsersRoute: typeof AuthAdminUsersRoute
-  AuthAdminUsersUserIdRoute: typeof AuthAdminUsersUserIdRoute
+  AuthAdminUsersUserSubRoute: typeof AuthAdminUsersUserSubRoute
 }
 
 const AuthAdminRouteChildren: AuthAdminRouteChildren = {
   AuthAdminAddServiceRoute: AuthAdminAddServiceRoute,
   AuthAdminUsersRoute: AuthAdminUsersRoute,
-  AuthAdminUsersUserIdRoute: AuthAdminUsersUserIdRoute,
+  AuthAdminUsersUserSubRoute: AuthAdminUsersUserSubRoute,
 }
 
 const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
@@ -222,6 +236,7 @@ const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
 interface AuthRouteChildren {
   AuthAdminRoute: typeof AuthAdminRouteWithChildren
   AuthGuestsRoute: typeof AuthGuestsRoute
+  AuthMeRoute: typeof AuthMeRoute
   AuthNewNotificationRoute: typeof AuthNewNotificationRoute
   AuthNewVisitRoute: typeof AuthNewVisitRoute
   AuthVisitsRoute: typeof AuthVisitsRoute
@@ -232,6 +247,7 @@ interface AuthRouteChildren {
 const AuthRouteChildren: AuthRouteChildren = {
   AuthAdminRoute: AuthAdminRouteWithChildren,
   AuthGuestsRoute: AuthGuestsRoute,
+  AuthMeRoute: AuthMeRoute,
   AuthNewNotificationRoute: AuthNewNotificationRoute,
   AuthNewVisitRoute: AuthNewVisitRoute,
   AuthVisitsRoute: AuthVisitsRoute,
@@ -246,6 +262,7 @@ export interface FileRoutesByFullPath {
   '': typeof AuthAdminRouteWithChildren
   '/login': typeof LoginRoute
   '/guests': typeof AuthGuestsRoute
+  '/me': typeof AuthMeRoute
   '/new-notification': typeof AuthNewNotificationRoute
   '/new-visit': typeof AuthNewVisitRoute
   '/visits': typeof AuthVisitsRoute
@@ -253,7 +270,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthAdminUsersRoute
   '/guests/$guestId': typeof AuthGuestsGuestIdRoute
   '/services/$serviceId': typeof AuthServicesServiceIdRoute
-  '/users/$userId': typeof AuthAdminUsersUserIdRoute
+  '/users/$userSub': typeof AuthAdminUsersUserSubRoute
 }
 
 export interface FileRoutesByTo {
@@ -261,6 +278,7 @@ export interface FileRoutesByTo {
   '': typeof AuthAdminRouteWithChildren
   '/login': typeof LoginRoute
   '/guests': typeof AuthGuestsRoute
+  '/me': typeof AuthMeRoute
   '/new-notification': typeof AuthNewNotificationRoute
   '/new-visit': typeof AuthNewVisitRoute
   '/visits': typeof AuthVisitsRoute
@@ -268,7 +286,7 @@ export interface FileRoutesByTo {
   '/users': typeof AuthAdminUsersRoute
   '/guests/$guestId': typeof AuthGuestsGuestIdRoute
   '/services/$serviceId': typeof AuthServicesServiceIdRoute
-  '/users/$userId': typeof AuthAdminUsersUserIdRoute
+  '/users/$userSub': typeof AuthAdminUsersUserSubRoute
 }
 
 export interface FileRoutesById {
@@ -278,6 +296,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_auth/_admin': typeof AuthAdminRouteWithChildren
   '/_auth/guests': typeof AuthGuestsRoute
+  '/_auth/me': typeof AuthMeRoute
   '/_auth/new-notification': typeof AuthNewNotificationRoute
   '/_auth/new-visit': typeof AuthNewVisitRoute
   '/_auth/visits': typeof AuthVisitsRoute
@@ -285,7 +304,7 @@ export interface FileRoutesById {
   '/_auth/_admin/users': typeof AuthAdminUsersRoute
   '/_auth/guests_/$guestId': typeof AuthGuestsGuestIdRoute
   '/_auth/services_/$serviceId': typeof AuthServicesServiceIdRoute
-  '/_auth/_admin/users_/$userId': typeof AuthAdminUsersUserIdRoute
+  '/_auth/_admin/users_/$userSub': typeof AuthAdminUsersUserSubRoute
 }
 
 export interface FileRouteTypes {
@@ -295,6 +314,7 @@ export interface FileRouteTypes {
     | ''
     | '/login'
     | '/guests'
+    | '/me'
     | '/new-notification'
     | '/new-visit'
     | '/visits'
@@ -302,13 +322,14 @@ export interface FileRouteTypes {
     | '/users'
     | '/guests/$guestId'
     | '/services/$serviceId'
-    | '/users/$userId'
+    | '/users/$userSub'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | ''
     | '/login'
     | '/guests'
+    | '/me'
     | '/new-notification'
     | '/new-visit'
     | '/visits'
@@ -316,7 +337,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/guests/$guestId'
     | '/services/$serviceId'
-    | '/users/$userId'
+    | '/users/$userSub'
   id:
     | '__root__'
     | '/'
@@ -324,6 +345,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_auth/_admin'
     | '/_auth/guests'
+    | '/_auth/me'
     | '/_auth/new-notification'
     | '/_auth/new-visit'
     | '/_auth/visits'
@@ -331,7 +353,7 @@ export interface FileRouteTypes {
     | '/_auth/_admin/users'
     | '/_auth/guests_/$guestId'
     | '/_auth/services_/$serviceId'
-    | '/_auth/_admin/users_/$userId'
+    | '/_auth/_admin/users_/$userSub'
   fileRoutesById: FileRoutesById
 }
 
@@ -370,6 +392,7 @@ export const routeTree = rootRoute
       "children": [
         "/_auth/_admin",
         "/_auth/guests",
+        "/_auth/me",
         "/_auth/new-notification",
         "/_auth/new-visit",
         "/_auth/visits",
@@ -386,11 +409,15 @@ export const routeTree = rootRoute
       "children": [
         "/_auth/_admin/add-service",
         "/_auth/_admin/users",
-        "/_auth/_admin/users_/$userId"
+        "/_auth/_admin/users_/$userSub"
       ]
     },
     "/_auth/guests": {
       "filePath": "_auth.guests.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/me": {
+      "filePath": "_auth.me.tsx",
       "parent": "/_auth"
     },
     "/_auth/new-notification": {
@@ -421,8 +448,8 @@ export const routeTree = rootRoute
       "filePath": "_auth.services_.$serviceId.tsx",
       "parent": "/_auth"
     },
-    "/_auth/_admin/users_/$userId": {
-      "filePath": "_auth._admin.users_.$userId.tsx",
+    "/_auth/_admin/users_/$userSub": {
+      "filePath": "_auth._admin.users_.$userSub.tsx",
       "parent": "/_auth/_admin"
     }
   }

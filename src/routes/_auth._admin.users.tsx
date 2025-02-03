@@ -256,12 +256,12 @@ function UsersTable({ rows /* setSortedRows */ }) {
         </tr>
       </thead>
       <tbody>
-        {rows.map((u) => {
+        {rows.map((u: User) => {
           return (
             <tr
               key={u.user_id}
               className="cursor-pointer"
-              onClick={() => navigate({ to: `/users/${u.user_id}` })}
+              onClick={() => navigate({ to: `/users/${u.sub}` })}
             >
               <td>{u.name}</td>
               <td>{u.email}</td>
