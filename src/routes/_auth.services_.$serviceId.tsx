@@ -14,7 +14,7 @@ import { readableDateTime } from '../lib/utils'
 
 import { Button, Modal, Form, Table, Card, Container, Row, Col } from 'react-bootstrap'
 
-import ShowerGuests from '../../public/sample-data/get_slotted_shower_guests.json'
+import ShowerGuests from '../../sample-data/get_slotted_shower_guests.json'
 
 export const Route = createFileRoute('/_auth/services_/$serviceId')({
   component: ServiceView,
