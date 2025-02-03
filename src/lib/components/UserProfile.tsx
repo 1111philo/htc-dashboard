@@ -1,8 +1,8 @@
-import { useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
-import { Button, Form } from "react-bootstrap"
-import FeedbackMessage from "./FeedbackMessage2"
-import { deleteUser, updateUser } from "../api"
+import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { Button, Form } from "react-bootstrap";
+import FeedbackMessage from "./FeedbackMessage2";
+import { deleteUser, updateUser } from "../api";
 
 interface Props {
   user: User;
@@ -10,10 +10,10 @@ interface Props {
   isOwnAccount: boolean;
 }
 export default function UserProfile({ user, isOwnAccount }: Props) {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const blankFeedback: UserMessage = { text: '', isError: false }
-  const [feedback, setFeedback] = useState(blankFeedback)
+  const blankFeedback: UserMessage = { text: "", isError: false };
+  const [feedback, setFeedback] = useState(blankFeedback);
 
   return (
     <>
@@ -28,51 +28,56 @@ export default function UserProfile({ user, isOwnAccount }: Props) {
         </Button>
       </div>
       <FeedbackMessage message={feedback} />
-      <UserForm user={user} setFeedback={setFeedback} />
+      <UserForm
+        user={user}
+        isOwnAccount={isOwnAccount}
+        setFeedback={setFeedback}
+      />
     </>
-  )
+  );
 
   async function deleteUsr() {
     if (
       !confirm(
         `Are you sure you want to delete ${user.role}:
-          ${user.email}`,
+          ${user.name}
+          ${user.email}`
       )
     ) {
-      return
+      return;
     }
-    const success = await deleteUser(user.user_id)
+    const success = await deleteUser(user.user_id);
     if (!success) {
       setFeedback({
         text: `Oops! The user couldn't be deleted. Try again in a few.`,
         isError: true,
-      })
-      return
+      });
+      return;
     }
-    navigate({ to: '/users', replace: true })
+    navigate({ to: "/users", replace: true });
   }
 }
 
-function UserForm({ user, setFeedback }) {
+function UserForm({ user, isOwnAccount, setFeedback }) {
   const initialFields: Partial<User> = {
-    name: user.name ?? '',
-    email: user.email ?? '',
-    role: user.role ?? '',
-  }
-  const [fields, setFields] = useState(initialFields)
+    name: user.name ?? "",
+    email: user.email ?? "",
+    role: user.role ?? "",
+  };
+  const [fields, setFields] = useState(initialFields);
 
-  const [password, setPassword] = useState({ password: '', confirm: '' })
+  const [password, setPassword] = useState({ password: "", confirm: "" });
 
-  const isPasswordChanged = password.password !== ''
+  const isPasswordChanged = password.password !== "";
   const isFormChanged =
     user.name !== fields.name ||
     user.email !== fields.email ||
     user.role !== fields.role ||
-    isPasswordChanged
+    isPasswordChanged;
 
   return (
     <Form onSubmit={saveEditedUser}>
-      <h4>ID: {user.user_id.toString().padStart(5, '0')}</h4>
+      <h4>ID: {user.user_id.toString().padStart(5, "0")}</h4>
       <Form.Group className="mb-3">
         <Form.Label className="fst-italic">Full Name</Form.Label>
         <Form.Control
@@ -82,7 +87,7 @@ function UserForm({ user, setFeedback }) {
           onChange={(e) => setFields({ ...fields, name: e.target.value })}
           size="lg"
           className={
-            fields.name?.trim() !== user.name ? 'border-2 border-warning' : ''
+            fields.name?.trim() !== user.name ? "border-2 border-warning" : ""
           }
         />
       </Form.Group>
@@ -95,7 +100,7 @@ function UserForm({ user, setFeedback }) {
           value={fields.email}
           onChange={(e) => setFields({ ...fields, email: e.target.value })}
           className={
-            fields.email?.trim() !== user.email ? 'border-2 border-warning' : ''
+            fields.email?.trim() !== user.email ? "border-2 border-warning" : ""
           }
         />
       </Form.Group>
@@ -105,9 +110,14 @@ function UserForm({ user, setFeedback }) {
           id="input-role"
           name="role"
           value={fields.role}
-          onChange={(e) => setFields({ ...fields, role: e.target.value })}
+          // prevent user from accidentally un-admin-ing their self
+          disabled={isOwnAccount}
+          onChange={(e) => {
+            if (isOwnAccount) return;
+            setFields({ ...fields, role: e.target.value as UserRole });
+          }}
           className={
-            fields.role?.trim() !== user.role ? 'border-2 border-warning' : ''
+            fields.role?.trim() !== user.role ? "border-2 border-warning" : ""
           }
         >
           <option value="manager">Manager</option>
@@ -123,7 +133,7 @@ function UserForm({ user, setFeedback }) {
           minLength={6}
           maxLength={33}
           readOnly // this + onFocus = hack to stop autofilling of password
-          onFocus={(e) => e.target.removeAttribute('readonly')}
+          onFocus={(e) => e.target.removeAttribute("readonly")}
           value={password.password}
           onChange={(e) =>
             setPassword({ ...password, password: e.target.value })
@@ -137,7 +147,7 @@ function UserForm({ user, setFeedback }) {
           name="confirm_password"
           type="password"
           readOnly // this + onFocus = hack to stop autofilling of password
-          onFocus={(e) => e.target.removeAttribute('readonly')}
+          onFocus={(e) => e.target.removeAttribute("readonly")}
           value={password.confirm}
           onChange={(e) =>
             setPassword({ ...password, confirm: e.target.value })
@@ -155,47 +165,48 @@ function UserForm({ user, setFeedback }) {
         </div>
       )}
     </Form>
-  )
+  );
 
   function cancelEdit() {
-    setFields(initialFields)
-    setPassword({ password: '', confirm: '' })
+    setFields(initialFields);
+    setPassword({ password: "", confirm: "" });
   }
 
   async function saveEditedUser(e: SubmitEvent, onSave) {
-    e.preventDefault()
+    e.preventDefault();
     // first, check if passwords match
     if (password.password.trim() !== password.confirm.trim()) {
-      setFeedback({ text: "Passwords don't match.", isError: true })
-
-      return
+      setFeedback({ text: "Passwords don't match.", isError: true });
+      return;
     } else {
-      setFeedback({ text: '', isError: false })
+      setFeedback({ text: "", isError: false });
     }
+
     if (
       !confirm(`Save changes?
+        ${user.name} -> ${fields.name}
         ${user.email} -> ${fields.email}
-        ${user.role} -> ${fields.role}`)
+        ${user.role} -> ${fields.role}
+        password -> ${new Array(password.password.length).fill("*").join("")}`)
     ) {
-      return
+      return;
     }
 
     const userWithPassword = Object.fromEntries(
-      new FormData(e.target),
-    ) as Partial<User> & { password: string; confirm_password: string }
-    const { confirm_password, ...rest } = userWithPassword
-    const updatedUser = { ...rest, user_id: user.user_id }
-    const success = await updateUser(updatedUser) // placeholder
+      new FormData(e.target)
+    ) as Partial<User> & { password: string; confirm_password: string };
+    const { confirm_password, ...rest } = userWithPassword;
+    const updatedUser = { ...rest, user_id: user.user_id };
+    const success = await updateUser(updatedUser);
     if (!success) {
       setFeedback({
         text: "Oops! The edits couldn't be saved. Try again in a few.",
         isError: true,
-      })
-      setFields(initialFields)
-      setPassword({ password: '', confirm: '' })
-      return
+      });
+      setFields(initialFields);
+      return;
     }
-    setFeedback({ text: 'Successfully updated.', isError: false })
-    setPassword({ password: '', confirm: '' })
+    setFeedback({ text: "Successfully updated.", isError: false });
+    setPassword({ password: "", confirm: "" });
   }
 }
