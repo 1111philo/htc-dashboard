@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import Chart from '../lib/components/Chart'
+import { Chart } from '../lib/components'
 
 import * as API from 'aws-amplify/api'
 

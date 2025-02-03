@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { Button, Form } from 'react-bootstrap'
-import FeedbackMessage from '../lib/components/FeedbackMessage2'
+import { FeedbackMessage2 } from '../lib/components'
 import { deleteUser, getUser, updateUser } from '../lib/api/user'
 
 interface LoaderData {
@@ -40,7 +40,7 @@ function UserProfileView() {
           Delete User
         </Button>
       </div>
-      <FeedbackMessage message={feedback} />
+      <FeedbackMessage2 message={feedback} />
       <UserForm user={user} setFeedback={setFeedback} />
     </>
   )

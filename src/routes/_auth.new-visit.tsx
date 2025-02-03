@@ -2,9 +2,11 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
-import FeedbackMessage from "../lib/components/FeedbackMessage";
-import NewGuestForm from "../lib/components/NewGuestForm";
-import { GuestSelectSearch } from "../lib/components/GuestSelectSearch";
+import {
+  FeedbackMessage,
+  NewGuestForm,
+  GuestSelectSearch
+} from '../lib/components'
 import { addGuest, getGuestData, getGuestsWithQuery } from "../lib/api/guest";
 import { addVisit } from "../lib/api/visit";
 import { toggleGuestNotificationStatus } from "../lib/api/notification";

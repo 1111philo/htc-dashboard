@@ -1,5 +1,5 @@
 import { Button, Form } from "react-bootstrap";
-import FeedbackMessage from "./FeedbackMessage";
+import { FeedbackMessage } from "./";
 import { today } from "../utils";
 import { useState } from "react";
 

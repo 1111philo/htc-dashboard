@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Table, Button, Modal } from 'react-bootstrap'
 import { ArrowUpDown as SortIcon } from 'lucide-react'
-import NewGuestForm from '../lib/components/NewGuestForm'
-import FeedbackMessage from '../lib/components/FeedbackMessage'
-import TableFilter from '../lib/components/TableFilter'
-import TablePager from '../lib/components/TablePager'
+import {
+  NewGuestForm,
+  FeedbackMessage,
+  TableFilter,
+  TablePager
+} from '../lib/components'
 import {
   addGuest,
   getGuestData,

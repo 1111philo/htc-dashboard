@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import * as API from 'aws-amplify/api'
 import { fetchServices } from '../lib/api'
-import FeedbackMessage from '../lib/components/FeedbackMessage'
+import { FeedbackMessage } from '../lib/components'
 
 import { Button, Form } from 'react-bootstrap'
 

@@ -6,7 +6,7 @@ import { guestOptLabel, guestLookupOpts } from '../utils';
 
 import { Form } from 'react-bootstrap';
 
-export function GuestSelectSearch({ newGuest, selectedGuestOpt, setSelectedGuestOpt }) {
+export default function GuestSelectSearch({ newGuest, selectedGuestOpt, setSelectedGuestOpt }) {
   const [guestSelectOpts, setGuestSelectOpts] = useState<
     { value: string; label: string }[]
   >([]);
