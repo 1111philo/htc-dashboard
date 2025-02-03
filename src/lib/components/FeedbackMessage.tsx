@@ -1,9 +1,9 @@
-interface FeedbackMessageProps extends UserMessage {
-  className: string;
+interface FeedbackMessageProps {
+  message: UserMessage;
+  className?: string;
 }
 export default function FeedbackMessage({
-  text,
-  isError,
+  message: { text, isError },
   className,
 }: FeedbackMessageProps) {
   return (

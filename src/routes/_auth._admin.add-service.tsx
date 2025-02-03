@@ -84,8 +84,7 @@ function AddNewServiceForm() {
   return (
     <>
       <FeedbackMessage
-        text={feedback.text}
-        isError={feedback.isError}
+        message={feedback} 
         className="my-3"
       />
 

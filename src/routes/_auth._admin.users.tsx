@@ -91,8 +91,7 @@ function UsersView() {
       </div>
 
       <FeedbackMessage
-        text={feedback.text}
-        isError={feedback.isError}
+        message={feedback}
         className="my-3"
       />
 
@@ -150,8 +149,7 @@ function NewUserForm({
     <div className="p-3">
       <h2 className="mb-3">New Staff User</h2>
       <FeedbackMessage
-        text={formFeedback.text}
-        isError={formFeedback.isError}
+        message={formFeedback}
         className="my-3"
       />
       <Form

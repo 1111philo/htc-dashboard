@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button, Form } from "react-bootstrap";
-import FeedbackMessage from "./FeedbackMessage2";
+import { FeedbackMessage } from "../components"
 import { deleteUser, updateUser } from "../api";
 
 interface Props {
