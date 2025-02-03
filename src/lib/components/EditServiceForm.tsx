@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useState } from "react";
 import * as API from "aws-amplify/api";
-import FeedbackMessage from "./FeedbackMessage";
+import { FeedbackMessage } from "./";
 
 import { Button, Form } from "react-bootstrap";
 import { useNavigate } from "@tanstack/react-router";

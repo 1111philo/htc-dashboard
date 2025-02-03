@@ -9,7 +9,6 @@ import {
   fetchServices,
   updateGuestServiceStatus,
 } from '../lib/api'
-import EditServiceForm from '../lib/components/EditServiceForm'
 import { readableDateTime } from '../lib/utils'
 
 import { Button, Modal, Form, Table, Card, Container, Row, Col } from 'react-bootstrap'

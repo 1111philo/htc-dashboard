@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { Col, Row, Form, Button, InputGroup, Card } from 'react-bootstrap'
-import FeedbackMessage from '../lib/components/FeedbackMessage2'
+import { FeedbackMessage2 } from '../lib/components'
 import { Mail, MailOpen, PersonStanding } from 'lucide-react'
 import { readableDateTime, today } from '../lib/utils'
 import { deleteGuest, getGuestData, updateGuest } from '../lib/api'
