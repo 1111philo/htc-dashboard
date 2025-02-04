@@ -183,7 +183,14 @@ function GuestsTable({ rows /* setSortedRows */ }) {
             Last {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
           <th /* title="Sort by birthday" onClick={} */>
-            DOB {/* <SortIcon className="ms-2" size={16} /> */}
+            DOB{" "}
+            <span
+              className="text-secondary fw-light"
+              style={{ fontSize: "0.9rem" }}
+            >
+              (Y/M/D)
+            </span>{" "}
+            {/* <SortIcon className="ms-2" size={16} /> */}
           </th>
           <th
             /* title="Sort by notification count" */

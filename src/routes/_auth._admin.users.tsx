@@ -49,12 +49,11 @@ export const Route = createFileRoute("/_auth/_admin/users")({
     // NOTE: pagination appears broken because api does not return pagination data
     //    effect: all pages show the same data
 
-    // TODO: remove `userResponse.rows` when API returns pagination data
+    // TODO: remove `?? userResponse` when API returns pagination data
     const users = usersResponse.rows ?? usersResponse;
-    // TODO: remove `|| 5` when API returns pagination data
-    const totalUserCount = usersResponse.total || 5;
+    // TODO: remove `?? 0` when API returns pagination data
+    const totalUserCount = usersResponse.total ?? 0;
     const totalPages = Math.ceil(totalUserCount / ITEMS_PER_PAGE);
-
     return {
       users,
       totalUserCount,
@@ -67,7 +66,7 @@ export const Route = createFileRoute("/_auth/_admin/users")({
 function UsersView() {
   const { users, totalUserCount, page, totalPages } = Route.useLoaderData();
 
-  const [sortedUsers, setSortedUsers] = useState<User[]>(users);
+  const [sortedUsers, setSortedUsers] = useState<Partial<User>[]>(users);
   useEffect(() => setSortedUsers(users), [users]);
 
   const [filterText, setFilterText] = useState("");
@@ -101,9 +100,7 @@ function UsersView() {
       <Modal show={showNewUserModal}>
         <NewUserForm
           setShowNewUserModal={setShowNewUserModal}
-          setViewFeedback={setFeedback}
-          sortedUsers={sortedUsers}
-          setSortedUsers={setSortedUsers}
+          onSubmit={onCreateNewUser}
         />
       </Modal>
 
@@ -131,64 +128,63 @@ function UsersView() {
     setFilterText(newVal);
     executeSearch();
   }
+
+  function onCreateNewUser(newUser: Partial<User>) {
+    setShowNewUserModal(false);
+    setFeedback({
+      text: `User created successfully! ID: ${newUser.user_id}`,
+      isError: false,
+    });
+    setSortedUsers([newUser, ...sortedUsers]);
+  }
 }
 
-function NewUserForm({
-  setShowNewUserModal,
-  setViewFeedback,
-  sortedUsers,
-  setSortedUsers,
-}) {
+function NewUserForm({ setShowNewUserModal, onSubmit }) {
   const [formFeedback, setFormFeedback] = useState<UserMessage>({
     text: "",
     isError: false,
   });
-
-  const initialFields: Partial<User> = {
-    name: "",
-    email: "",
-    role: "Manager",
-  };
-  const [fields, setFields] = useState(initialFields);
   return (
     <div className="p-3">
       <h2 className="mb-3">New Staff User</h2>
       <FeedbackMessage message={formFeedback} className="my-3" />
-      <Form
-        onSubmit={(e) =>
-          submitNewUserForm(e, setShowNewUserModal, sortedUsers, setSortedUsers)
-        }
-      >
+      <Form onSubmit={(e) => submitNewUserForm(e)}>
         <Form.Group className="mb-3">
-          <Form.Label>Name</Form.Label>
-          <Form.Control
-            id="input-name"
-            name="name"
-            value={fields.name}
-            onChange={(e) => setFields({ ...fields, name: e.target.value })}
-          />
+          <Form.Label className="fst-italic">Name</Form.Label>
+          <Form.Control id="input-name" name="name" />
         </Form.Group>
         <Form.Group className="mb-3">
-          <Form.Label>Email</Form.Label>
-          <Form.Control
-            id="input-email"
-            name="email"
-            type="email"
-            value={fields.email}
-            onChange={(e) => setFields({ ...fields, email: e.target.value })}
-          />
+          <Form.Label className="fst-italic">Email</Form.Label>
+          <Form.Control id="input-email" name="email" type="email" />
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label className="fst-italic">Role</Form.Label>
-          <Form.Select
-            id="input-role"
-            name="role"
-            value={fields.role}
-            onChange={(e) => setFields({ ...fields, role: e.target.value })}
-          >
-            <option value="Manager">Manager</option>
-            <option value="Admin">Admin</option>
+          <Form.Select id="input-role" name="role">
+            <option value="manager">Manager</option>
+            <option value="admin">Admin</option>
           </Form.Select>
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label className="fst-italic">Password</Form.Label>
+          <Form.Control
+            id="input-password"
+            name="password"
+            type="password"
+            minLength={6}
+            maxLength={33}
+            readOnly // this + onFocus = hack to stop autofilling of password
+            onFocus={(e) => e.target.removeAttribute("readonly")}
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label className="fst-italic">Confirm Password</Form.Label>
+          <Form.Control
+            id="input-confirm-password"
+            name="confirm_password"
+            type="password"
+            readOnly // this + onFocus = hack to stop autofilling of password
+            onFocus={(e) => e.target.removeAttribute("readonly")}
+          />
         </Form.Group>
         <div className="d-flex justify-content-between">
           <Button
@@ -209,15 +205,14 @@ function NewUserForm({
     </div>
   );
 
-  async function submitNewUserForm(
-    e: React.FormEvent<HTMLFormElement>,
-    setShowNewUserModal,
-    sortedUsers,
-    setSortedUsers
-  ) {
+  async function submitNewUserForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const user: Partial<User> = Object.fromEntries(new FormData(e.target));
-    const user_id = await addUser(user);
+    const formEntries = Object.fromEntries(new FormData(e.target));
+    const { confirm_password, ...userWithPassword } = formEntries as User & {
+      password: string;
+      confirm_password: string;
+    };
+    const user_id = await addUser(userWithPassword);
     if (!user_id) {
       setFormFeedback({
         text: "Failed to create user. Try again in a few.",
@@ -225,15 +220,9 @@ function NewUserForm({
       });
       return;
     }
-    setShowNewUserModal(false);
-    setViewFeedback &&
-      setViewFeedback({
-        text: `User created successfully! ID: ${user_id}`,
-        isError: false,
-      });
-
-    const newUser: Partial<User> = { ...user, user_id };
-    setSortedUsers([newUser, ...sortedUsers]);
+    const { password, ...withoutPassword } = userWithPassword;
+    const newUser: Partial<User> = { ...withoutPassword, user_id };
+    onSubmit(newUser);
   }
 }
 
