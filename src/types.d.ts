@@ -119,7 +119,7 @@ interface GuestSlottedResponse {
   last_name: string;
   first_name: string;
   case_manager: string | null;
-  slot_number: number;
+  slot_number: number | null;
   slotted_at: string;
 }
 
