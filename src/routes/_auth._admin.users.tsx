@@ -49,13 +49,11 @@ export const Route = createFileRoute("/_auth/_admin/users")({
     // NOTE: pagination appears broken because api does not return pagination data
     //    effect: all pages show the same data
 
-    // TODO: remove `userResponse.rows` when API returns pagination data
+    // TODO: remove `?? userResponse` when API returns pagination data
     const users = usersResponse.rows ?? usersResponse;
-    // TODO: remove `|| 5` when API returns pagination data
+    // TODO: remove `?? 0` when API returns pagination data
     const totalUserCount = usersResponse.total ?? 0;
     const totalPages = Math.ceil(totalUserCount / ITEMS_PER_PAGE);
-    debugger
-
     return {
       users,
       totalUserCount,
@@ -68,7 +66,7 @@ export const Route = createFileRoute("/_auth/_admin/users")({
 function UsersView() {
   const { users, totalUserCount, page, totalPages } = Route.useLoaderData();
 
-  const [sortedUsers, setSortedUsers] = useState<User[]>(users);
+  const [sortedUsers, setSortedUsers] = useState<Partial<User>[]>(users);
   useEffect(() => setSortedUsers(users), [users]);
 
   const [filterText, setFilterText] = useState("");
@@ -102,9 +100,7 @@ function UsersView() {
       <Modal show={showNewUserModal}>
         <NewUserForm
           setShowNewUserModal={setShowNewUserModal}
-          setViewFeedback={setFeedback}
-          sortedUsers={sortedUsers}
-          setSortedUsers={setSortedUsers}
+          onSubmit={onCreateNewUser}
         />
       </Modal>
 
@@ -132,13 +128,20 @@ function UsersView() {
     setFilterText(newVal);
     executeSearch();
   }
+
+  function onCreateNewUser(newUser: Partial<User>) {
+    setShowNewUserModal(false);
+    setFeedback({
+      text: `User created successfully! ID: ${newUser.user_id}`,
+      isError: false,
+    });
+    setSortedUsers([newUser, ...sortedUsers]);
+  }
 }
 
 function NewUserForm({
   setShowNewUserModal,
-  setViewFeedback,
-  sortedUsers,
-  setSortedUsers,
+  onSubmit,
 }) {
   const [formFeedback, setFormFeedback] = useState<UserMessage>({
     text: "",
@@ -148,11 +151,7 @@ function NewUserForm({
     <div className="p-3">
       <h2 className="mb-3">New Staff User</h2>
       <FeedbackMessage message={formFeedback} className="my-3" />
-      <Form
-        onSubmit={(e) =>
-          submitNewUserForm(e, setShowNewUserModal, sortedUsers, setSortedUsers)
-        }
-      >
+      <Form onSubmit={(e) => submitNewUserForm(e)}>
         <Form.Group className="mb-3">
           <Form.Label className="fst-italic">Name</Form.Label>
           <Form.Control
@@ -219,12 +218,7 @@ function NewUserForm({
     </div>
   );
 
-  async function submitNewUserForm(
-    e: React.FormEvent<HTMLFormElement>,
-    setShowNewUserModal,
-    sortedUsers,
-    setSortedUsers
-  ) {
+  async function submitNewUserForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formEntries = Object.fromEntries(new FormData(e.target));
     const { confirm_password, ...userWithPassword } = formEntries as User & {
@@ -239,16 +233,9 @@ function NewUserForm({
       });
       return;
     }
-    setShowNewUserModal(false);
-    setViewFeedback &&
-      setViewFeedback({
-        text: `User created successfully! ID: ${user_id}`,
-        isError: false,
-      });
-
     const { password, ...withoutPassword } = userWithPassword
     const newUser: Partial<User> = { ...withoutPassword, user_id };
-    setSortedUsers([newUser, ...sortedUsers]);
+    onSubmit(newUser)
   }
 }
 

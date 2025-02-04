@@ -4,13 +4,18 @@ import * as API from "aws-amplify/api";
 import { pageOffset, trimStringValues } from "../utils";
 
 export async function addUser(u: Partial<User> & { password: string }): Promise<number | null> {
-  const response = await API.post({
-    apiName: "auth",
-    path: "/addUser",
-    options: { body: { ...(u as FormData) } },
-  }).response;
-  const { user_id } = (await response.body.json()) as AddUserAPIResponse;
-  return user_id;
+  try{
+    const response = await API.post({
+      apiName: "auth",
+      path: "/addUser",
+      options: { body: { ...(u as FormData) } },
+    }).response;
+    const { user_id } = (await response.body.json()) as AddUserAPIResponse;
+    return user_id;
+  } catch (err) {
+    console.error(err)
+    return null
+  }
 }
 
 export async function updateUser(u: Partial<User>): Promise<boolean> {
