@@ -52,8 +52,9 @@ export const Route = createFileRoute("/_auth/_admin/users")({
     // TODO: remove `userResponse.rows` when API returns pagination data
     const users = usersResponse.rows ?? usersResponse;
     // TODO: remove `|| 5` when API returns pagination data
-    const totalUserCount = usersResponse.total || 5;
+    const totalUserCount = usersResponse.total ?? 0;
     const totalPages = Math.ceil(totalUserCount / ITEMS_PER_PAGE);
+    debugger
 
     return {
       users,
@@ -143,13 +144,6 @@ function NewUserForm({
     text: "",
     isError: false,
   });
-
-  const initialFields: Partial<User> = {
-    name: "",
-    email: "",
-    role: "Manager",
-  };
-  const [fields, setFields] = useState(initialFields);
   return (
     <div className="p-3">
       <h2 className="mb-3">New Staff User</h2>
@@ -160,22 +154,18 @@ function NewUserForm({
         }
       >
         <Form.Group className="mb-3">
-          <Form.Label>Name</Form.Label>
+          <Form.Label className="fst-italic">Name</Form.Label>
           <Form.Control
             id="input-name"
             name="name"
-            value={fields.name}
-            onChange={(e) => setFields({ ...fields, name: e.target.value })}
           />
         </Form.Group>
         <Form.Group className="mb-3">
-          <Form.Label>Email</Form.Label>
+          <Form.Label className="fst-italic">Email</Form.Label>
           <Form.Control
             id="input-email"
             name="email"
             type="email"
-            value={fields.email}
-            onChange={(e) => setFields({ ...fields, email: e.target.value })}
           />
         </Form.Group>
         <Form.Group className="mb-3">
@@ -183,12 +173,32 @@ function NewUserForm({
           <Form.Select
             id="input-role"
             name="role"
-            value={fields.role}
-            onChange={(e) => setFields({ ...fields, role: e.target.value })}
           >
-            <option value="Manager">Manager</option>
-            <option value="Admin">Admin</option>
+            <option value="manager">Manager</option>
+            <option value="admin">Admin</option>
           </Form.Select>
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label className="fst-italic">Password</Form.Label>
+          <Form.Control
+            id="input-password"
+            name="password"
+            type="password"
+            minLength={6}
+            maxLength={33}
+            readOnly // this + onFocus = hack to stop autofilling of password
+            onFocus={(e) => e.target.removeAttribute("readonly")}
+          />
+        </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label className="fst-italic">Confirm Password</Form.Label>
+          <Form.Control
+            id="input-confirm-password"
+            name="confirm_password"
+            type="password"
+            readOnly // this + onFocus = hack to stop autofilling of password
+            onFocus={(e) => e.target.removeAttribute("readonly")}
+          />
         </Form.Group>
         <div className="d-flex justify-content-between">
           <Button
@@ -216,8 +226,12 @@ function NewUserForm({
     setSortedUsers
   ) {
     e.preventDefault();
-    const user: Partial<User> = Object.fromEntries(new FormData(e.target));
-    const user_id = await addUser(user);
+    const formEntries = Object.fromEntries(new FormData(e.target));
+    const { confirm_password, ...userWithPassword } = formEntries as User & {
+      password: string;
+      confirm_password: string;
+    };
+    const user_id = await addUser(userWithPassword);
     if (!user_id) {
       setFormFeedback({
         text: "Failed to create user. Try again in a few.",
@@ -232,7 +246,8 @@ function NewUserForm({
         isError: false,
       });
 
-    const newUser: Partial<User> = { ...user, user_id };
+    const { password, ...withoutPassword } = userWithPassword
+    const newUser: Partial<User> = { ...withoutPassword, user_id };
     setSortedUsers([newUser, ...sortedUsers]);
   }
 }

@@ -3,7 +3,7 @@
 import * as API from "aws-amplify/api";
 import { pageOffset, trimStringValues } from "../utils";
 
-export async function addUser(u: Partial<User>): Promise<number | null> {
+export async function addUser(u: Partial<User> & { password: string }): Promise<number | null> {
   const response = await API.post({
     apiName: "auth",
     path: "/addUser",
