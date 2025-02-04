@@ -72,4 +72,4 @@ For those who want to contribute, create an issue for it in this repo.
 - SQL queries for local setup
 
 ## Additional Links
-Information available here: https://philosophers.notion.site/htc-dashboard
+- [Video overview of our stack as of 2/4/24](https://us06web.zoom.us/rec/share/L3O6v3vV6wljV0SJz87CeLvevRfK3V4z4Y5GlkSzXD4QPnjrApQiDk4xtUni1krd.2k59v7DioKcRWm9H)
