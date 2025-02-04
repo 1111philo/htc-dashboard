@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import "./index.css"
 import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 
 import * as auth from "./lib/api/auth";
