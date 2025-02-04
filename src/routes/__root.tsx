@@ -34,6 +34,9 @@ async function fetchGlobalData() {
     apiName: "auth",
     path: "/getServices",
   }).response;
-  const serviceTypes: ServiceType[] = (await response.body.json())!.rows;
+
+  const serviceTypes: ServiceType[] =
+    (await response.body.json())!.rows.sort((s1, s2) => s1.service_id - s2.service_id)
+
   return { serviceTypes };
 }
