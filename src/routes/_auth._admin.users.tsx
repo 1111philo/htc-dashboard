@@ -139,10 +139,7 @@ function UsersView() {
   }
 }
 
-function NewUserForm({
-  setShowNewUserModal,
-  onSubmit,
-}) {
+function NewUserForm({ setShowNewUserModal, onSubmit }) {
   const [formFeedback, setFormFeedback] = useState<UserMessage>({
     text: "",
     isError: false,
@@ -154,25 +151,15 @@ function NewUserForm({
       <Form onSubmit={(e) => submitNewUserForm(e)}>
         <Form.Group className="mb-3">
           <Form.Label className="fst-italic">Name</Form.Label>
-          <Form.Control
-            id="input-name"
-            name="name"
-          />
+          <Form.Control id="input-name" name="name" />
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label className="fst-italic">Email</Form.Label>
-          <Form.Control
-            id="input-email"
-            name="email"
-            type="email"
-          />
+          <Form.Control id="input-email" name="email" type="email" />
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label className="fst-italic">Role</Form.Label>
-          <Form.Select
-            id="input-role"
-            name="role"
-          >
+          <Form.Select id="input-role" name="role">
             <option value="manager">Manager</option>
             <option value="admin">Admin</option>
           </Form.Select>
@@ -233,9 +220,9 @@ function NewUserForm({
       });
       return;
     }
-    const { password, ...withoutPassword } = userWithPassword
+    const { password, ...withoutPassword } = userWithPassword;
     const newUser: Partial<User> = { ...withoutPassword, user_id };
-    onSubmit(newUser)
+    onSubmit(newUser);
   }
 }
 
