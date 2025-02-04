@@ -11,13 +11,13 @@ import {
 } from '../lib/api'
 import {
   AvailableSlotCard,
+  CompletedTable,
   EditServiceForm,
   OccupiedSlotCard,
-  Timer
+  QueuedTable
 } from '../lib/components'
-import { readableDateTime } from '../lib/utils'
 
-import { Button, Modal, Form, Table, Card, Container, Row, Col } from 'react-bootstrap'
+import { Button, Modal } from 'react-bootstrap'
 
 import ShowerGuests from '../../sample-data/get_slotted_shower_guests.json'
 
@@ -87,6 +87,8 @@ function ServiceView() {
     )
   }
 
+  const occupiedSlots: number[] = [3, 5, 7]
+
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -148,94 +150,19 @@ function ServiceView() {
       ) : (
         ''
       )}
+
       <h2>Queue</h2>
-      <Table responsive={true}>
-        <thead>
-          <tr>
-            <th>Time Requested</th>
-            <th>Guest Name (ID)</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {guestsQueuedState!.map(
-            ({ guest_id, first_name, last_name, created_at }, i) => {
-              const nameAndID = first_name + ' ' + last_name + ` (${guest_id})`
-              const timeRequested = readableDateTime(created_at)
+      <QueuedTable
+        guestsQueued={guestsQueuedState}
+        occupiedSlots={occupiedSlots}
+        service={service}
+      />
 
-              return (
-                <tr key={`${guest_id}-${i}`}>
-                  <td>{timeRequested}</td>
-                  <td>{nameAndID}</td>
-                  <td>
-                    {service.quota ? (
-                      <Form.Select
-                        aria-label="Select which slot to assign"
-                        onChange={(e) =>
-                          handleMoveToNewStatus(
-                            guest_id,
-                            'Slotted',
-                            parseInt(e.target.value),
-                          )
-                        }
-                      >
-                        <option>Assign Slot</option>
-                        {Array.from({ length: service.quota }).map((_, i) => {
-                          // TODO: need array of available slots for these options
-                          return <option key={i}>{i + 1}</option>
-                        })}
-                      </Form.Select>
-                    ) : (
-                      ''
-                    )}
-                    <Button variant="outline-primary"
-                      onClick={() =>
-                        handleMoveToNewStatus(guest_id, 'Completed', null)
-                      }
-                    >
-                      Completed
-                    </Button>
-                  </td>
-                </tr>
-              )
-            },
-          )}
-        </tbody>
-      </Table>
       <h2>Completed</h2>
-      <Table responsive={true}>
-        <thead>
-          <tr>
-            <th>Time Requested</th>
-            <th>Guest Name (ID)</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {guestsCompletedState!.map(
-            ({ guest_id, first_name, last_name, created_at }, i) => {
-              const nameAndID = first_name + ' ' + last_name + ` (${guest_id})`
-              const timeRequested = readableDateTime(created_at)
-
-              return (
-                <tr key={`${guest_id}-${i}`}>
-                  <td>{timeRequested}</td>
-                  <td>{nameAndID}</td>
-                  <td>
-                    <Button variant="outline-primary"
-                      onClick={() =>
-                        handleMoveToNewStatus(guest_id, 'Queued', null)
-                      }
-                    >
-                      Move to Queue
-                    </Button>
-                  </td>
-                </tr>
-              )
-            },
-          )}
-        </tbody>
-      </Table>
+      <CompletedTable
+        guestsCompleted={guestsCompletedState}
+        service={service}
+      />
     </>
   )
 }
