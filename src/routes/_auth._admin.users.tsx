@@ -41,18 +41,12 @@ export const Route = createFileRoute("/_auth/_admin/users")({
   loaderDeps: ({ search: { query, page } }) => {
     return { query, page };
   },
-  loader: async ({ context, deps: { query, page } }): Promise<LoaderData> => {
+  loader: async ({ deps: { query, page } }): Promise<LoaderData> => {
     const usersResponse = query
       ? await getUsersWithQuery(query)
       : await getUsers(page ?? 1, ITEMS_PER_PAGE);
 
-    // NOTE: pagination appears broken because api does not return pagination data
-    //    effect: all pages show the same data
-
-    // TODO: remove `?? userResponse` when API returns pagination data
-    const users = usersResponse.rows ?? usersResponse;
-    // TODO: remove `?? 0` when API returns pagination data
-    const totalUserCount = usersResponse.total ?? 0;
+    const { rows: users, total: totalUserCount } = usersResponse
     const totalPages = Math.ceil(totalUserCount / ITEMS_PER_PAGE);
     return {
       users,

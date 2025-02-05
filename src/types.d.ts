@@ -98,14 +98,12 @@ interface AddUserAPIResponse {
   user_id: number
 }
 
-// TODO: fix when API returns pagination data 
-type GetUsersAPIResponse = User[]
-// interface GetUsersAPIResponse {
-//   total: number;
-//   offset: number;
-//   limit: number;
-//   rows: User[];
-// }
+interface GetUsersAPIResponse {
+  total: number;
+  offset: number;
+  limit: number;
+  rows: User[];
+}
 
 interface GetVisitsAPIResponse extends PaginationInfo {
   rows: Visit[];

@@ -53,16 +53,21 @@ export async function deleteUser(id): Promise<boolean> {
 
 /** THIS WORKS DUE TO A HACK that compensates for the API not accepting user_id key in the request body */
 export async function getUser(sub: string): Promise<User | null> {
-  const response = await API.post({
-    apiName: "auth",
-    path: "/getUsers",
-    options: { body: { sub } },
-  }).response;
-  const usersResponse = (await response.body.json()) as GetUsersAPIResponse;
-  // const [user] = usersResponse;
-  // HACK UNTIL API WORKS TO GET A SINGLE USER
-  const user = usersResponse.find((u) => u.sub === sub) ?? null;
-  return user;
+  try {
+    const response = await API.post({
+      apiName: "auth",
+      path: "/getUsers",
+      options: { body: { sub } },
+    }).response;
+    const usersResponse = (await response.body.json()) as GetUsersAPIResponse;
+    // const [user] = usersResponse;
+    // HACK UNTIL API WORKS TO GET A SINGLE USER
+    const user = usersResponse.rows.find((u) => u.sub === sub) ?? null;
+    return user;
+  } catch (err) {
+    console.error(err)
+    return null
+  }
 }
 
 /** NOTE: 25.01.30 - page number and limit do nothing as the api is not expecting them yet */

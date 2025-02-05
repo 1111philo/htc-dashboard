@@ -15,7 +15,7 @@ export default function TablePager(props: Props) {
   return (
     <div className="d-flex justify-content-between align-items-center text-muted">
       <small>
-        Showing {paginatedDataLength} of {rowsCount || "???"} guests
+        Showing {paginatedDataLength} of {rowsCount || "???"} {queryRoute === "/guests" ? "guests" : "users"}
       </small>
 
       <Pagination className="mb-0">
