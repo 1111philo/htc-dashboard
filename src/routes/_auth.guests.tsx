@@ -12,8 +12,7 @@ import {
 } from "../lib/components";
 import {
   addGuest,
-  getGuestData,
-  getGuests,
+  getGuestsData,
   getGuestsWithQuery,
 } from "../lib/api/guest";
 import { useDebouncedCallback } from "use-debounce";
@@ -50,20 +49,17 @@ export const Route = createFileRoute("/_auth/guests")({
   loader: async ({ deps: { query, page } }): Promise<LoaderData> => {
     const guestsResponse = query
       ? await getGuestsWithQuery(query)
-      : await getGuests(page ?? 1, ITEMS_PER_PAGE);
-    /** Filtered and sorted. */
-    const guests = await Promise.all(
-      guestsResponse.rows.map((g) =>
-        getGuestData(g.guest_id).then((guestResp) => {
-          const { total, ...guest } = guestResp;
-          return guest;
-        })
-      )
-    );
-    // TODO: fix api -- need total user count (key 'total' = 0, always)
-    // BUG? NO! the page count remaining the same when a query returns 1 page of results is because we can't yet get total guest count from the api
-    /** TODO: WHEN API WORKS -- remove `|| 48` below */
-    const totalGuestCount = guestsResponse.total || 48;
+      : await getGuestsData(page!, ITEMS_PER_PAGE);
+    /** Filtered and sorted by the server */
+    if (!guestsResponse) {
+      return {
+        guests: [],
+        totalGuestCount: 0,
+        page: 1,
+        totalPages: 1
+      }
+    }
+    const { rows: guests, total: totalGuestCount } = guestsResponse
     const totalPages = Math.ceil(totalGuestCount / ITEMS_PER_PAGE);
     return {
       guests,
