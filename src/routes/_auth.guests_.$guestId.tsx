@@ -4,14 +4,17 @@ import { Button } from 'react-bootstrap'
 import { FeedbackMessage, GuestProfileForm, Notifications, Services } from '../lib/components'
 import { deleteGuest, getGuestData } from '../lib/api'
 
-interface NotificationGroups {
-  active: GuestNotification[]
-  archived: GuestNotification[]
-}
 interface LoaderData {
   guest: Guest
-  services: GuestService[]
-  notifications: NotificationGroups
+  notifications: {
+    active: GuestNotification[];
+    archived: GuestNotification[];
+  };
+  services: {
+    slotted: GuestService[];
+    queued: GuestService[];
+    completed: GuestService[];
+  };
 }
 
 export const Route = createFileRoute('/_auth/guests_/$guestId')({
@@ -24,17 +27,25 @@ export const Route = createFileRoute('/_auth/guests_/$guestId')({
     const { guestId } = params
     const guestResponse = await getGuestData(guestId)
     const { total, ...guest } = guestResponse
-    let { guest_services: services, guest_notifications } = guest
+    let { guest_services, guest_notifications } = guest
 
-    services = services
-      .filter((s) => s.status === 'Completed')
-      .map((s) => {
+    // mix in names from service types, filtering out those tied to services
+    // that no longer exist (in theory, this filtering should not be needed
+    // as a service type deletion should cascade to all guest services, but
+    // this is currently not the case)
+    const servicesWithNames: GuestService[] = guest_services.map((s) => {
         let { name: service_name } = serviceTypes!.find(
           (t) => t.service_id === s.service_id,
         ) ?? { name: null }
-        !service_name && (service_name = '[Service No Longer Exists]')
+        if (!service_name) return null
         return { ...s, service_name }
-      })
+      }).filter(s => s)
+
+    const services = {
+      slotted: servicesWithNames.filter(s => s.status === "Slotted"),
+      queued: servicesWithNames.filter(s => s.status === "Queued"),
+      completed: servicesWithNames.filter(s => s.status === "Completed"),
+    }
 
     const notifications = {
       active: guest_notifications.filter((n) => n.status === 'Active'),
@@ -96,8 +107,14 @@ export default function GuestProfileView() {
         onToggleStatus={onToggleNotificationStatus}
       />
 
+      <h2 className="mb-3">Slotted Services</h2>
+      <Services services={services.slotted} status="Slotted" />
+
+      <h2 className="mb-3">Queued Services</h2>
+      <Services services={services.queued} status="Queued" />
+
       <h2 className="mb-3">Completed Services</h2>
-      <Services services={services} />
+      <Services services={services.completed} status="Completed" />
     </>
   )
 

@@ -43,13 +43,13 @@ interface GuestNotification {
   updated_at: string;
 }
 
-type GuestServiceStatus = "Completed" | "Active" | "Queued"
+type GuestServiceStatus = "Queued" | "Slotted" | "Completed"
 
 interface GuestService {
   guest_service_id: number;
   service_id: number;
   service_name?: string;
-  status: "Completed" | "Active";
+  status: GuestServiceStatus;
   slot_occupied: number;
   queued_at: string;
   slotted_at: string;
