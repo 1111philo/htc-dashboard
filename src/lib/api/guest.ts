@@ -68,6 +68,25 @@ export async function getGuests(
   return guestsResponse;
 }
 
+export async function getGuestsData(
+  pageNum: number,
+  limit = 10
+): Promise<GuestsAPIResponse | null> {
+  try {
+    const offset = pageOffset(pageNum);
+    const response = await API.post({
+      apiName: "auth",
+      path: "/getGuestsData",
+      options: { body: { offset, limit } },
+    }).response;
+    const guestsResponse = (await response.body.json()) as GuestsAPIResponse;
+    return guestsResponse;
+  } catch (err) {
+    console.log(err)
+    return null
+  }
+}
+
 /** Get guests with search query - first, last, dob, id. */
 export async function getGuestsWithQuery(query): Promise<GuestsAPIResponse> {
   const response = await API.post({
