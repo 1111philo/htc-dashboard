@@ -50,7 +50,6 @@ export const Route = createFileRoute('/_auth/guests_/$guestId')({
       archived: guest_notifications.filter((n) => n.status === 'Archived'),
     }
 
-    guest.case_manager = '[Case Manager name needed in API response.]'
     return { guest, services, notifications /* visits: */ }
   },
 })
