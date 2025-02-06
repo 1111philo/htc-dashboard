@@ -2,7 +2,7 @@
 
 // AUTH
 
-type UserRole = "admin" | "manager"
+type UserRole = "admin" | "manager";
 
 interface AuthUser {
   name: string;
@@ -32,7 +32,7 @@ interface Guest {
   guest_services: GuestService[];
 }
 
-type GuestNotificationStatus = "Archived" | "Active"
+type GuestNotificationStatus = "Archived" | "Active";
 
 interface GuestNotification {
   notification_id: number;
@@ -43,13 +43,13 @@ interface GuestNotification {
   updated_at: string;
 }
 
-type GuestServiceStatus = "Completed" | "Active" | "Queued"
+type GuestServiceStatus = "Queued" | "Slotted" | "Completed";
 
 interface GuestService {
   guest_service_id: number;
   service_id: number;
   service_name?: string;
-  status: "Completed" | "Active";
+  status: GuestServiceStatus;
   slot_occupied: number;
   queued_at: string;
   slotted_at: string;
@@ -95,7 +95,7 @@ interface GuestsAPIResponse extends PaginationInfo {
 }
 
 interface AddUserAPIResponse {
-  user_id: number
+  user_id: number;
 }
 
 interface GetUsersAPIResponse {
