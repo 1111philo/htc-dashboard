@@ -5,6 +5,7 @@ import App from "../App";
 
 import * as API from "aws-amplify/api";
 import { useGlobalStore } from "../lib/utils";
+import { fetchServices } from "../lib/api";
 
 /* NOTE: auth state is handled by useGlobalStore (zustand) */
 
@@ -29,14 +30,8 @@ export const Route = createRootRouteWithContext<AppContext>()({
 });
 
 async function fetchGlobalData() {
-  // get the current list of service types
-  let response = await API.post({
-    apiName: "auth",
-    path: "/getServices",
-  }).response;
-
-  const serviceTypes: ServiceType[] =
-    (await response.body.json())!.rows.sort((s1, s2) => s1.service_id - s2.service_id)
+  // get the current list of service types for services subnav
+  const serviceTypes = await fetchServices()
 
   return { serviceTypes };
 }

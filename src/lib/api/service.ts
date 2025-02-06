@@ -19,14 +19,16 @@ export async function fetchServiceByID(serviceId: number) {
 }
 
 export async function fetchServices() {
-  const servicesResponse = await (
+  const response = await (
     API.post({
       apiName: "auth",
       path: "/getServices"
     }).response
   )
-  const services: ServiceType[] = (await servicesResponse.body.json())!.rows
-  return services;
+  const serviceTypes: ServiceType[] =
+    (await response.body.json())!.rows.sort((s1, s2) => s1.service_id - s2.service_id)
+
+  return serviceTypes;
 }
 
 export async function fetchServiceGuestsSlotted(serviceId: number): Guest[] {
