@@ -1,11 +1,8 @@
 import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { Col, Row, Form, Button, InputGroup, Card } from 'react-bootstrap'
+import { Button } from 'react-bootstrap'
 import { FeedbackMessage, GuestProfileForm, Notifications, Services } from '../lib/components'
-import { Mail, MailOpen, PersonStanding } from 'lucide-react'
-import { readableDateTime, today } from '../lib/utils'
-import { deleteGuest, getGuestData, updateGuest } from '../lib/api'
-import { toggleGuestNotificationStatus } from '../lib/api/notification'
+import { deleteGuest, getGuestData } from '../lib/api'
 
 interface NotificationGroups {
   active: GuestNotification[]
@@ -26,15 +23,9 @@ export const Route = createFileRoute('/_auth/guests_/$guestId')({
     const { serviceTypes } = context
     const { guestId } = params
     const guestResponse = await getGuestData(guestId)
-    if (!guestResponse) {
-      // TODO: make sure this hits the 404 route
-      // redirect({ to: "not-found" })
-    }
     const { total, ...guest } = guestResponse
     let { guest_services: services, guest_notifications } = guest
 
-    // NOTE: this is why service_name should be included in Guest.guest_services
-    // account for completed services that no longer exist in services types #test
     services = services
       .filter((s) => s.status === 'Completed')
       .map((s) => {
@@ -50,7 +41,7 @@ export const Route = createFileRoute('/_auth/guests_/$guestId')({
       archived: guest_notifications.filter((n) => n.status === 'Archived'),
     }
 
-    return { guest, services, notifications /* visits: */ }
+    return { guest, services, notifications }
   },
 })
 
