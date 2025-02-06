@@ -7,13 +7,13 @@ import { readableDateTime } from '../utils';
 
 interface QueuedTableProps {
   guestsQueued: Guest[];
-  occupiedSlots: number[];
+  availableSlots: number[];
   service: ServiceType;
 }
 
 export default function QueuedTable({
   guestsQueued,
-  occupiedSlots,
+  availableSlots,
   service
 }: QueuedTableProps) {
 
@@ -53,9 +53,8 @@ export default function QueuedTable({
                       }
                     >
                       <option>Assign Slot</option>
-                      {occupiedSlots.map((os, i) => {
-                        // TODO: need array of available slots for these options, currently hardcoded in service view
-                        return <option key={`${os}-${i}`}>{os}</option>;
+                      {availableSlots.map((slotNums, i) => {
+                        return <option key={`${slotNums}-${i}`}>{slotNums}</option>;
                       })}
                     </Form.Select>
                   ) : (
