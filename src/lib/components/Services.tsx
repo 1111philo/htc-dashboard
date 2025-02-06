@@ -22,10 +22,10 @@ export default function Services({ services, status }: ServicesProps) {
 }
 
 const timestampsKeys: Record<GuestServiceStatus, keyof GuestService> = {
-  "Slotted": "slotted_at",
-  "Queued": "queued_at",
-  "Completed": "completed_at",
-}
+  Slotted: "slotted_at",
+  Queued: "queued_at",
+  Completed: "completed_at",
+};
 
 interface SCProps {
   s: GuestService;
@@ -40,10 +40,7 @@ function ServiceCard({ s, status }: SCProps) {
       </Card.Header>
       <Card.Body>
         <Card.Title>
-          <Link
-            to="/services/$serviceId"
-            params={{ serviceId: s.service_id }}
-          >
+          <Link to="/services/$serviceId" params={{ serviceId: s.service_id }}>
             {s.service_name}
           </Link>
         </Card.Title>
