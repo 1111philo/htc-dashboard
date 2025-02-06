@@ -19,28 +19,34 @@ import {
 
 import { Button, Modal } from 'react-bootstrap'
 
-import ShowerGuests from '../../sample-data/get_slotted_shower_guests.json'
-
 export const Route = createFileRoute('/_auth/services_/$serviceId')({
   component: ServiceView,
   parseParams: (params): { serviceId: number } => ({
     serviceId: parseInt(params.serviceId),
   }),
-  loader: async ({ context, params: { serviceId } }) => {
-    let guestsSlotted
+  beforeLoad: async ({ params: { serviceId }}) => {
+    const service = await fetchServiceByID(serviceId)
+    return { service }
+  },
+  loader: async ({ context: { service, authUserIsAdmin }, params: { serviceId } }) => {
+    let guestsSlotted;
+    let availableSlots;
+    const totalSlots = Array.from({ length: service.quota }, (_, i) => i + 1);
 
     const services = await fetchServices()
-    const service = await fetchServiceByID(serviceId)
     if (service.quota) {
-      // guestsSlotted = await fetchServiceGuestsSlotted(serviceId)
+      guestsSlotted = await fetchServiceGuestsSlotted(serviceId)
+      const occupiedSlots = guestsSlotted.map((g) => g.slot_id)
+      availableSlots = totalSlots.reduce((accum: number[], curr: number, i) => {
+        if (!occupiedSlots.includes(curr)) {
+          accum.push(curr)
+        }
+        return accum
+      }, [])
     }
     const guestsQueued = await fetchServiceGuestsQueued(serviceId)
     const guestsCompleted = await fetchServiceGuestsCompleted(serviceId)
 
-    const authUserIsAdmin = context.authUserIsAdmin ?? false
-
-    // filter for guests with shower slot
-    const showerGuestsSlotted: GuestSlottedResponse[] = ShowerGuests.filter((g) => g.slot_number !== null)
 
     return {
       authUserIsAdmin,
@@ -49,7 +55,7 @@ export const Route = createFileRoute('/_auth/services_/$serviceId')({
       guestsSlotted,
       guestsQueued,
       guestsCompleted,
-      showerGuestsSlotted
+      availableSlots,
     }
   },
 })
@@ -62,15 +68,14 @@ function ServiceView() {
     guestsSlotted,
     guestsQueued,
     guestsCompleted,
-    showerGuestsSlotted
+    availableSlots,
   } = Route.useLoaderData()
 
   const [guestsSlottedState, setGuestsSlottedState] = useState(guestsSlotted)
   const [guestsQueuedState, setGuestsQueuedState] = useState(guestsQueued)
-  const [guestsCompletedState, setGuestsCompletedState] =
-    useState(guestsCompleted)
+  const [guestsCompletedState, setGuestsCompletedState] = useState(guestsCompleted)
   const [showEditServiceModal, setShowEditServiceModal] = useState(false)
-  const [isExpired, setIsExpired] = useState<boolean>(false)
+  const [availableSlotsState, setAvailableSlotsState] = useState<number[]>(availableSlots)
 
   const handleMoveToNewStatus = async (
     guestId: number,
@@ -79,7 +84,7 @@ function ServiceView() {
   ) => {
     updateGuestServiceStatus(service, newStatus, guestId, slotNum)
     if (service.quota) {
-      // setGuestsSlottedState(await fetchServiceGuestsSlotted(service.service_id))
+      setGuestsSlottedState(await fetchServiceGuestsSlotted(service.service_id))
     }
     setGuestsQueuedState(await fetchServiceGuestsQueued(service.service_id))
     setGuestsCompletedState(
@@ -87,13 +92,10 @@ function ServiceView() {
     )
   }
 
-  const occupiedSlots: number[] = [3, 5, 7]
-
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className='mb-0'>{ service.name }</h1>
-        <span>**Slots simulated until /serviceGuestsSlotted is stable**</span>
         { authUserIsAdmin &&
           (<Button onClick={() => setShowEditServiceModal(true)}
           >
@@ -116,14 +118,9 @@ function ServiceView() {
           <ServiceSlotCards>
           {
             // for every slot, display the guestSlotted or empty/available row
-            // TODO: Will quota work reliably? should there be a fallback? quota ? quota : service.quota
-            // TODO: change 10 back to service.quota when API live
-            Array.from({ length: 10 }).map((slot, slotIndex) => {
-              // if (guestsSlottedState.length !== 0 && slotIndex < guestsSlottedState.length) {
-              //   const { guest_id, first_name, last_name } = guestsSlottedState[slotIndex];
-
+            Array.from({ length: service.quota }).map((slot, slotIndex) => {
               const slotNum = slotIndex + 1
-              const guest = showerGuestsSlotted.find((g) => g.slot_number === slotNum)
+              const guest = guestsSlottedState.find((g) => g.slot_id === slotNum)
 
               if (guest) {
                 return (
@@ -132,8 +129,7 @@ function ServiceView() {
                     serviceName={service.name}
                     slotNum={slotNum}
                     key={`${slotIndex}-${slotNum}`}
-                  >
-                  </OccupiedSlotCard>
+                  />
                 )
               } else {
                 return (
@@ -154,7 +150,7 @@ function ServiceView() {
       <h2>Queue</h2>
       <QueuedTable
         guestsQueued={guestsQueuedState}
-        occupiedSlots={occupiedSlots}
+        availableSlots={availableSlotsState}
         service={service}
       />
 
