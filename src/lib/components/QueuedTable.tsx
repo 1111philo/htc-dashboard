@@ -1,9 +1,8 @@
-import {
-  Button,
-  Form,
-  Table
-} from 'react-bootstrap'
-import { readableDateTime } from '../utils';
+import { useState } from "react";
+import { Button, Form, Table } from "react-bootstrap";
+import { readableDateTime } from "../utils";
+import { updateGuestServiceStatus } from "../api";
+import FeedbackMessage from "./FeedbackMessage";
 
 interface QueuedTableProps {
   guestsQueued: Guest[];
@@ -14,8 +13,33 @@ interface QueuedTableProps {
 export default function QueuedTable({
   guestsQueued,
   availableSlots,
-  service
+  service,
 }: QueuedTableProps) {
+  const [slotNumAssigned, setSlotNumAssigned] = useState<number | null>(null);
+  const [feedback, setFeedback] = useState({
+    text: "",
+    isError: false,
+  });
+  const [showFeedback, setShowFeedback] = useState<boolean>(false);
+
+  const handleSlotAssignment = (guestId) => {
+    if (slotNumAssigned === null) {
+      setFeedback({
+        text: "Must choose a slot.",
+        isError: true
+      })
+      setShowFeedback(true)
+    } else {
+      // TODO:
+      // updateGuestServiceStatus(service, "Slotted", guestId, slotNumAssigned);
+      setFeedback({
+        text: "",
+        isError: false
+      })
+    }
+    console.log(`Assigned to slot ${slotNumAssigned}`)
+
+  };
 
   return (
     <Table responsive={true}>
@@ -40,35 +64,51 @@ export default function QueuedTable({
                 <td>{nameAndID}</td>
                 <td>
                   {service.quota ? (
-                    <Form.Select
-                      aria-label="Select which slot to assign"
-                      onChange={(e) =>
-                        // TODO: upon API activation
-                        // handleMoveToNewStatus(
-                        //   guest_id,
-                        //   "Slotted",
-                        //   parseInt(e.target.value)
-                        // )
-                        console.log("Assigned to slot:", parseInt(e.target.value))
+                    <>
+                      { showFeedback &&
+                        <FeedbackMessage
+                          message={feedback}
+                        />
                       }
-                    >
-                      <option>Assign Slot</option>
-                      {availableSlots.map((slotNums, i) => {
-                        return <option key={`${slotNums}-${i}`}>{slotNums}</option>;
-                      })}
-                    </Form.Select>
+                      <div className="d-flex flex-row">
+                        <Form.Select
+                          aria-label="Select which slot to assign"
+                          onChange={(e) => setSlotNumAssigned(+e.target.value)}
+                        >
+                          <option>Slot #</option>
+                          {availableSlots.map((slotNum, i) => {
+                            return (
+                              <option key={`${slotNum}-${i}`}>{slotNum}</option>
+                            );
+                          })}
+                        </Form.Select>
+                        <Button
+                          onClick={() =>
+                            // TODO: upon blocker resolution
+                            handleSlotAssignment(guest_id)
+                          }
+                        >
+                          Assign
+                        </Button>
+                      </div>
+                    </>
                   ) : (
                     ""
                   )}
                   <Button
                     variant="outline-primary"
                     onClick={() =>
-                      // TODO: upon API activation
-                      // handleMoveToNewStatus(guest_id, "Completed", null)
+                      // TODO: upon blocker resolution
+                      // updateGuestServiceStatus(
+                      //   service,
+                      //   "Completed",
+                      //   guest_id,
+                      //   null
+                      // )
                       console.log("Moved to completed")
                     }
                   >
-                    Completed
+                    Move to Completed
                   </Button>
                 </td>
               </tr>
@@ -77,5 +117,5 @@ export default function QueuedTable({
         )}
       </tbody>
     </Table>
-  )
+  );
 }
