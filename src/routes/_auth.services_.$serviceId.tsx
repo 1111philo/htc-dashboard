@@ -31,10 +31,11 @@ export const Route = createFileRoute('/_auth/services_/$serviceId')({
   loader: async ({ context: { service, authUserIsAdmin }, params: { serviceId } }) => {
     let guestsSlotted;
     let availableSlots;
-    const totalSlots = Array.from({ length: service.quota }, (_, i) => i + 1);
+    let totalSlots;
 
     const services = await fetchServices()
     if (service.quota) {
+      totalSlots = Array.from({ length: service.quota }, (_, i) => i + 1);
       guestsSlotted = await fetchServiceGuestsSlotted(serviceId)
       const occupiedSlots = guestsSlotted.map((g) => g.slot_id)
       availableSlots = totalSlots.reduce((accum: number[], curr: number, i) => {
@@ -46,7 +47,6 @@ export const Route = createFileRoute('/_auth/services_/$serviceId')({
     }
     const guestsQueued = await fetchServiceGuestsQueued(serviceId)
     const guestsCompleted = await fetchServiceGuestsCompleted(serviceId)
-
 
     return {
       authUserIsAdmin,
@@ -97,8 +97,11 @@ function ServiceView() {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h1 className='mb-0'>{ service.name }</h1>
         { authUserIsAdmin &&
-          (<Button onClick={() => setShowEditServiceModal(true)}
-          >
+          (
+            <Button
+              variant="outline-primary"
+              onClick={() => setShowEditServiceModal(true)}
+            >
             Edit Service
           </Button>
         )}
