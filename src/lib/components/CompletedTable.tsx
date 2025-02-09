@@ -1,7 +1,8 @@
-import { Button, Table } from 'react-bootstrap'
+import { useNavigate } from '@tanstack/react-router';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { readableDateTime } from '../utils';
 import { updateGuestServiceStatus } from '../api';
-import { useNavigate } from '@tanstack/react-router';
+import { Button, Table } from 'react-bootstrap'
 
 interface CompletedTableProps {
   guestsCompleted: GuestResponse[];
@@ -9,7 +10,17 @@ interface CompletedTableProps {
 }
 
 export default function CompletedTable({ guestsCompleted }: CompletedTableProps) {
+  const queryClient = useQueryClient();
   const navigate = useNavigate()
+
+  const { mutateAsync: moveToQueuedMutation } = useMutation({
+    mutationFn: (guest: GuestResponse): Promise<number> =>
+      updateGuestServiceStatus("Queued", guest, null),
+    onSuccess: () => {
+      queryClient.invalidateQueries()
+    }
+  })
+
   return (
     <Table responsive={true}>
       <thead>
@@ -21,7 +32,7 @@ export default function CompletedTable({ guestsCompleted }: CompletedTableProps)
         </tr>
       </thead>
       <tbody>
-        {guestsCompleted!.map(
+        {guestsCompleted?.map(
           (guest, i) => {
             const fullName = guest.first_name + " " + guest.last_name;
             const timeRequested = readableDateTime(guest.created_at);
@@ -35,13 +46,7 @@ export default function CompletedTable({ guestsCompleted }: CompletedTableProps)
                   <Button
                     variant="outline-primary"
                     onClick={() =>
-                      // TODO: upon blocker resolution
-                      // updateGuestServiceStatus(
-                      //   "Queued",
-                      //   guest,
-                      //   null
-                      // )
-                      console.log("Moved to Queue")
+                      moveToQueuedMutation(guest)
                     }
                   >
                     Move to Queue

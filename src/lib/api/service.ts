@@ -31,7 +31,7 @@ export async function fetchServices() {
   return serviceTypes;
 }
 
-export async function fetchServiceGuestsSlotted(serviceId: number): Guest[] {
+export async function fetchServiceGuestsSlotted(serviceId: number): Promise<GuestResponse[]>{
   const guestsSlotted = await (
     await API.post({
       apiName: "auth",
@@ -83,7 +83,7 @@ export async function updateGuestServiceStatus(
   newStatus: string,
   guest: GuestResponse,
   slotNum: number | null
-) {
+): Promise<number> {
   const updateGuestServiceStatusResponse = await (
     await API.post({
       apiName: "auth",
@@ -98,4 +98,20 @@ export async function updateGuestServiceStatus(
     }).response
   ).statusCode
   return updateGuestServiceStatusResponse;
+}
+
+export async function getAvailableSlots(service): Promise<number[]> {
+  const { service_id, quota } = service;
+
+  let totalSlots = Array.from({ length: quota }, (_, i) => i + 1);
+  const guestsSlotted = await fetchServiceGuestsSlotted(service_id)
+  const occupiedSlots = guestsSlotted.map((g) => g.slot_id)
+  const availableSlots = totalSlots.reduce((accum: number[], curr: number, i) => {
+    if (!occupiedSlots.includes(curr)) {
+      accum.push(curr)
+    }
+    return accum
+  }, [])
+
+  return availableSlots;
 }
