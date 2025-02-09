@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { Timer } from '.'
+import { updateGuestServiceStatus } from '../api';
 import {
   Button,
   Card,
@@ -10,7 +11,7 @@ import {
 } from "react-bootstrap";
 
 interface OccupiedSlotCardProps {
-  guest: GuestSlottedResponse;
+  guest: GuestResponse;
   serviceName: string;
   slotNum: number;
 }
@@ -56,7 +57,7 @@ export default function OccupiedSlotCard({
                 <Button
                   variant="primary"
                   onClick={() =>
-                    // handleMoveToNewStatus(guest_id, 'Completed', null)
+                    // updateGuestServiceStatus("Completed", guest, null)
                     console.log("move to Completed clicked")
                   }
                   className="mb-2"
@@ -66,7 +67,7 @@ export default function OccupiedSlotCard({
                 <Button
                   variant="outline-primary"
                   onClick={() =>
-                    // handleMoveToNewStatus(guest_id, 'Queued', null)
+                    // updateGuestServiceStatus("Queued", guest, null)
                     console.log("move to queued clicked")
                   }
                 >

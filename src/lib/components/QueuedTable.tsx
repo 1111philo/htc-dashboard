@@ -6,7 +6,7 @@ import { updateGuestServiceStatus } from "../api";
 import { Button, Dropdown, Form, Table } from "react-bootstrap";
 
 interface QueuedTableProps {
-  guestsQueued: Guest[];
+  guestsQueued: GuestResponse[];
   availableSlots: number[];
   service: ServiceType;
 }
@@ -24,7 +24,7 @@ export default function QueuedTable({
   const [showFeedback, setShowFeedback] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  const handleSlotAssignment = (guestId) => {
+  const handleSlotAssignment = (guest) => {
     if (slotNumAssigned === null) {
       setFeedback({
         text: "Must choose a slot.",
@@ -33,7 +33,7 @@ export default function QueuedTable({
       setShowFeedback(true);
     } else {
       // TODO:
-      // updateGuestServiceStatus(service, "Slotted", guestId, slotNumAssigned);
+      // updateGuestServiceStatus("Slotted", guest, slotNumAssigned);
       setFeedback({
         text: "",
         isError: false,
@@ -55,16 +55,16 @@ export default function QueuedTable({
       </thead>
       <tbody>
         {guestsQueued!.map(
-          ({ guest_id, first_name, last_name, created_at }, i) => {
-            const fullName = first_name + " " + last_name;
-            const timeRequested = readableDateTime(created_at);
+          (guest, i) => {
+            const fullName = guest.first_name + " " + guest.last_name;
+            const timeRequested = readableDateTime(guest.created_at);
 
             return (
-              <tr key={`${guest_id}-${i}`}>
+              <tr key={`${guest.guest_id}-${i}`}>
                 <td>{i + 1}</td>
                 <td>{timeRequested}</td>
-                <td onClick={() => navigate({ to: `/guests/${guest_id}` })}>{guest_id}</td>
-                <td onClick={() => navigate({ to: `/guests/${guest_id}` })}>{fullName}</td>
+                <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{guest.guest_id}</td>
+                <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{fullName}</td>
                 <td>
                   <div className="d-flex flex-column justify-content-end">
                     {service.quota ? (
@@ -88,7 +88,7 @@ export default function QueuedTable({
                             className="flex-grow-1 me-2"
                             onClick={() =>
                               // TODO: upon blocker resolution
-                              handleSlotAssignment(guest_id)
+                              handleSlotAssignment(guest)
                             }
                           >
                             Assign
@@ -100,9 +100,8 @@ export default function QueuedTable({
                                 onClick={() =>
                                   // TODO: upon blocker resolution
                                   // updateGuestServiceStatus(
-                                  //   service,
                                   //   "Completed",
-                                  //   guest_id,
+                                  //   guest,
                                   //   null
                                   // )
                                   console.log("Moved to completed")
@@ -120,9 +119,8 @@ export default function QueuedTable({
                         onClick={() =>
                           // TODO: upon blocker resolution
                           // updateGuestServiceStatus(
-                          //   service,
                           //   "Completed",
-                          //   guest_id,
+                          //   guest,
                           //   null
                           // )
                           console.log("Moved to completed")
