@@ -32,8 +32,7 @@ export default function QueuedTable({
       });
       setShowFeedback(true);
     } else {
-      // TODO:
-      // updateGuestServiceStatus("Slotted", guest, slotNumAssigned);
+      updateGuestServiceStatus("Slotted", guest, slotNumAssigned);
       setFeedback({
         text: "",
         isError: false,
@@ -87,7 +86,6 @@ export default function QueuedTable({
                           <Button
                             className="flex-grow-1 me-2"
                             onClick={() =>
-                              // TODO: upon blocker resolution
                               handleSlotAssignment(guest)
                             }
                           >
@@ -98,13 +96,11 @@ export default function QueuedTable({
                             <Dropdown.Menu>
                               <Dropdown.Item
                                 onClick={() =>
-                                  // TODO: upon blocker resolution
-                                  // updateGuestServiceStatus(
-                                  //   "Completed",
-                                  //   guest,
-                                  //   null
-                                  // )
-                                  console.log("Moved to completed")
+                                  updateGuestServiceStatus(
+                                    "Completed",
+                                    guest,
+                                    null
+                                  )
                                 }
                               >
                                 Move to Completed
@@ -117,13 +113,11 @@ export default function QueuedTable({
                       <Button
                         variant="primary"
                         onClick={() =>
-                          // TODO: upon blocker resolution
-                          // updateGuestServiceStatus(
-                          //   "Completed",
-                          //   guest,
-                          //   null
-                          // )
-                          console.log("Moved to completed")
+                          updateGuestServiceStatus(
+                            "Completed",
+                            guest,
+                            null
+                          )
                         }
                       >
                         Move to Completed

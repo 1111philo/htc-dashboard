@@ -35,13 +35,11 @@ export default function CompletedTable({ guestsCompleted }: CompletedTableProps)
                   <Button
                     variant="outline-primary"
                     onClick={() =>
-                      // TODO: upon blocker resolution
-                      // updateGuestServiceStatus(
-                      //   "Queued",
-                      //   guest,
-                      //   null
-                      // )
-                      console.log("Moved to Queue")
+                      updateGuestServiceStatus(
+                        "Queued",
+                        guest,
+                        null
+                      )
                     }
                   >
                     Move to Queue

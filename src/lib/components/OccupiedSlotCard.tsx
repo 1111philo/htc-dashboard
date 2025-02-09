@@ -57,8 +57,7 @@ export default function OccupiedSlotCard({
                 <Button
                   variant="primary"
                   onClick={() =>
-                    // updateGuestServiceStatus("Completed", guest, null)
-                    console.log("move to Completed clicked")
+                    updateGuestServiceStatus("Completed", guest, null)
                   }
                   className="mb-2"
                 >
@@ -67,8 +66,7 @@ export default function OccupiedSlotCard({
                 <Button
                   variant="outline-primary"
                   onClick={() =>
-                    // updateGuestServiceStatus("Queued", guest, null)
-                    console.log("move to queued clicked")
+                    updateGuestServiceStatus("Queued", guest, null)
                   }
                 >
                   Move to Queue
