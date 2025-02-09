@@ -1,6 +1,6 @@
 import { useState } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { Timer } from '.'
-
 import {
   Button,
   Card,
@@ -21,9 +21,10 @@ export default function OccupiedSlotCard({
   slotNum
 }: OccupiedSlotCardProps) {
 
+  const navigate = useNavigate();
   const [isExpired, setIsExpired] = useState(false);
 
-  const nameAndID = `${guest?.first_name} ${guest?.last_name} (${guest?.guest_id})`;
+  const nameAndID = `(${guest?.guest_id}) ${guest?.first_name} ${guest?.last_name}`;
   const slotStart = guest.slotted_at
   const slotStatusColor = isExpired ? "danger" : "warning"
   const slotIndicatorStyle = `bg-${slotStatusColor} rounded d-flex justify-content-center align-items-center`
@@ -39,7 +40,7 @@ export default function OccupiedSlotCard({
                 xs={7}
                 className="d-flex flex-column justify-content-between"
               >
-                <span>{nameAndID}</span>
+                <span onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{nameAndID}</span>
                 {serviceName === "Shower" && (
                   <>
                     {/* Default length of shower is 20min */}
@@ -53,7 +54,7 @@ export default function OccupiedSlotCard({
               </Col>
               <Col xs={4}>
                 <Button
-                  variant="outline-primary"
+                  variant="primary"
                   onClick={() =>
                     // handleMoveToNewStatus(guest_id, 'Completed', null)
                     console.log("move to Completed clicked")

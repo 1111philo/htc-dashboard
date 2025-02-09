@@ -94,7 +94,7 @@ export async function updateGuestServiceStatus(
           status: newStatus,
           guest_id: guestId,
           service_id: service.service_id,
-          slot_id: slotNum ?? null
+          slot_id: slotNum
         }
       }
     }).response
