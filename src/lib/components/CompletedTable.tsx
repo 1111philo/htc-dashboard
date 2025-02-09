@@ -21,7 +21,7 @@ export default function CompletedTable({ guestsCompleted }: CompletedTableProps)
         </tr>
       </thead>
       <tbody>
-        {guestsCompleted!.map(
+        {guestsCompleted?.map(
           (guest, i) => {
             const fullName = guest.first_name + " " + guest.last_name;
             const timeRequested = readableDateTime(guest.created_at);

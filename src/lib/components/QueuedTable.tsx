@@ -53,7 +53,7 @@ export default function QueuedTable({
         </tr>
       </thead>
       <tbody>
-        {guestsQueued!.map(
+        {guestsQueued?.map(
           (guest, i) => {
             const fullName = guest.first_name + " " + guest.last_name;
             const timeRequested = readableDateTime(guest.created_at);
