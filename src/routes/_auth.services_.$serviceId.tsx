@@ -124,6 +124,7 @@ function ServiceView() {
             Array.from({ length: service.quota }).map((slot, slotIndex) => {
               const slotNum = slotIndex + 1
               const guest = guestsSlottedState.find((g) => g.slot_id === slotNum)
+                const guest = guestsSlotted?.find((g) => g.slot_id === slotNum)
 
               if (guest) {
                 return (
