@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from '@tanstack/react-router';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Timer } from '.'
 import { updateGuestServiceStatus } from '../api';
 import {
@@ -12,18 +13,32 @@ import {
 
 interface OccupiedSlotCardProps {
   guest: GuestResponse;
-  serviceName: string;
   slotNum: number;
 }
 
 export default function OccupiedSlotCard({
   guest,
-  serviceName,
   slotNum
 }: OccupiedSlotCardProps) {
-
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [isExpired, setIsExpired] = useState(false);
+
+  const { mutateAsync: moveToCompletedMutation } = useMutation({
+    mutationFn: (guest: GuestResponse): Promise<number> =>
+      updateGuestServiceStatus("Completed", guest, null),
+    onSuccess: () => {
+      queryClient.invalidateQueries()
+    }
+  })
+
+  const { mutateAsync: moveToQueuedMutation } = useMutation({
+    mutationFn: (guest: GuestResponse): Promise<number> =>
+      updateGuestServiceStatus("Queued", guest, null),
+    onSuccess: () => {
+      queryClient.invalidateQueries()
+    }
+  })
 
   const nameAndID = `(${guest?.guest_id}) ${guest?.first_name} ${guest?.last_name}`;
   const slotStart = guest.slotted_at
@@ -57,11 +72,7 @@ export default function OccupiedSlotCard({
                 <Button
                   variant="primary"
                   onClick={() =>
-                    updateGuestServiceStatus(
-                      "Completed",
-                      guest,
-                      null
-                    )
+                    moveToCompletedMutation(guest)
                   }
                   className="mb-2"
                 >
@@ -70,7 +81,7 @@ export default function OccupiedSlotCard({
                 <Button
                   variant="outline-primary"
                   onClick={() =>
-                    updateGuestServiceStatus("Queued", guest, null)
+                    moveToQueuedMutation(guest)
                   }
                 >
                   Move to Queue

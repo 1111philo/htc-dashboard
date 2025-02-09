@@ -1,13 +1,12 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   fetchServiceByID,
   fetchServiceGuestsCompleted,
   fetchServiceGuestsQueued,
   fetchServiceGuestsSlotted,
   fetchServices,
-  updateGuestServiceStatus,
 } from '../lib/api'
 import {
   AvailableSlotCard,
@@ -16,7 +15,6 @@ import {
   OccupiedSlotCard,
   QueuedTable
 } from '../lib/components'
-
 import { Button, Modal } from 'react-bootstrap'
 
 export const Route = createFileRoute('/_auth/services_/$serviceId')({
@@ -45,16 +43,11 @@ export const Route = createFileRoute('/_auth/services_/$serviceId')({
         return accum
       }, [])
     }
-    const guestsQueued = await fetchServiceGuestsQueued(serviceId)
-    const guestsCompleted = await fetchServiceGuestsCompleted(serviceId)
 
     return {
       authUserIsAdmin,
       service,
       services,
-      guestsSlotted,
-      guestsQueued,
-      guestsCompleted,
       availableSlots,
     }
   },
@@ -65,32 +58,26 @@ function ServiceView() {
     authUserIsAdmin,
     service,
     services,
-    guestsSlotted,
-    guestsQueued,
-    guestsCompleted,
     availableSlots,
   } = Route.useLoaderData()
+  const queryClient = useQueryClient();
 
-  const [guestsSlottedState, setGuestsSlottedState] = useState(guestsSlotted)
-  const [guestsQueuedState, setGuestsQueuedState] = useState(guestsQueued)
-  const [guestsCompletedState, setGuestsCompletedState] = useState(guestsCompleted)
   const [showEditServiceModal, setShowEditServiceModal] = useState(false)
   const [availableSlotsState, setAvailableSlotsState] = useState<number[]>(availableSlots)
 
-  const handleMoveToNewStatus = async (
-    guestId: number,
-    newStatus: string,
-    slotNum: number | null,
-  ) => {
-    updateGuestServiceStatus(service, newStatus, guestId, slotNum)
-    if (service.quota) {
-      setGuestsSlottedState(await fetchServiceGuestsSlotted(service.service_id))
-    }
-    setGuestsQueuedState(await fetchServiceGuestsQueued(service.service_id))
-    setGuestsCompletedState(
-      await fetchServiceGuestsCompleted(service.service_id),
-    )
-  }
+  const { data: guestsSlotted, isPending: isSlotsPending } = useQuery({
+    queryFn: () => fetchServiceGuestsSlotted(service.service_id),
+    queryKey: ["guestsSlotted"],
+    enabled: !!service.quota
+  });
+  const { data: guestsQueued, isPending: isQueuedPending } = useQuery({
+    queryFn: () => fetchServiceGuestsQueued(service.service_id),
+    queryKey: ["guestsQueued"]
+  });
+  const { data: guestsCompleted, isPending: isCompletedPending } = useQuery({
+    queryFn: () => fetchServiceGuestsCompleted(service.service_id),
+    queryKey: ["guestsCompleted"]
+  });
 
   return (
     <>
@@ -118,50 +105,61 @@ function ServiceView() {
       { service.quota ? (
         <>
           <h2>Slots</h2>
-          <ServiceSlotCards>
-          {
-            // for every slot, display the guestSlotted or empty/available row
-            Array.from({ length: service.quota }).map((slot, slotIndex) => {
-              const slotNum = slotIndex + 1
-              const guest = guestsSlottedState.find((g) => g.slot_id === slotNum)
+          { isSlotsPending ? (
+            <p>Loading...</p>
+          ) : (
+            <ServiceSlotCards>
+            {
+              // for every slot, display the guestSlotted or empty/available row
+              Array.from({ length: service.quota }).map((slot, slotIndex) => {
+                const slotNum = slotIndex + 1
                 const guest = guestsSlotted?.find((g) => g.slot_id === slotNum)
 
-              if (guest) {
-                return (
-                  <OccupiedSlotCard
-                    guest={guest}
-                    serviceName={service.name}
-                    slotNum={slotNum}
-                    key={`${slotIndex}-${slotNum}`}
-                  />
-                )
-              } else {
-                return (
-                  <AvailableSlotCard
-                    slotNum={slotNum}
-                    key={`${slotIndex}-${slotNum}`}
-                  />
-                )
-              }
-            })
+                if (guest) {
+                  return (
+                    <OccupiedSlotCard
+                      guest={guest}
+                      slotNum={slotNum}
+                      key={`${slotIndex}-${slotNum}`}
+                    />
+                  )
+                } else {
+                  return (
+                    <AvailableSlotCard
+                      slotNum={slotNum}
+                      key={`${slotIndex}-${slotNum}`}
+                    />
+                  )
+                }
+              })
+            }
+            </ServiceSlotCards>
+          )
           }
-          </ServiceSlotCards>
         </>
       ) : (
         ''
       )}
 
       <h2>Queue</h2>
-      <QueuedTable
-        guestsQueued={guestsQueuedState}
-        availableSlots={availableSlotsState}
-        service={service}
-      />
+      { isQueuedPending ? (
+        <p>Loading...</p>
+      ) : (
+        <QueuedTable
+          guestsQueued={guestsQueued}
+          availableSlots={availableSlotsState}
+          service={service}
+        />
+      )}
 
       <h2>Completed</h2>
-      <CompletedTable
-        guestsCompleted={guestsCompletedState}
-      />
+      { isCompletedPending ? (
+        <p>Loading...</p>
+      ) : (
+        <CompletedTable
+          guestsCompleted={guestsCompleted}
+        />
+      )}
     </>
   )
 }

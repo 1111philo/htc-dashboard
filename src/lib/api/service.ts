@@ -31,7 +31,7 @@ export async function fetchServices() {
   return serviceTypes;
 }
 
-export async function fetchServiceGuestsSlotted(serviceId: number): Guest[] {
+export async function fetchServiceGuestsSlotted(serviceId: number): Promise<GuestResponse[]>{
   const guestsSlotted = await (
     await API.post({
       apiName: "auth",
@@ -83,7 +83,7 @@ export async function updateGuestServiceStatus(
   newStatus: string,
   guest: GuestResponse,
   slotNum: number | null
-) {
+): Promise<number> {
   const updateGuestServiceStatusResponse = await (
     await API.post({
       apiName: "auth",
