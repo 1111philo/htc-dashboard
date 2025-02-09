@@ -8,7 +8,7 @@ import { Button, Dropdown, Form, Table } from "react-bootstrap";
 
 interface QueuedTableProps {
   guestsQueued: GuestResponse[];
-  availableSlots: number[];
+  availableSlots: number[] | undefined;
   service: ServiceType;
 }
 

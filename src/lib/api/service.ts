@@ -99,3 +99,19 @@ export async function updateGuestServiceStatus(
   ).statusCode
   return updateGuestServiceStatusResponse;
 }
+
+export async function getAvailableSlots(service): Promise<number[]> {
+  const { service_id, quota } = service;
+
+  let totalSlots = Array.from({ length: quota }, (_, i) => i + 1);
+  const guestsSlotted = await fetchServiceGuestsSlotted(service_id)
+  const occupiedSlots = guestsSlotted.map((g) => g.slot_id)
+  const availableSlots = totalSlots.reduce((accum: number[], curr: number, i) => {
+    if (!occupiedSlots.includes(curr)) {
+      accum.push(curr)
+    }
+    return accum
+  }, [])
+
+  return availableSlots;
+}

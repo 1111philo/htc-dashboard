@@ -7,6 +7,7 @@ import {
   fetchServiceGuestsQueued,
   fetchServiceGuestsSlotted,
   fetchServices,
+  getAvailableSlots,
 } from '../lib/api'
 import {
   AvailableSlotCard,
@@ -26,29 +27,13 @@ export const Route = createFileRoute('/_auth/services_/$serviceId')({
     const service = await fetchServiceByID(serviceId)
     return { service }
   },
-  loader: async ({ context: { service, authUserIsAdmin }, params: { serviceId } }) => {
-    let guestsSlotted;
-    let availableSlots;
-    let totalSlots;
-
+  loader: async ({ context: { service, authUserIsAdmin } }) => {
     const services = await fetchServices()
-    if (service.quota) {
-      totalSlots = Array.from({ length: service.quota }, (_, i) => i + 1);
-      guestsSlotted = await fetchServiceGuestsSlotted(serviceId)
-      const occupiedSlots = guestsSlotted.map((g) => g.slot_id)
-      availableSlots = totalSlots.reduce((accum: number[], curr: number, i) => {
-        if (!occupiedSlots.includes(curr)) {
-          accum.push(curr)
-        }
-        return accum
-      }, [])
-    }
 
     return {
       authUserIsAdmin,
       service,
       services,
-      availableSlots,
     }
   },
 })
@@ -58,13 +43,11 @@ function ServiceView() {
     authUserIsAdmin,
     service,
     services,
-    availableSlots,
   } = Route.useLoaderData()
   const queryClient = useQueryClient();
   queryClient.invalidateQueries();
 
   const [showEditServiceModal, setShowEditServiceModal] = useState(false)
-  const [availableSlotsState, setAvailableSlotsState] = useState<number[]>(availableSlots)
 
   const { data: guestsSlotted, isPending: isSlotsPending } = useQuery({
     queryFn: () => fetchServiceGuestsSlotted(service.service_id),
@@ -79,6 +62,10 @@ function ServiceView() {
     queryFn: () => fetchServiceGuestsCompleted(service.service_id),
     queryKey: ["guestsCompleted"]
   });
+  const { data: availableSlots } = useQuery({
+    queryFn: () => getAvailableSlots(service),
+    queryKey: ["availableSLots"]
+  })
 
   return (
     <>
@@ -148,7 +135,7 @@ function ServiceView() {
       ) : (
         <QueuedTable
           guestsQueued={guestsQueued}
-          availableSlots={availableSlotsState}
+          availableSlots={availableSlots}
           service={service}
         />
       )}
