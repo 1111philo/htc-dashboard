@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "typeRoots": [
+      "./src/types.d.ts"
+    ],
+    "jsx": "react-jsx",
+    "lib": ["DOM", "ES2019"],
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "strictNullChecks": true,
+  }
+}

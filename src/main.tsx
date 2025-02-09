@@ -1,38 +1,32 @@
-import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router";
-import "./index.css";
-import App from "./App.tsx";
-import { Route, Routes } from "react-router-dom";
+import ReactDOM from "react-dom/client";
+import { RouterProvider, } from "@tanstack/react-router";
+import { router } from "./router";
+import { LoginView } from "./routes/login";
+import * as auth from './lib/api/auth'
 
-// MOVE ME WHEN THESE ROUTES ARE MOVED TO OWN FILES
-import { useParams } from "react-router";
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}
 
-import NewVisitView from "./views/NewVisitView.tsx"
-import NewNotificationView from "./views/NewNotificationView.tsx";
-import VisitsView from "./views/VisitsView.tsx"
-import AddServiceView from "./views/AddServiceView.tsx"
-import ServiceView from "./views/ServiceView.tsx"
-import GuestsView from "./views/GuestsView.tsx"
-import GuestProfileView from "./views/GuestProfileView.tsx"
-import UsersView from "./views/UsersView.tsx"
-import UserProfileView from "./views/UserProfileView.tsx";
+auth.configure(); 
 
-
-createRoot(document.getElementById("root")).render(
-  <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<App />}>
-        <Route index element={<NewVisitView />} />
-        <Route path="/new-notification" element={<NewNotificationView />} />
-        <Route path="/new-visit" element={<NewVisitView />} />
-        <Route path="/visits" element={<VisitsView />} />
-        <Route path="/add-service" element={<AddServiceView />} />
-        <Route path="/services/:serviceId" element={<ServiceView />} />
-        <Route path="/guests" element={<GuestsView />} />
-        <Route path="/guests/:guestId" element={<GuestProfileView />} />
-        <Route path="/users" element={<UsersView />} />
-        <Route path="/users/:userId" element={<UserProfileView />} />
-      </Route>
-    </Routes>
-  </BrowserRouter>
-);
+const rootElement = document.getElementById("root")!;
+if (!rootElement.innerHTML) {
+  const root = ReactDOM.createRoot(rootElement);
+  // Render login view outside of router system.
+  // NOTE: couldn't get it to work within the router system. Issue appears to be
+  // related to auth. If you want to see what happens, uncomment the next line
+  // of code and comment out the rest. The issue might be related to async
+  // timing of Amplify vs router init. Or it could be related to the fact that
+  // _auth is an invisible route and that's causing confusing between "/" and 
+  // children (just login) and every other route, since "/_auth/route" is really
+  // "/route".
+  // Offending line 👇🏽
+  // root.render(<RouterProvider router={router} />)
+  const isLoggedIn = await auth.isLoggedIn()
+  root.render(
+    !isLoggedIn ? <LoginView /> : <RouterProvider router={router} />
+  );
+}

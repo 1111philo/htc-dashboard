@@ -1,0 +1,16 @@
+[
+  {
+    "user_id": 1,
+    "email": "blake@bertuccelli-booth.org",
+    "role": "admin",
+    "created_at": "2025-01-23 20:34:04",
+    "updated_at": "2025-01-23 22:50:11"
+  },
+  {
+    "user_id": 2,
+    "email": "e@example.com",
+    "role": "manager",
+    "created_at": "2025-01-23 22:50:32",
+    "updated_at": "2025-01-23 22:50:32"
+  }
+]
