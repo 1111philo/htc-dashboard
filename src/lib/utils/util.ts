@@ -47,5 +47,5 @@ export function trimStringValues(entries: Object) {
 
 /** Return a new string with the first character capitalized. */
 export function capitalize(str): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+  return str[0].toUpperCase() + str.slice(1);
 }
