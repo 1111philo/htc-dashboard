@@ -80,9 +80,8 @@ export async function fetchServiceGuestsCompleted(serviceId: number) {
 
 // send api call to /updateGuestServiceStatus
 export async function updateGuestServiceStatus(
-  service: ServiceType,
   newStatus: string,
-  guestId: number,
+  guest: GuestResponse,
   slotNum: number | null
 ) {
   const updateGuestServiceStatusResponse = await (
@@ -92,8 +91,7 @@ export async function updateGuestServiceStatus(
       options: {
         body: {
           status: newStatus,
-          guest_id: guestId,
-          service_id: service.service_id,
+          guest_service_id: guest.guest_service_id,
           slot_id: slotNum
         }
       }

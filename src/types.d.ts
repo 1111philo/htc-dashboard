@@ -109,15 +109,20 @@ interface GetVisitsAPIResponse extends PaginationInfo {
   rows: Visit[];
 }
 
-interface GuestSlottedResponse {
+interface GuestResponse {
+  queued_at: string;
+  created_at: string;
+  last_name: string;
+  case_manager: string;
+  guest_service_id: number;
+  completed_at: string;
   guest_id: number;
   updated_at: string;
   dob: string;
-  created_at: string;
-  last_name: string;
+  slot_id: number;
+  service_id: number;
   first_name: string;
-  case_manager: string | null;
-  slot_id: number | null;
+  status: string;
   slotted_at: string;
 }
 

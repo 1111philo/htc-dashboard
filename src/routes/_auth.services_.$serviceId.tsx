@@ -160,7 +160,6 @@ function ServiceView() {
       <h2>Completed</h2>
       <CompletedTable
         guestsCompleted={guestsCompletedState}
-        service={service}
       />
     </>
   )
