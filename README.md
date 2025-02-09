@@ -9,7 +9,7 @@
 - Notification System: Notifying someone when someone signs in.
 - Trend Analysis: Use of services and their effect on stability goals.
 
-## Users:
+## App Users
 ### Admin
 **What Do They Want?**
 - Add services
@@ -53,11 +53,23 @@
 **Donors**
 - Donor views HTC impact report and gets excited to see detailed data around how folks reached stability.
 
-## Roles
-- @bbertucc PM: Delivering Amazing by Friday.
-- @BaronWolfenstein Data Vis: Creating a trend analysis with future data to inspire continue use of the app.
-- @ebertucc Full Stack Dev: Building the from the DB structuring to the frontend.
-- @mikesamm and @its-all-waves: UX dev.
+## Technicals
+For those who want to contribute, create an issue for it in this repo.
+### Frontend ([https://github.com/1111philo/apolis-app](https://github.com/1111philo/apolis-app))
+- React-based single page application
+- File-based routing with TanStack Router
+- React Bootstrap for UI components
+- Deployment: GitHub Actions to S3 and CloudFront
+
+### API ([https://github.com/1111philo/apolis-api](https://github.com/1111philo/apolis-api))
+- Node.js serverless functions on AWS Lambda
+- Authentication: Amazon Cognito
+- Supports GET and POST requests
+- Deployment: Production (apolis.app) and staging (apolis.dev)
+
+### DB ([https://github.com/1111philo/apolis-db](https://github.com/1111philo/apolis-db))
+- PostgreSQL
+- SQL queries for local setup
 
 ## Additional Links
-Information available here: https://philosophers.notion.site/htc-dashboard
+- [Video overview of our stack as of 2/4/24](https://us06web.zoom.us/rec/share/L3O6v3vV6wljV0SJz87CeLvevRfK3V4z4Y5GlkSzXD4QPnjrApQiDk4xtUni1krd.2k59v7DioKcRWm9H)
