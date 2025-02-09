@@ -42,22 +42,26 @@ export default function OccupiedSlotCard({
                 className="d-flex flex-column justify-content-between"
               >
                 <span onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{nameAndID}</span>
-                {serviceName === "Shower" && (
+                {/* {serviceName === "Shower" && (
                   <>
-                    {/* Default length of shower is 20min */}
+                    // Default length of shower is 20min
                     <Timer
                       slotStart={slotStart!}
                       slotTimeLength={20}
                       setIsExpired={setIsExpired}
                     ></Timer>
                   </>
-                )}
+                )} */}
               </Col>
               <Col xs={4}>
                 <Button
                   variant="primary"
                   onClick={() =>
-                    updateGuestServiceStatus("Completed", guest, null)
+                    updateGuestServiceStatus(
+                      "Completed",
+                      guest,
+                      null
+                    )
                   }
                   className="mb-2"
                 >
