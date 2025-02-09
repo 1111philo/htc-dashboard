@@ -19,9 +19,9 @@ import { Button, Modal } from 'react-bootstrap'
 
 export const Route = createFileRoute('/_auth/services_/$serviceId')({
   component: ServiceView,
-  parseParams: (params): { serviceId: number } => ({
-    serviceId: parseInt(params.serviceId),
-  }),
+  parseParams: (params): { serviceId: number } => {
+    return { serviceId: parseInt(params.serviceId) }
+  },
   beforeLoad: async ({ params: { serviceId }}) => {
     const service = await fetchServiceByID(serviceId)
     return { service }
@@ -61,6 +61,7 @@ function ServiceView() {
     availableSlots,
   } = Route.useLoaderData()
   const queryClient = useQueryClient();
+  queryClient.invalidateQueries();
 
   const [showEditServiceModal, setShowEditServiceModal] = useState(false)
   const [availableSlotsState, setAvailableSlotsState] = useState<number[]>(availableSlots)
