@@ -1,13 +1,14 @@
 import { Button, Table } from 'react-bootstrap'
 import { readableDateTime } from '../utils';
+import { updateGuestServiceStatus } from '../api';
 import { useNavigate } from '@tanstack/react-router';
 
 interface CompletedTableProps {
-  guestsCompleted: Guest[];
+  guestsCompleted: GuestResponse[];
   service: ServiceType;
 }
 
-export default function CompletedTable({ guestsCompleted, service}: CompletedTableProps) {
+export default function CompletedTable({ guestsCompleted }: CompletedTableProps) {
   const navigate = useNavigate()
   return (
     <Table responsive={true}>
@@ -21,24 +22,23 @@ export default function CompletedTable({ guestsCompleted, service}: CompletedTab
       </thead>
       <tbody>
         {guestsCompleted!.map(
-          ({ guest_id, first_name, last_name, created_at }, i) => {
-            const fullName = first_name + " " + last_name;
-            const timeRequested = readableDateTime(created_at);
+          (guest, i) => {
+            const fullName = guest.first_name + " " + guest.last_name;
+            const timeRequested = readableDateTime(guest.created_at);
 
             return (
-              <tr key={`${guest_id}-${i}`}>
+              <tr key={`${guest.guest_id}-${i}`}>
                 <td>{timeRequested}</td>
-                <td onClick={() => navigate({ to: `/guests/${guest_id}` })}>{guest_id}</td>
-                <td onClick={() => navigate({ to: `/guests/${guest_id}` })}>{fullName}</td>
+                <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{guest.guest_id}</td>
+                <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{fullName}</td>
                 <td>
                   <Button
                     variant="outline-primary"
                     onClick={() =>
                       // TODO: upon blocker resolution
                       // updateGuestServiceStatus(
-                      //   service,
                       //   "Queued",
-                      //   guest_id,
+                      //   guest,
                       //   null
                       // )
                       console.log("Moved to Queue")
