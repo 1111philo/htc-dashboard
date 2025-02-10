@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button, Form } from "react-bootstrap";
-import { FeedbackMessage } from "../components"
+import { FeedbackMessage } from "../components";
 import { deleteUser, updateUser } from "../api";
 
 interface Props {
@@ -76,7 +76,11 @@ function UserForm({ user, isOwnAccount, setFeedback }) {
     isPasswordChanged;
 
   return (
-    <Form onSubmit={saveEditedUser}>
+    <Form
+      onSubmit={async (e: React.FormEvent<HTMLFormElement>) =>
+        await saveEditedUser(e)
+      }
+    >
       <h4>ID: {user.user_id.toString().padStart(5, "0")}</h4>
       <Form.Group className="mb-3">
         <Form.Label className="fst-italic">Full Name</Form.Label>
@@ -106,23 +110,40 @@ function UserForm({ user, isOwnAccount, setFeedback }) {
       </Form.Group>
       <Form.Group className="mb-3">
         <Form.Label className="fst-italic">Role</Form.Label>
-        <Form.Select
-          id="input-role"
-          name="role"
-          value={fields.role}
+        {
           // prevent user from accidentally un-admin-ing their self
-          disabled={isOwnAccount}
-          onChange={(e) => {
-            if (isOwnAccount) return;
-            setFields({ ...fields, role: e.target.value as UserRole });
-          }}
-          className={
-            fields.role?.trim() !== user.role ? "border-2 border-warning" : ""
-          }
-        >
-          <option value="manager">Manager</option>
-          <option value="admin">Admin</option>
-        </Form.Select>
+          isOwnAccount ? (
+            <Form.Control
+              id="input-role"
+              name="role"
+              value={fields.role}
+              readOnly
+              className={
+                fields.role?.trim() !== user.role
+                  ? "border-2 border-warning"
+                  : ""
+              }
+            />
+          ) : (
+            <Form.Select
+              id="input-role"
+              name="role"
+              value={fields.role}
+              // prevent user from accidentally un-admin-ing their self
+              onChange={(e) =>
+                setFields({ ...fields, role: e.target.value as UserRole })
+              }
+              className={
+                fields.role?.trim() !== user.role
+                  ? "border-2 border-warning"
+                  : ""
+              }
+            >
+              <option value="manager">manager</option>
+              <option value="admin">admin</option>
+            </Form.Select>
+          )
+        }
       </Form.Group>
       <Form.Group className="mb-3">
         <Form.Label className="fst-italic">New Password</Form.Label>
@@ -172,7 +193,7 @@ function UserForm({ user, isOwnAccount, setFeedback }) {
     setPassword({ password: "", confirm: "" });
   }
 
-  async function saveEditedUser(e: SubmitEvent, onSave) {
+  async function saveEditedUser(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     // first, check if passwords match
     if (password.password.trim() !== password.confirm.trim()) {
