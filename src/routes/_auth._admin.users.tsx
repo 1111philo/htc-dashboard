@@ -98,12 +98,12 @@ function UsersView() {
         />
       </Modal>
 
-      <TableFilter
+      {/* <TableFilter
         label="Filter Users by ID, Name, Birthday, or Notification Count"
         placeholder="Oops, I don't work yet! Waiting for the API to support queries..."
         filterText={filterText}
         onChange={onChangeFilter}
-      />
+      /> */}
 
       <HScroll>
         <UsersTable rows={sortedUsers} /* setSortedRows={setSortedUsers} */ />
