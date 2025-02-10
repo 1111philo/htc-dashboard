@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { Link, Outlet } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -10,7 +10,7 @@ import "./index.css";
 import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 
 import * as auth from "./lib/api/auth";
-import { Route } from "./routes/__root";
+import { Route } from "./routes/_auth";
 import { capitalize, useGlobalStore } from "./lib/utils";
 
 const queryClient = new QueryClient();
@@ -53,6 +53,7 @@ function AppNav({ authUserIsAdmin, authUser }) {
   const { serviceTypes } = Route.useLoaderData();
   const setAuthUser = useGlobalStore((state) => state.setAuthUser);
   const LOGO_SIZE = "50px";
+  const navigate = useNavigate()
   return (
     <Navbar
       expand="md"
@@ -110,7 +111,7 @@ function AppNav({ authUserIsAdmin, authUser }) {
                 onClick={async () => {
                   await auth.logout();
                   setAuthUser(null);
-                  location.replace("/login");
+                  navigate({ to: "/" })
                 }}
               >
                 <NavDropdown.Divider className="p-0 m-0" />
