@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import * as API from 'aws-amplify/api'
 
 import { FeedbackMessage, GuestSelectSearch } from '../lib/components'
-import { Button, Form, Modal } from "react-bootstrap";
+import { Button, Form } from "react-bootstrap";
 
 export const Route = createFileRoute('/_auth/new-notification')({
   component: NewNotificationView,
