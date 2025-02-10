@@ -8,6 +8,7 @@ import {
   Services,
 } from "../lib/components";
 import { deleteGuest, getGuestData } from "../lib/api";
+import { sortByTimeDescending } from "../lib/utils";
 
 interface LoaderData {
   guest: Guest;
@@ -54,6 +55,11 @@ export const Route = createFileRoute("/_auth/guests_/$guestId")({
       completed: servicesWithNames.filter((s) => s.status === "Completed"),
     };
 
+    guest_notifications = sortByTimeDescending(
+      guest_notifications,
+      "created_at"
+    ) as GuestNotification[];
+
     const notifications = {
       active: guest_notifications.filter((n) => n.status === "Active"),
       archived: guest_notifications.filter((n) => n.status === "Archived"),
@@ -74,11 +80,12 @@ export default function GuestProfileView() {
   const [notifications, setNotifications] = useState(_notifications);
 
   // TODO: swap out this hack for a real solution
-  // DIRTY HACK: update notifications list after new notif created, 
+  // DIRTY HACK: update notifications list after new notif created,
   // without doing a full page refresh (without this, needs a refresh to update)
+  // POTENTIAL FIX: use tanstack query like Service Detail view
   useEffect(() => {
-    setNotifications(_notifications)
-  }, [_notifications])
+    setNotifications(_notifications);
+  }, [_notifications]);
 
   const navigate = useNavigate();
 
@@ -159,7 +166,8 @@ export default function GuestProfileView() {
   ) {
     if (!success) return;
     // move the item to the other notifications array
-    // (if we want to move to the TOP of the other array, remove both `.sort()`s)
+    // (if we want to move to the TOP of the other array, remove both sort func calls,
+    // keeping only the [moved, ...notifications.XXX])
     let active: GuestNotification[];
     let archived: GuestNotification[];
     let moved: GuestNotification;
@@ -173,13 +181,10 @@ export default function GuestProfileView() {
         )!,
         status: "Archived",
       };
-      archived = [moved, ...notifications.archived].sort((a, b) => {
-        const aTime = new Date(a.created_at);
-        const bTime = new Date(b.created_at);
-        if (aTime < bTime) return -1;
-        if (aTime > bTime) return 1;
-        return 0;
-      });
+      archived = sortByTimeDescending(
+        [moved, ...notifications.archived],
+        "created_at"
+      ) as GuestNotification[];
     } else {
       archived = notifications.archived.filter(
         (n) => n.notification_id !== notificationId
@@ -190,13 +195,10 @@ export default function GuestProfileView() {
         )!,
         status: "Active",
       };
-      active = [moved, ...notifications.active].sort((a, b) => {
-        const aTime = new Date(a.created_at);
-        const bTime = new Date(b.created_at);
-        if (aTime < bTime) return -1;
-        if (aTime > bTime) return 1;
-        return 0;
-      });
+      active = sortByTimeDescending(
+        [moved, ...notifications.active],
+        "created_at"
+      ) as GuestNotification[];
     }
     setNotifications({ active, archived });
   }

@@ -31,11 +31,20 @@ export function pageOffset(pageNum: number): number {
   return pageNum * 10 - 10;
 }
 
-type SortDirection = boolean;
-export const SORT_DIRECTION = Object.freeze({
-  ASCENDING: true,
-  DESCENDING: false,
-});
+/** `key` param is the key with a datetime value to sort by. E.g. `obj.created_at` or `obj.updated_at` */
+export function sortByTimeDescending(
+  arr: GuestService[] | GuestNotification[],
+  key: string
+): GuestService[] | GuestNotification[] {
+  arr.sort((a, b) => {
+    const aTime = new Date(a[key]);
+    const bTime = new Date(b[key]);
+    if (aTime < bTime) return 1;
+    if (aTime > bTime) return -1;
+    return 0;
+  });
+  return arr;
+}
 
 /** To be used when sending form data  */
 export function trimStringValues(entries: Object) {
