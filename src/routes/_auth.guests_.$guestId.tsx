@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button } from "react-bootstrap";
 import {
@@ -72,6 +72,13 @@ export default function GuestProfileView() {
   } = Route.useLoaderData();
 
   const [notifications, setNotifications] = useState(_notifications);
+
+  // TODO: swap out this hack for a real solution
+  // DIRTY HACK: update notifications list after new notif created, 
+  // without doing a full page refresh (without this, needs a refresh to update)
+  useEffect(() => {
+    setNotifications(_notifications)
+  }, [_notifications])
 
   const navigate = useNavigate();
 
