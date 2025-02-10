@@ -54,6 +54,14 @@ export const Route = createFileRoute("/_auth/guests_/$guestId")({
       completed: servicesWithNames.filter((s) => s.status === "Completed"),
     };
 
+    guest_notifications = guest_notifications.sort((a, b) => {
+      const aTime = new Date(a.created_at);
+      const bTime = new Date(b.created_at);
+      if (aTime < bTime) return 1;
+      if (aTime > bTime) return -1;
+      return 0;
+    })
+
     const notifications = {
       active: guest_notifications.filter((n) => n.status === "Active"),
       archived: guest_notifications.filter((n) => n.status === "Archived"),
@@ -76,6 +84,7 @@ export default function GuestProfileView() {
   // TODO: swap out this hack for a real solution
   // DIRTY HACK: update notifications list after new notif created, 
   // without doing a full page refresh (without this, needs a refresh to update)
+  // POTENTIAL FIX: use tanstack query like Service Detail view
   useEffect(() => {
     setNotifications(_notifications)
   }, [_notifications])
@@ -176,8 +185,8 @@ export default function GuestProfileView() {
       archived = [moved, ...notifications.archived].sort((a, b) => {
         const aTime = new Date(a.created_at);
         const bTime = new Date(b.created_at);
-        if (aTime < bTime) return -1;
-        if (aTime > bTime) return 1;
+        if (aTime < bTime) return 1;
+        if (aTime > bTime) return -1;
         return 0;
       });
     } else {
@@ -193,8 +202,8 @@ export default function GuestProfileView() {
       active = [moved, ...notifications.active].sort((a, b) => {
         const aTime = new Date(a.created_at);
         const bTime = new Date(b.created_at);
-        if (aTime < bTime) return -1;
-        if (aTime > bTime) return 1;
+        if (aTime < bTime) return 1;
+        if (aTime > bTime) return -1;
         return 0;
       });
     }
