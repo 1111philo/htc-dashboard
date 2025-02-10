@@ -51,16 +51,17 @@ export async function deleteUser(id): Promise<boolean> {
   }
 }
 
-/** THIS WORKS DUE TO A HACK that compensates for the API not accepting user_id key in the request body */
+/** THIS WORKS DUE TO A HACK that compensates for the API not accepting `sub` key in the request body */
 export async function getUser(sub: string): Promise<User | null> {
   try {
     const response = await API.post({
       apiName: "auth",
       path: "/getUsers",
-      options: { body: { sub } },
+      // TODO: use this line instead, once api supports getting a single user
+      // options: { body: { sub } },
+      options: { body: { limit: 50_000 } },
     }).response;
     const usersResponse = (await response.body.json()) as GetUsersAPIResponse;
-    // const [user] = usersResponse;
     // HACK UNTIL API WORKS TO GET A SINGLE USER
     const user = usersResponse.rows.find((u) => u.sub === sub) ?? null;
     return user;
