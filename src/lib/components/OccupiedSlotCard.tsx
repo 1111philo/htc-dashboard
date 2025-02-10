@@ -8,6 +8,7 @@ import {
   Card,
   Col,
   Container,
+  Dropdown,
   Row
 } from "react-bootstrap";
 
@@ -47,17 +48,18 @@ export default function OccupiedSlotCard({
 
   return (
     <Card className={`border border-${slotStatusColor} border-2 mb-3 shadow`}>
-      <Card.Body className="mh-100" style={{ height: "120px" }}>
+      <Card.Body className="mh-100">
         <Container className="h-100">
           {guest ? (
             <Row>
               <Col className={slotIndicatorStyle}>{slotNum}</Col>
               <Col
-                xs={7}
-                className="d-flex flex-column justify-content-between"
+                xs={6}
+                className="d-flex flex-column justify-content-between fs-5"
               >
                 <span onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{nameAndID}</span>
-                {/* {serviceName === "Shower" && (
+                {/* TIMER DISPLAY FOR FUTURE RELEASE
+                {serviceName === "Shower" && (
                   <>
                     // Default length of shower is 20min
                     <Timer
@@ -68,24 +70,28 @@ export default function OccupiedSlotCard({
                   </>
                 )} */}
               </Col>
-              <Col xs={4}>
+              <Col xs={5} className="d-flex flex-row justify-content-end">
                 <Button
                   variant="primary"
                   onClick={() =>
                     moveToCompletedMutation(guest)
                   }
-                  className="mb-2"
+                  className="me-2"
                 >
                   Move to Completed
                 </Button>
-                <Button
-                  variant="outline-primary"
-                  onClick={() =>
-                    moveToQueuedMutation(guest)
-                  }
-                >
-                  Move to Queue
-                </Button>
+                <Dropdown drop='down' autoClose={true}>
+                  <Dropdown.Toggle  variant='outline-primary' />
+                  <Dropdown.Menu>
+                    <Dropdown.Item
+                      onClick={() =>
+                        moveToQueuedMutation(guest)
+                      }
+                    >
+                      Move back to Queue
+                    </Dropdown.Item>
+                  </Dropdown.Menu>
+                </Dropdown>
               </Col>
             </Row>
           ) : (
