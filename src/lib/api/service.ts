@@ -22,7 +22,12 @@ export async function fetchServices() {
   const response = await (
     API.post({
       apiName: "auth",
-      path: "/getServices"
+      path: "/getServices",
+      options: {
+        body: {
+          limit: 1000
+        }
+      }
     }).response
   )
   const serviceTypes: ServiceType[] =

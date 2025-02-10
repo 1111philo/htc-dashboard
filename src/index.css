@@ -3,3 +3,9 @@
 body {
   font-family: "DM Sans", sans-serif;
 }
+
+.dropdown-menu.show {
+  display: block;
+  max-height: 75vh;
+  overflow-y: auto;
+}
