@@ -6,7 +6,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
-import "./index.css"
+import "./index.css";
 import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 
 import * as auth from "./lib/api/auth";
@@ -28,15 +28,22 @@ export default function App() {
         </Container>
 
         {/* DEV */}
-        <Suspense>
-          {/* for use with dynamically importing dev tools in dev mode, which is not yet set up */}
-          <TanStackRouterDevtools initialIsOpen={false} />
-          <ReactQueryDevtools initialIsOpen={false} />
-        </Suspense>
-        <div className="mt-5 text-danger float-end">
-          API URL: {import.meta.env.VITE_API_URL}
-        </div>
+        {import.meta.env.MODE === 'staging' ? (
+          <>
+          <Suspense>
+            {/* for use with dynamically importing dev tools in dev mode, which is not yet set up */}
+            <TanStackRouterDevtools initialIsOpen={false} />
+            <ReactQueryDevtools initialIsOpen={false} />
+          </Suspense>
+          <div className="mt-5 text-danger float-end">
+            API URL: {import.meta.env.VITE_API_URL}
+             - MODE: {import.meta.env.MODE}
+          </div>
+          </>
+        ) : null
+        }
         {/* END DEV */}
+
       </QueryClientProvider>
     </>
   );
