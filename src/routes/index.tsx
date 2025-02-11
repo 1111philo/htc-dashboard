@@ -16,44 +16,6 @@ function LoginView() {
   const [errorMsg, setErrorMsg] = useState('');
   const setAuthUser = useGlobalStore((state) => state.setAuthUser);
   const navigate = useNavigate();
-  const forgotPassword = async () => {
-    const email = prompt(`What is your email address?`);
-    if (email) {
-      await Auth.resetPassword({ username: email.toString() });
-      alert(
-        `Success! Please check your email address for a link to reset your password.`
-      );
-      return;
-    } else {
-      alert(`Please provide a valid email address to reset your password.`);
-    }
-  };
-
-  const setNewPassword = async ({ email, code }) => {
-    const newPassword = prompt(`What is your new password?`);
-    if (newPassword) {
-      await Auth.confirmResetPassword({
-        username: email,
-        confirmationCode: code,
-        newPassword: newPassword.toString(),
-      });
-      await sleep(1000);
-      const authUser = await login(email, newPassword);
-      setAuthUser(authUser);
-      location.replace('/');
-    }
-  };
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams(location.search);
-    if (searchParams.get('reset') === '1') {
-      setNewPassword({
-        email: searchParams.get('email'),
-        code: searchParams.get('code'),
-      });
-    }
-  }, [location]);
-
   return (
     <Container className='vh-100 d-flex align-items-center justify-content-center'>
       <Row>
