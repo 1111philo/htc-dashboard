@@ -11,6 +11,7 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as ResetPasswordImport } from './routes/reset-password'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as IndexImport } from './routes/index'
 import { Route as AuthVisitsImport } from './routes/_auth.visits'
@@ -26,6 +27,12 @@ import { Route as AuthAdminAddServiceImport } from './routes/_auth._admin.add-se
 import { Route as AuthAdminUsersUserSubImport } from './routes/_auth._admin.users_.$userSub'
 
 // Create/Update Routes
+
+const ResetPasswordRoute = ResetPasswordImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const AuthRoute = AuthImport.update({
   id: '/_auth',
@@ -119,6 +126,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof AuthImport
+      parentRoute: typeof rootRoute
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordImport
       parentRoute: typeof rootRoute
     }
     '/_auth/_admin': {
@@ -246,6 +260,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '': typeof AuthAdminRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/guests': typeof AuthGuestsRoute
   '/me': typeof AuthMeRoute
   '/new-notification': typeof AuthNewNotificationRoute
@@ -261,6 +276,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '': typeof AuthAdminRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/guests': typeof AuthGuestsRoute
   '/me': typeof AuthMeRoute
   '/new-notification': typeof AuthNewNotificationRoute
@@ -277,6 +293,7 @@ export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
   '/_auth': typeof AuthRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/_auth/_admin': typeof AuthAdminRouteWithChildren
   '/_auth/guests': typeof AuthGuestsRoute
   '/_auth/me': typeof AuthMeRoute
@@ -295,6 +312,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | ''
+    | '/reset-password'
     | '/guests'
     | '/me'
     | '/new-notification'
@@ -309,6 +327,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | ''
+    | '/reset-password'
     | '/guests'
     | '/me'
     | '/new-notification'
@@ -323,6 +342,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_auth'
+    | '/reset-password'
     | '/_auth/_admin'
     | '/_auth/guests'
     | '/_auth/me'
@@ -340,11 +360,13 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRoute: typeof AuthRouteWithChildren
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRouteWithChildren,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 
 export const routeTree = rootRoute
@@ -358,7 +380,8 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/_auth"
+        "/_auth",
+        "/reset-password"
       ]
     },
     "/": {
@@ -376,6 +399,9 @@ export const routeTree = rootRoute
         "/_auth/guests_/$guestId",
         "/_auth/services_/$serviceId"
       ]
+    },
+    "/reset-password": {
+      "filePath": "reset-password.tsx"
     },
     "/_auth/_admin": {
       "filePath": "_auth._admin.tsx",
