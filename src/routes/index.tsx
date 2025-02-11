@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
-import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
-import { sleep, useGlobalStore } from '../lib/utils';
-import { login } from '../lib/api';
-import { Button, Card, Col, Container, Form, Row } from 'react-bootstrap';
-import * as Auth from 'aws-amplify/auth';
+import { useState } from "react";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { useGlobalStore } from "../lib/utils";
+import { initForgotPassword, login } from "../lib/api";
+import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 
 export const Route = createFileRoute('/')({
   component: LoginView,
@@ -63,8 +62,13 @@ function LoginView() {
             <Card.Body>
               <h2 className='text-center mb-4'>Harry Tompson Center</h2>
               <Form onSubmit={onSubmit}>
-                <Form.Group className='mb-3'>
-                  <Form.Control type='email' placeholder='Email' name='email' />
+                <Form.Group className="mb-3">
+                  <Form.Control
+                    type="email"
+                    placeholder="Email"
+                    name="email"
+                    id="email-input"
+                  />
                 </Form.Group>
 
                 <Form.Group className='mb-3'>
@@ -75,14 +79,14 @@ function LoginView() {
                   />
                 </Form.Group>
 
-                <div className='d-flex justify-content-between mb-4'>
-                  <a
-                    href='#'
-                    className='text-decoration-none'
-                    onClick={forgotPassword}
+                <div className="d-flex justify-content-between mb-4">
+                  <Button
+                    variant="link"
+                    className="text-decoration-none"
+                    onClick={async () => await resetPassword()}
                   >
                     Forgot password?
-                  </a>
+                  </Button>
                 </div>
 
                 <Button variant='primary' type='submit' className='w-100'>
@@ -109,5 +113,22 @@ function LoginView() {
     }
     setAuthUser(authUser);
     navigate({ to: '/new-visit', replace: true });
+  }
+
+  async function resetPassword() {
+    const emailInput = document.getElementById(
+      "email-input"
+    ) as HTMLInputElement;
+    const email = emailInput.value;
+    if (!email)
+      setErrorMsg("Please enter your email address to reset your password.");
+    const success = await initForgotPassword(email);
+    success
+      ? setErrorMsg(
+          `Check your email for a password reset link from "no-reply@verificationemail.com."`
+        )
+      : setErrorMsg(
+          "There was an issue resetting the password. Try again in a few."
+        );
   }
 }

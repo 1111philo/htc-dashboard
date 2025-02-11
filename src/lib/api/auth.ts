@@ -37,6 +37,44 @@ export async function isLoggedIn() {
   }
 }
 
+export async function initForgotPassword(email): Promise<boolean> {
+  try {
+    const { nextStep } = await Auth.resetPassword({
+      username: email,
+    });
+    switch (nextStep.resetPasswordStep) {
+      case "CONFIRM_RESET_PASSWORD_WITH_CODE":
+        const codeDeliveryDetails = nextStep.codeDeliveryDetails;
+        console.log(
+          `Confirmation code was sent to ${codeDeliveryDetails.deliveryMedium}`
+        );
+        // Collect the confirmation code from the user and pass to confirmResetPassword.
+        break;
+      case "DONE":
+        console.log("Successfully reset password.");
+        break;
+    }
+    return true
+  } catch (err) {
+    console.error("There was an issue starting the password reset process:", err);
+    return false;
+  }
+}
+
+export async function resetPassword(email, confirmationCode, newPassword) {
+  try {
+    await Auth.confirmResetPassword({
+      username: email,
+      confirmationCode,
+      newPassword,
+    });
+    return true
+  } catch (err) {
+    if (err.name === "UserLambdaValidationException") return true // really a warning about email validation // TODO: what other problems could have this name / throw this error?
+    console.error("There was an issue resetting the password:", err) 
+  }
+}
+
 export function configure() {
   Amplify.configure(
     {
