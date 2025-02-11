@@ -231,13 +231,14 @@ function NewVisitView() {
         text: `Visit created successfully! ID: ${visitId}`,
         isError: false,
       })
-      clearInputs()
+      clear()
     }
   }
 
-  function clearInputs() {
+  function clear() {
     setSelectedGuestOpt(null)
     setSelectedServicesOpt([])
+    setNotifications([])
   }
 }
 
