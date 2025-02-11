@@ -1,6 +1,7 @@
 /** API calls related to Services */
 
 import * as API from "aws-amplify/api";
+import { sortByTimeDescending } from "../utils";
 
 export async function fetchServiceByID(serviceId: number) {
   const serviceResponse = await (
@@ -63,7 +64,9 @@ export async function fetchServiceGuestsQueued(serviceId: number) {
       }
     }).response
   )
-  const guestsQueued = (await guestsQueuedResponse.body.json())
+  const unsortedGuestsQueued = (await guestsQueuedResponse.body.json())
+  // TODO: resolve unsortedQuestsQueued into an object that is accepted in sortByTimeDescending
+  const guestsQueued = sortByTimeDescending(unsortedGuestsQueued, 'queued_at')
   return guestsQueued;
 }
 
