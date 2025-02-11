@@ -120,10 +120,10 @@ export default function GuestProfileForm({ guest, onFeedback }) {
     e.preventDefault();
     if (
       !confirm(`Save changes?
-        ${guest.first_name} -> ${fields.first_name}
-        ${guest.last_name} -> ${fields.last_name}
-        ${guest.dob} -> ${fields.dob}
-        ${guest.case_manager} -> ${fields.case_manager}`)
+        ${guest.first_name || "First Name"} -> ${fields.first_name}
+        ${guest.last_name || "Last Name"} -> ${fields.last_name}
+        ${guest.dob || "Birthday"} -> ${fields.dob}
+        ${guest.case_manager || "Case Manager"} -> ${fields.case_manager}`)
     ) {
       return;
     }
