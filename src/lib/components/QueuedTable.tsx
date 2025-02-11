@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import FeedbackMessage from "./FeedbackMessage";
@@ -17,7 +17,7 @@ export default function QueuedTable({
   availableSlots,
   service,
 }: QueuedTableProps) {
-  const [slotNumAssigned, setSlotNumAssigned] = useState<number | null>(null);
+  const [slotNumAssigned, setSlotNumAssigned] = useState(Array.from({ length: guestsQueued.length }, (_, i) => '0'));
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [feedback, setFeedback] = useState({
@@ -26,8 +26,8 @@ export default function QueuedTable({
   });
 
   const { mutateAsync: moveToSlottedMutation } = useMutation({
-    mutationFn: (guest: GuestResponse): Promise<number> | undefined => {
-      if (slotNumAssigned === null) {
+    mutationFn: async ({guest, i}: { guest: GuestResponse, i: number }): Promise<number> | undefined => {
+      if (slotNumAssigned[i] === null) {
         setFeedback({
           text: "Must choose a slot.",
           isError: true,
@@ -37,7 +37,8 @@ export default function QueuedTable({
           text: "",
           isError: false,
         });
-        return updateGuestServiceStatus("Slotted", guest, slotNumAssigned);
+        await updateGuestServiceStatus("Slotted", guest, +slotNumAssigned[i]);
+        // setSlotNumAssigned(removeAtIndex(slotNumAssigned, slotNumAssigned[i]))
       }
     },
     onSuccess: () => {
@@ -68,7 +69,7 @@ export default function QueuedTable({
         {guestsQueued?.map(
           (guest, i) => {
             const fullName = guest.first_name + " " + guest.last_name;
-            const timeRequested = readableDateTime(guest.created_at);
+            const timeRequested = readableDateTime(guest.queued_at);
 
             return (
               <tr key={`${guest.guest_id}-${i}`}>
@@ -86,7 +87,14 @@ export default function QueuedTable({
                         <div className="d-flex flex-row">
                           <Form.Select
                             aria-label="Select which slot to assign"
-                            onChange={(e) => setSlotNumAssigned(+e.target.value)}
+                            value={(() => {
+
+                              return slotNumAssigned[i]
+                            })()}
+                            onChange={(e) => {
+                              slotNumAssigned[i] = e.target.value
+                              setSlotNumAssigned([...slotNumAssigned])
+                            }}
                           >
                             <option>Slot #</option>
                             {availableSlots?.map((slotNum, i) => {
@@ -97,8 +105,9 @@ export default function QueuedTable({
                           </Form.Select>
                           <Button
                             className="flex-grow-1 me-2"
-                            onClick={() =>
-                              moveToSlottedMutation(guest)
+                            onClick={async (e) => {
+                              e.preventDefault()
+                              await moveToSlottedMutation({guest, i})}
                             }
                           >
                             Assign
@@ -136,4 +145,12 @@ export default function QueuedTable({
       </tbody>
     </Table>
   );
+}
+
+function removeAtIndex(arr, index) {
+  if (index < 0 || index >= arr.length) {
+      return arr;
+  }
+  arr.splice(index, 1);
+  return arr;
 }
