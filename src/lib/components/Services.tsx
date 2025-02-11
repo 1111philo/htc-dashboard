@@ -1,10 +1,9 @@
 /** A list of a guest's services. */
 
-import { Link } from "@tanstack/react-router";
 import { PersonStanding } from "lucide-react";
 import { Card } from "react-bootstrap";
 import Cards from "./Cards";
-import { readableDateTime } from "../utils";
+import { Link } from "@tanstack/react-router";
 
 interface ServicesProps {
   services: GuestService[];
@@ -22,7 +21,7 @@ export default function Services({ services, status }: ServicesProps) {
   );
 }
 
-const timestampKeys: Record<GuestServiceStatus, keyof GuestService> = {
+const timestampsKeys: Record<GuestServiceStatus, keyof GuestService> = {
   Slotted: "slotted_at",
   Queued: "queued_at",
   Completed: "completed_at",
@@ -37,7 +36,7 @@ function ServiceCard({ s, status }: SCProps) {
     <Card className="mb-3 shadow">
       <Card.Header className="fst-italic">
         <PersonStanding className="m-0 me-1" /> {status}:{" "}
-        {readableDateTime(s[timestampKeys[status]] as string)}
+        {s[timestampsKeys[status]] ?? "(missing from api)"}
       </Card.Header>
       <Card.Body>
         <Card.Title>
