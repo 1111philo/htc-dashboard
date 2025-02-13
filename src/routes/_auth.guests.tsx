@@ -192,7 +192,7 @@ function GuestsTable({ rows /* setSortedRows */ }) {
       </thead>
       <tbody>
         {rows.map((g: Guest) => {
-          const notificationCount = g.guest_notifications.filter(
+          const notificationCount = g.guest_notifications?.filter(
             (n) => n.status === "Active"
           ).length;
           return (
