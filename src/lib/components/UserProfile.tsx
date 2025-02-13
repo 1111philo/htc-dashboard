@@ -19,13 +19,15 @@ export default function UserProfile({ user, isOwnAccount }: Props) {
     <>
       <div className="d-flex justify-content-between align-items-center">
         <h1>{isOwnAccount ? "My Account" : "Staff Profile"}</h1>
-        <Button
-          variant="danger"
-          type="button"
-          onClick={async () => await deleteUsr()}
-        >
-          Delete User
-        </Button>
+        {!isOwnAccount && (
+          <Button
+            variant="danger"
+            type="button"
+            onClick={async () => await deleteUsr()}
+          >
+            Delete User
+          </Button>
+        )}
       </div>
       <FeedbackMessage message={feedback} />
       <UserForm
