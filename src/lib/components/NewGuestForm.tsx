@@ -1,6 +1,6 @@
 import { Button, Form } from "react-bootstrap";
 import { FeedbackMessage } from "./";
-import { today } from "../utils";
+import { guestFormRequirementsSatisfied, today } from "../utils";
 import { useState } from "react";
 
 interface NewGuestFormProps {
@@ -57,13 +57,7 @@ export default function NewGuestForm(props: NewGuestFormProps) {
   async function submitForm(e) {
     e.preventDefault();
     const guest = Object.fromEntries(new FormData(e.target)) as Partial<Guest>;
-    // at least 2 are required: first name, last name, dob (case manager optional)
-    let requiredCount = 0;
-    for (const key in guest) {
-      if (key === "case_manager") continue;
-      guest[key].length > 0 && requiredCount++;
-    }
-    if (requiredCount < 2) {
+    if (!guestFormRequirementsSatisfied(guest)) {
       setFormFeedback({
         text: "At least 2 of the following are required: First Name, Last Name, Birthday",
         isError: true,

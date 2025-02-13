@@ -58,3 +58,13 @@ export function trimStringValues(entries: Object) {
 export function capitalize(str): string {
   return str[0].toUpperCase() + str.slice(1);
 }
+
+export function guestFormRequirementsSatisfied(guest: Partial<Guest>): boolean {
+  const MIN_REQUIRED_COUNT = 2
+  let requiredCount = 0;
+  for (const key in guest) {
+    if (key === "case_manager") continue;
+    guest[key].length > 0 && requiredCount++;
+  }
+  return requiredCount >= MIN_REQUIRED_COUNT;
+}
