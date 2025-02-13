@@ -38,6 +38,10 @@ export default function NewGuestForm(props: NewGuestFormProps) {
             max={today()}
           />
         </Form.Group>
+        <Form.Group className="mb-3">
+          <Form.Label>Case Manager</Form.Label>
+          <Form.Control id="input-case-manager" name="case_manager" />
+        </Form.Group>
         <div className="d-flex justify-content-between">
           <Button variant="danger" type="button" onClick={onClose}>
             Cancel
@@ -53,6 +57,21 @@ export default function NewGuestForm(props: NewGuestFormProps) {
   async function submitForm(e) {
     e.preventDefault();
     const guest = Object.fromEntries(new FormData(e.target)) as Partial<Guest>;
+    // at least 2 are required: first name, last name, dob (case manager optional)
+    let requiredCount = 0;
+    for (const key in guest) {
+      if (key === "case_manager") continue;
+      guest[key].length > 0 && requiredCount++;
+    }
+    if (requiredCount < 2) {
+      setFormFeedback({
+        text: "At least 2 of the following are required: First Name, Last Name, Birthday",
+        isError: true,
+      });
+      return;
+    } else {
+      setFormFeedback({ text: "", isError: false });
+    }
     const guest_id = await onSubmit(guest);
     if (!guest_id) {
       setFormFeedback({
