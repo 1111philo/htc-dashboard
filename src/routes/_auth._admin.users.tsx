@@ -6,7 +6,7 @@ import {
   DataTable,
   FeedbackMessage,
   HScroll,
-  TableFilter,
+  // TableFilter,
   TablePager,
 } from "../lib/components";
 import { useDebouncedCallback } from "use-debounce";
@@ -46,7 +46,7 @@ export const Route = createFileRoute("/_auth/_admin/users")({
       ? await getUsersWithQuery(query)
       : await getUsers(page ?? 1, ITEMS_PER_PAGE);
 
-    const { rows: users, total: totalUserCount } = usersResponse
+    const { rows: users, total: totalUserCount } = usersResponse;
     const totalPages = Math.ceil(totalUserCount / ITEMS_PER_PAGE);
     return {
       users,
@@ -98,12 +98,14 @@ function UsersView() {
         />
       </Modal>
 
-      {/* <TableFilter
+      {/* TODO: add this back in when api supports querying users like guests
+      <TableFilter
         label="Filter Users by ID, Name, Birthday, or Notification Count"
         placeholder="Oops, I don't work yet! Waiting for the API to support queries..."
         filterText={filterText}
         onChange={onChangeFilter}
-      /> */}
+      />
+      */}
 
       <HScroll>
         <UsersTable rows={sortedUsers} /* setSortedRows={setSortedUsers} */ />
@@ -206,6 +208,12 @@ function NewUserForm({ setShowNewUserModal, onSubmit }) {
       password: string;
       confirm_password: string;
     };
+    if (userWithPassword.password !== confirm_password) {
+      setFormFeedback({ text: "Passwords don't match", isError: true });
+      return;
+    } else {
+      setFormFeedback({ text: "", isError: false });
+    }
     const user_id = await addUser(userWithPassword);
     if (!user_id) {
       setFormFeedback({
@@ -213,6 +221,8 @@ function NewUserForm({ setShowNewUserModal, onSubmit }) {
         isError: true,
       });
       return;
+    } else {
+      setFormFeedback({ text: "", isError: false });
     }
     const { password, ...withoutPassword } = userWithPassword;
     const newUser: Partial<User> = { ...withoutPassword, user_id };
