@@ -1,7 +1,7 @@
 /** Guest-related API calls */
 
 import * as API from "aws-amplify/api";
-import { pageOffset, trimStringValues } from "../utils";
+import { pageOffset } from "../utils";
 
 export async function addGuest(g: Partial<Guest>): Promise<number | null> {
   const response = await API.post({
@@ -14,7 +14,6 @@ export async function addGuest(g: Partial<Guest>): Promise<number | null> {
 }
 
 export async function updateGuest(g: Partial<Guest>): Promise<boolean> {
-  trimStringValues(g)
   try {
     const response = await API.post({
       apiName: "auth",

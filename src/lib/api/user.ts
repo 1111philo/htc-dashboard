@@ -1,7 +1,7 @@
 /** User-related API calls */
 
 import * as API from "aws-amplify/api";
-import { pageOffset, trimStringValues } from "../utils";
+import { pageOffset } from "../utils";
 
 export async function addUser(
   u: Partial<User> & { password: string }
@@ -21,7 +21,6 @@ export async function addUser(
 }
 
 export async function updateUser(u: Partial<User>): Promise<boolean> {
-  trimStringValues(u);
   try {
     const response = await API.post({
       apiName: "auth",

@@ -11,6 +11,7 @@ import {
 } from "../lib/components";
 import { useDebouncedCallback } from "use-debounce";
 import { addUser, getUsers, getUsersWithQuery } from "../lib/api/user";
+import { trimStringValues } from "../lib/utils";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -120,10 +121,10 @@ function UsersView() {
     </>
   );
 
-  async function onChangeFilter(newVal) {
-    setFilterText(newVal);
-    executeSearch();
-  }
+  // async function onChangeFilter(newVal) {
+  //   setFilterText(newVal);
+  //   executeSearch();
+  // }
 
   function onCreateNewUser(newUser: Partial<User>) {
     setShowNewUserModal(false);
@@ -131,7 +132,7 @@ function UsersView() {
       text: `User created successfully! ID: ${newUser.user_id}`,
       isError: false,
     });
-    setSortedUsers([newUser, ...sortedUsers]);
+    navigate({ to: ".", replace: true });
   }
 }
 
@@ -214,9 +215,8 @@ function NewUserForm({ setShowNewUserModal, onSubmit }) {
 
   async function submitNewUserForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const MIN_NAME_LENGTH = 1;
-    const MIN_EMAIL_LENGTH = 5; // 1@3.5 -> at least one char in each part of the email
     const formEntries = Object.fromEntries(new FormData(e.target));
+    trimStringValues(formEntries);
     const { name, email, role, password, confirm_password } = formEntries;
     if (!name || !email || !role || !password) {
       setFormFeedback({ text: "All fields are required.", isError: true });
