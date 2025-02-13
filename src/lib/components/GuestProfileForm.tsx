@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Form, Row, Col, InputGroup, Button } from "react-bootstrap";
 import { updateGuest } from "../api";
-import { guestFormRequirementsSatisfied, today } from "../utils";
+import { guestFormRequirementsSatisfied, today, trimStringValues } from "../utils";
 import { useNavigate } from "@tanstack/react-router";
 
 interface Props {
@@ -125,6 +125,7 @@ export default function GuestProfileForm({ guest, setViewFeedback }: Props) {
   async function saveEditedGuest(e: React.FormEvent, guest: Partial<Guest>) {
     e.preventDefault();
     const updatedGuest = { ...fields, guest_id: guest.guest_id };
+    trimStringValues(updatedGuest)
     if (!guestFormRequirementsSatisfied(updatedGuest)) {
       setViewFeedback({
         text: "At least 2 of the following are required: First Name, Last Name, Birthday",

@@ -10,7 +10,7 @@ import {
 import { addGuest, getGuestData, getGuestsWithQuery } from "../lib/api/guest";
 import { addVisit } from "../lib/api/visit";
 import { toggleGuestNotificationStatus } from "../lib/api/notification";
-import { guestOptLabel, readableDateTime } from "../lib/utils";
+import { guestOptLabel, readableDateTime, trimStringValues } from "../lib/utils";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
@@ -101,6 +101,7 @@ function NewVisitView() {
   async function onSubmitNewGuestForm(
     guest: Partial<Guest>
   ): Promise<number | null> {
+    trimStringValues(guest)
     const guest_id = await addGuest(guest);
     if (!guest_id) return null;
     setShowNewGuestModal(false);

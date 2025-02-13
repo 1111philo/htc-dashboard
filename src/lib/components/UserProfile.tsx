@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { FeedbackMessage } from "../components";
 import { deleteUser, updateUser } from "../api";
+import { trimStringValues } from "../utils";
 
 interface Props {
   user: User;
@@ -208,6 +209,7 @@ function UserForm({ user, isOwnAccount, setFeedback }: UFProps) {
     const formEntries = Object.fromEntries(
       new FormData(e.target)
     ) as Partial<User> & { password: string; confirm_password: string };
+    trimStringValues(formEntries)
     const { name, email, role, password, confirm_password } = formEntries;
     if (!name || !email || !role) {
       setFeedback({
