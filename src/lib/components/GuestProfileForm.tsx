@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Form, Row, Col, InputGroup, Button } from "react-bootstrap";
 import { updateGuest } from "../api";
 import { guestFormRequirementsSatisfied, today } from "../utils";
+import { useNavigate } from "@tanstack/react-router";
 
 interface Props {
   guest: Partial<Guest>;
@@ -23,6 +24,7 @@ export default function GuestProfileForm({ guest, setViewFeedback }: Props) {
     (guest.dob || "") !== fields.dob ||
     (guest.case_manager || "") !== fields.case_manager;
 
+  const navigate = useNavigate()
   return (
     <div className="mb-5">
       <Form onSubmit={(e) => saveEditedGuest(e, guest)}>
@@ -150,6 +152,7 @@ export default function GuestProfileForm({ guest, setViewFeedback }: Props) {
       return;
     }
     setViewFeedback({ text: "Successfully updated.", isError: false });
+    navigate({ to: ".", replace: true })
   }
 }
 
