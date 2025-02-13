@@ -121,10 +121,10 @@ function UsersView() {
     </>
   );
 
-  async function onChangeFilter(newVal) {
-    setFilterText(newVal);
-    executeSearch();
-  }
+  // async function onChangeFilter(newVal) {
+  //   setFilterText(newVal);
+  //   executeSearch();
+  // }
 
   function onCreateNewUser(newUser: Partial<User>) {
     setShowNewUserModal(false);
@@ -132,7 +132,7 @@ function UsersView() {
       text: `User created successfully! ID: ${newUser.user_id}`,
       isError: false,
     });
-    setSortedUsers([newUser, ...sortedUsers]);
+    navigate({ to: ".", replace: true });
   }
 }
 
@@ -216,7 +216,7 @@ function NewUserForm({ setShowNewUserModal, onSubmit }) {
   async function submitNewUserForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formEntries = Object.fromEntries(new FormData(e.target));
-    trimStringValues(formEntries)
+    trimStringValues(formEntries);
     const { name, email, role, password, confirm_password } = formEntries;
     if (!name || !email || !role || !password) {
       setFormFeedback({ text: "All fields are required.", isError: true });
