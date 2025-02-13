@@ -140,10 +140,8 @@ function GuestsView() {
 
   // TODO: require at least 2 fields!
   async function onSubmitNewGuestForm(
-    e: React.FormEvent<HTMLFormElement>
+    guest: Partial<Guest>
   ): Promise<number | null> {
-    e.preventDefault();
-    const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
     const guest_id = await addGuest(guest);
     if (!guest_id) return null;
     setShowNewGuestModal(false);

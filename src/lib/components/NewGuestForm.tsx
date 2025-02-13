@@ -4,7 +4,7 @@ import { today } from "../utils";
 import { useState } from "react";
 
 interface NewGuestFormProps {
-  onSubmit: (e: React.FormEvent) => Promise<number | null>;
+  onSubmit: (guest: Partial<Guest>) => Promise<number | null>;
   onClose: () => void;
 }
 
@@ -18,10 +18,7 @@ export default function NewGuestForm(props: NewGuestFormProps) {
   return (
     <div className="p-3">
       <h2 className="mb-3">Add New Guest</h2>
-      <FeedbackMessage
-        message={formFeedback} 
-        className="my-3"
-      />
+      <FeedbackMessage message={formFeedback} className="my-3" />
       <Form onSubmit={async (e) => await submitForm(e)}>
         <Form.Group className="mb-3">
           <Form.Label>First Name</Form.Label>
@@ -54,11 +51,17 @@ export default function NewGuestForm(props: NewGuestFormProps) {
   );
 
   async function submitForm(e) {
-    const guest_id = await onSubmit(e);
-    !guest_id &&
+    e.preventDefault();
+    const guest = Object.fromEntries(new FormData(e.target)) as Partial<Guest>;
+    const guest_id = await onSubmit(guest);
+    if (!guest_id) {
       setFormFeedback({
         text: "Failed to create guest. Try again in a few.",
         isError: true,
       });
+      return;
+    } else {
+      setFormFeedback({ text: "", isError: false });
+    }
   }
 }
