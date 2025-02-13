@@ -134,7 +134,6 @@ function GuestsView() {
     executeSearch();
   }
 
-  // TODO: require at least 2 fields!
   async function onSubmitNewGuestForm(
     guest: Partial<Guest>
   ): Promise<number | null> {
@@ -146,7 +145,7 @@ function GuestsView() {
       isError: false,
     });
     const newGuest: Partial<Guest> = { ...guest, guest_id };
-    setSortedGuests && setSortedGuests([newGuest as Guest, ...sortedGuests]);
+    setSortedGuests([newGuest as Guest, ...sortedGuests]);
     return guest_id;
   }
 
