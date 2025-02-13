@@ -114,7 +114,7 @@ export default function GuestProfileView() {
 
       <FeedbackMessage message={feedback} />
 
-      <GuestProfileForm guest={guest} onFeedback={setFeedback} />
+      <GuestProfileForm guest={guest} setViewFeedback={setFeedback} />
 
       <h2 className="mb-3">Active Notifications</h2>
       <Notifications

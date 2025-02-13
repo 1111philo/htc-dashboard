@@ -60,11 +60,11 @@ export function capitalize(str): string {
 }
 
 export function guestFormRequirementsSatisfied(guest: Partial<Guest>): boolean {
-  const MIN_REQUIRED_COUNT = 2
+  const MIN_REQUIRED_COUNT = 2;
+  const { first_name, last_name, dob } = guest; // required fields = 2 of these 3
   let requiredCount = 0;
-  for (const key in guest) {
-    if (key === "case_manager") continue;
-    guest[key].length > 0 && requiredCount++;
+  for (const val of [first_name, last_name, dob]) {
+    val!.length > 0 && requiredCount++;
   }
   return requiredCount >= MIN_REQUIRED_COUNT;
 }
