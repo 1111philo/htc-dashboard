@@ -12,11 +12,12 @@ export default function GuestProfileForm({ guest, onFeedback }) {
   };
   const [fields, setFields] = useState(initialFields);
 
+  // any guest prop could be blank, hence the `... || ""`
   const isFormChanged =
-    guest.first_name !== fields.first_name ||
-    guest.last_name !== fields.last_name ||
-    guest.dob !== fields.dob ||
-    guest.case_manager !== fields.case_manager;
+    (guest.first_name || "") !== fields.first_name ||
+    (guest.last_name || "") !== fields.last_name ||
+    (guest.dob || "") !== fields.dob ||
+    (guest.case_manager || "") !== fields.case_manager;
 
   return (
     <div className="mb-5">
