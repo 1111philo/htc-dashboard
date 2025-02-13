@@ -10,11 +10,7 @@ import {
   HScroll,
   DataTable,
 } from "../lib/components";
-import {
-  addGuest,
-  getGuestsData,
-  getGuestsWithQuery,
-} from "../lib/api/guest";
+import { addGuest, getGuestsData, getGuestsWithQuery } from "../lib/api/guest";
 import { useDebouncedCallback } from "use-debounce";
 
 const ITEMS_PER_PAGE = 10;
@@ -56,10 +52,10 @@ export const Route = createFileRoute("/_auth/guests")({
         guests: [],
         totalGuestCount: 0,
         page: 1,
-        totalPages: 1
-      }
+        totalPages: 1,
+      };
     }
-    const { rows: guests, total: totalGuestCount } = guestsResponse
+    const { rows: guests, total: totalGuestCount } = guestsResponse;
     const totalPages = Math.ceil(totalGuestCount / ITEMS_PER_PAGE);
     return {
       guests,
@@ -140,10 +136,8 @@ function GuestsView() {
 
   // TODO: require at least 2 fields!
   async function onSubmitNewGuestForm(
-    e: React.FormEvent<HTMLFormElement>
+    guest: Partial<Guest>
   ): Promise<number | null> {
-    e.preventDefault();
-    const guest: Partial<Guest> = Object.fromEntries(new FormData(e.target));
     const guest_id = await addGuest(guest);
     if (!guest_id) return null;
     setShowNewGuestModal(false);
@@ -198,7 +192,9 @@ function GuestsTable({ rows /* setSortedRows */ }) {
       </thead>
       <tbody>
         {rows.map((g: Guest) => {
-          const notificationCount = g.guest_notifications?.length ?? 0;
+          const notificationCount = g.guest_notifications.filter(
+            (n) => n.status === "Active"
+          ).length;
           return (
             <tr
               key={g.guest_id}

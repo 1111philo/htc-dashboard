@@ -23,7 +23,7 @@ export default function GuestSelectSearch({ newGuest, selectedGuestOpt, setSelec
     <Form className="mt-3 my-5">
       <Form.Group className="mb-3" controlId="formUID">
         <Form.Label>
-          <i>Search by UID, Name, or Birthday (YYYY/MM/DD):</i>
+          <i>Search by UID, Name, or Birthday (YYYY-MM-DD):</i>
         </Form.Label>
         <Select
           id="user-dropdown"
