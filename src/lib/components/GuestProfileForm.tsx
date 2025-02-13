@@ -1,9 +1,14 @@
 import { useState } from "react";
 import { Form, Row, Col, InputGroup, Button } from "react-bootstrap";
 import { updateGuest } from "../api";
-import { today } from "../utils";
+import { guestFormRequirementsSatisfied, today } from "../utils";
+import { useNavigate } from "@tanstack/react-router";
 
-export default function GuestProfileForm({ guest, onFeedback }) {
+interface Props {
+  guest: Partial<Guest>;
+  setViewFeedback: (msg: UserMessage) => void;
+}
+export default function GuestProfileForm({ guest, setViewFeedback }: Props) {
   const initialFields: Partial<Guest> = {
     first_name: guest.first_name ?? "",
     last_name: guest.last_name ?? "",
@@ -19,6 +24,7 @@ export default function GuestProfileForm({ guest, onFeedback }) {
     (guest.dob || "") !== fields.dob ||
     (guest.case_manager || "") !== fields.case_manager;
 
+  const navigate = useNavigate()
   return (
     <div className="mb-5">
       <Form onSubmit={(e) => saveEditedGuest(e, guest)}>
@@ -113,12 +119,21 @@ export default function GuestProfileForm({ guest, onFeedback }) {
 
   function cancelEdit() {
     setFields(initialFields);
+    setViewFeedback({ text: "", isError: false });
   }
 
-  // TODO: circle back after api is fixed
-  /** NOTE: This api is broken -- returns success but guest is not altered. */
   async function saveEditedGuest(e: React.FormEvent, guest: Partial<Guest>) {
     e.preventDefault();
+    const updatedGuest = { ...fields, guest_id: guest.guest_id };
+    if (!guestFormRequirementsSatisfied(updatedGuest)) {
+      setViewFeedback({
+        text: "At least 2 of the following are required: First Name, Last Name, Birthday",
+        isError: true,
+      });
+      return;
+    } else {
+      setViewFeedback({ text: "", isError: false });
+    }
     if (
       !confirm(`Save changes?
         ${guest.first_name || "First Name"} -> ${fields.first_name}
@@ -128,17 +143,16 @@ export default function GuestProfileForm({ guest, onFeedback }) {
     ) {
       return;
     }
-
-    const updatedGuest = { ...fields, guest_id: guest.guest_id };
     const success = await updateGuest(updatedGuest); // placeholder
     if (!success) {
-      onFeedback({
+      setViewFeedback({
         text: "Oops! The edits couldn't be saved. Try again in a few.",
         isError: true,
       });
       return;
     }
-    onFeedback({ text: "Successfully updated.", isError: false });
+    setViewFeedback({ text: "Successfully updated.", isError: false });
+    navigate({ to: ".", replace: true })
   }
 }
 

@@ -60,7 +60,12 @@ export default function UserProfile({ user, isOwnAccount }: Props) {
   }
 }
 
-function UserForm({ user, isOwnAccount, setFeedback }) {
+interface UFProps {
+  user: Partial<User>;
+  isOwnAccount: boolean;
+  setFeedback: (msg: UserMessage) => void;
+}
+function UserForm({ user, isOwnAccount, setFeedback }: UFProps) {
   const initialFields: Partial<User> = {
     name: user.name ?? "",
     email: user.email ?? "",
@@ -68,14 +73,16 @@ function UserForm({ user, isOwnAccount, setFeedback }) {
   };
   const [fields, setFields] = useState(initialFields);
 
-  const [password, setPassword] = useState({ password: "", confirm: "" });
+  const [passwords, setPasswords] = useState({ password: "", confirm: "" });
 
-  const isPasswordChanged = password.password !== "";
+  const isPasswordChanged = passwords.password !== "";
   const isFormChanged =
     user.name !== fields.name ||
     user.email !== fields.email ||
     user.role !== fields.role ||
     isPasswordChanged;
+
+  const navigate = useNavigate();
 
   return (
     <Form
@@ -157,9 +164,9 @@ function UserForm({ user, isOwnAccount, setFeedback }) {
           maxLength={33}
           readOnly // this + onFocus = hack to stop autofilling of password
           onFocus={(e) => e.target.removeAttribute("readonly")}
-          value={password.password}
+          value={passwords.password}
           onChange={(e) =>
-            setPassword({ ...password, password: e.target.value })
+            setPasswords({ ...passwords, password: e.target.value })
           }
         />
       </Form.Group>
@@ -171,9 +178,9 @@ function UserForm({ user, isOwnAccount, setFeedback }) {
           type="password"
           readOnly // this + onFocus = hack to stop autofilling of password
           onFocus={(e) => e.target.removeAttribute("readonly")}
-          value={password.confirm}
+          value={passwords.confirm}
           onChange={(e) =>
-            setPassword({ ...password, confirm: e.target.value })
+            setPasswords({ ...passwords, confirm: e.target.value })
           }
         />
       </Form.Group>
@@ -192,34 +199,41 @@ function UserForm({ user, isOwnAccount, setFeedback }) {
 
   function cancelEdit() {
     setFields(initialFields);
-    setPassword({ password: "", confirm: "" });
+    setPasswords({ password: "", confirm: "" });
+    setFeedback({ text: "", isError: false });
   }
 
   async function saveEditedUser(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    // first, check if passwords match
-    if (password.password.trim() !== password.confirm.trim()) {
+    const formEntries = Object.fromEntries(
+      new FormData(e.target)
+    ) as Partial<User> & { password: string; confirm_password: string };
+    const { name, email, role, password, confirm_password } = formEntries;
+    if (!name || !email || !role) {
+      setFeedback({
+        text: "Name, Email, and Role are required.",
+        isError: true,
+      });
+      return;
+    } else {
+      setFeedback({ text: "", isError: false });
+    }
+    if (password !== confirm_password) {
       setFeedback({ text: "Passwords don't match.", isError: true });
       return;
     } else {
       setFeedback({ text: "", isError: false });
     }
-
     if (
       !confirm(`Save changes?
         ${user.name} -> ${fields.name}
         ${user.email} -> ${fields.email}
         ${user.role} -> ${fields.role}
-        password -> ${new Array(password.password.length).fill("*").join("")}`)
+        password -> ${new Array(password.length).fill("*").join("")}`)
     ) {
       return;
     }
-
-    const userWithPassword = Object.fromEntries(
-      new FormData(e.target)
-    ) as Partial<User> & { password: string; confirm_password: string };
-    const { confirm_password, ...rest } = userWithPassword;
-    const updatedUser = { ...rest, user_id: user.user_id };
+    const updatedUser = { name, email, role, password, user_id: user.user_id };
     const success = await updateUser(updatedUser);
     if (!success) {
       setFeedback({
@@ -230,6 +244,7 @@ function UserForm({ user, isOwnAccount, setFeedback }) {
       return;
     }
     setFeedback({ text: "Successfully updated.", isError: false });
-    setPassword({ password: "", confirm: "" });
+    setPasswords({ password: "", confirm: "" });
+    navigate({ to: ".", replace: true });
   }
 }
