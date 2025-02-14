@@ -11,6 +11,7 @@ import {
 } from "../lib/components";
 import { useDebouncedCallback } from "use-debounce";
 import { addUser, getUsers, getUsersWithQuery } from "../lib/api/user";
+import { trimStringValues } from "../lib/utils";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -120,10 +121,10 @@ function UsersView() {
     </>
   );
 
-  async function onChangeFilter(newVal) {
-    setFilterText(newVal);
-    executeSearch();
-  }
+  // async function onChangeFilter(newVal) {
+  //   setFilterText(newVal);
+  //   executeSearch();
+  // }
 
   function onCreateNewUser(newUser: Partial<User>) {
     setShowNewUserModal(false);
@@ -131,7 +132,7 @@ function UsersView() {
       text: `User created successfully! ID: ${newUser.user_id}`,
       isError: false,
     });
-    setSortedUsers([newUser, ...sortedUsers]);
+    navigate({ to: ".", replace: true });
   }
 }
 
@@ -147,11 +148,22 @@ function NewUserForm({ setShowNewUserModal, onSubmit }) {
       <Form onSubmit={(e) => submitNewUserForm(e)}>
         <Form.Group className="mb-3">
           <Form.Label className="fst-italic">Name</Form.Label>
-          <Form.Control id="input-name" name="name" />
+          <Form.Control
+            id="input-name"
+            name="name"
+            minLength={2}
+            maxLength={64}
+          />
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label className="fst-italic">Email</Form.Label>
-          <Form.Control id="input-email" name="email" type="email" />
+          <Form.Control
+            id="input-email"
+            name="email"
+            type="email"
+            minLength={5}
+            maxLength={100}
+          />
         </Form.Group>
         <Form.Group className="mb-3">
           <Form.Label className="fst-italic">Role</Form.Label>
@@ -204,17 +216,21 @@ function NewUserForm({ setShowNewUserModal, onSubmit }) {
   async function submitNewUserForm(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const formEntries = Object.fromEntries(new FormData(e.target));
-    const { confirm_password, ...userWithPassword } = formEntries as User & {
-      password: string;
-      confirm_password: string;
-    };
-    if (userWithPassword.password !== confirm_password) {
+    trimStringValues(formEntries);
+    const { name, email, role, password, confirm_password } = formEntries;
+    if (!name || !email || !role || !password) {
+      setFormFeedback({ text: "All fields are required.", isError: true });
+      return;
+    } else {
+      setFormFeedback({ text: "", isError: false });
+    }
+    if (password !== confirm_password) {
       setFormFeedback({ text: "Passwords don't match", isError: true });
       return;
     } else {
       setFormFeedback({ text: "", isError: false });
     }
-    const user_id = await addUser(userWithPassword);
+    const user_id = await addUser({ name, email, role, password });
     if (!user_id) {
       setFormFeedback({
         text: "Failed to create user. Try again in a few.",
@@ -224,8 +240,7 @@ function NewUserForm({ setShowNewUserModal, onSubmit }) {
     } else {
       setFormFeedback({ text: "", isError: false });
     }
-    const { password, ...withoutPassword } = userWithPassword;
-    const newUser: Partial<User> = { ...withoutPassword, user_id };
+    const newUser: Partial<User> = { name, email, role, user_id };
     onSubmit(newUser);
   }
 }

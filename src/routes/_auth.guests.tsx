@@ -12,6 +12,7 @@ import {
 } from "../lib/components";
 import { addGuest, getGuestsData, getGuestsWithQuery } from "../lib/api/guest";
 import { useDebouncedCallback } from "use-debounce";
+import { trimStringValues } from "../lib/utils";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -134,10 +135,10 @@ function GuestsView() {
     executeSearch();
   }
 
-  // TODO: require at least 2 fields!
   async function onSubmitNewGuestForm(
     guest: Partial<Guest>
   ): Promise<number | null> {
+    trimStringValues(guest)
     const guest_id = await addGuest(guest);
     if (!guest_id) return null;
     setShowNewGuestModal(false);
@@ -146,7 +147,7 @@ function GuestsView() {
       isError: false,
     });
     const newGuest: Partial<Guest> = { ...guest, guest_id };
-    setSortedGuests && setSortedGuests([newGuest as Guest, ...sortedGuests]);
+    setSortedGuests([newGuest as Guest, ...sortedGuests]);
     return guest_id;
   }
 
