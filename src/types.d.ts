@@ -98,6 +98,8 @@ interface AddUserAPIResponse {
   user_id: number;
 }
 
+type GetUserAPIResponse = User
+
 interface GetUsersAPIResponse {
   total: number;
   offset: number;
