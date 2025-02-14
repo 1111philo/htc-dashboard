@@ -55,95 +55,98 @@ export default function QueuedTable({
   })
 
   return (
-    <Table responsive={true}>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Time Requested</th>
-          <th>Guest ID</th>
-          <th>Guest Name</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {guestsQueued?.map(
-          (guest, i) => {
-            const fullName = guest.first_name + " " + guest.last_name;
-            const timeRequested = readableDateTime(guest.queued_at);
+    <>
+      <h2>Queue</h2>
+      <Table responsive={true}>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Time Requested</th>
+            <th>Guest ID</th>
+            <th>Guest Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {guestsQueued?.map(
+            (guest, i) => {
+              const fullName = guest.first_name + " " + guest.last_name;
+              const timeRequested = readableDateTime(guest.queued_at);
 
-            return (
-              <tr key={`${guest.guest_id}-${i}`}>
-                <td>{i + 1}</td>
-                <td>{timeRequested}</td>
-                <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{guest.guest_id}</td>
-                <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{fullName}</td>
-                <td>
-                  <div className="d-flex flex-column justify-content-end">
-                    {service.quota ? (
-                      <>
-                        <FeedbackMessage
-                          message={feedback}
-                        />
-                        <div className="d-flex flex-row">
-                          <Form.Select
-                            aria-label="Select which slot to assign"
-                            value={(() => {
+              return (
+                <tr key={`${guest.guest_id}-${i}`}>
+                  <td>{i + 1}</td>
+                  <td>{timeRequested}</td>
+                  <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{guest.guest_id}</td>
+                  <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{fullName}</td>
+                  <td>
+                    <div className="d-flex flex-column justify-content-end">
+                      {service.quota ? (
+                        <>
+                          <FeedbackMessage
+                            message={feedback}
+                          />
+                          <div className="d-flex flex-row">
+                            <Form.Select
+                              aria-label="Select which slot to assign"
+                              value={(() => {
 
-                              return slotNumAssigned[i]
-                            })()}
-                            onChange={(e) => {
-                              slotNumAssigned[i] = e.target.value
-                              setSlotNumAssigned([...slotNumAssigned])
-                            }}
-                          >
-                            <option>Slot #</option>
-                            {availableSlots?.map((slotNum, i) => {
-                              return (
-                                <option key={`${slotNum}-${i}`}>{slotNum}</option>
-                              );
-                            })}
-                          </Form.Select>
-                          <Button
-                            className="flex-grow-1 me-2"
-                            onClick={async (e) => {
-                              e.preventDefault()
-                              await moveToSlottedMutation({guest, i})}
-                            }
-                          >
-                            Assign
-                          </Button>
-                          <Dropdown drop='down' autoClose={true}>
-                            <Dropdown.Toggle  variant='outline-primary' />
-                            <Dropdown.Menu>
-                              <Dropdown.Item
-                                onClick={() =>
-                                  moveToCompletedMutation(guest)
-                                }
-                              >
-                                Move to Completed
-                              </Dropdown.Item>
-                            </Dropdown.Menu>
-                          </Dropdown>
-                        </div>
-                      </>
-                    ) : (
-                      <Button
-                        variant="primary"
-                        onClick={() =>
-                          moveToCompletedMutation(guest)
-                        }
-                      >
-                        Move to Completed
-                      </Button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            );
-          }
-        )}
-      </tbody>
-    </Table>
+                                return slotNumAssigned[i]
+                              })()}
+                              onChange={(e) => {
+                                slotNumAssigned[i] = e.target.value
+                                setSlotNumAssigned([...slotNumAssigned])
+                              }}
+                            >
+                              <option>Slot #</option>
+                              {availableSlots?.map((slotNum, i) => {
+                                return (
+                                  <option key={`${slotNum}-${i}`}>{slotNum}</option>
+                                );
+                              })}
+                            </Form.Select>
+                            <Button
+                              className="flex-grow-1 me-2"
+                              onClick={async (e) => {
+                                e.preventDefault()
+                                await moveToSlottedMutation({guest, i})}
+                              }
+                            >
+                              Assign
+                            </Button>
+                            <Dropdown drop='down' autoClose={true}>
+                              <Dropdown.Toggle  variant='outline-primary' />
+                              <Dropdown.Menu>
+                                <Dropdown.Item
+                                  onClick={() =>
+                                    moveToCompletedMutation(guest)
+                                  }
+                                >
+                                  Move to Completed
+                                </Dropdown.Item>
+                              </Dropdown.Menu>
+                            </Dropdown>
+                          </div>
+                        </>
+                      ) : (
+                        <Button
+                          variant="primary"
+                          onClick={() =>
+                            moveToCompletedMutation(guest)
+                          }
+                        >
+                          Move to Completed
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            }
+          )}
+        </tbody>
+      </Table>
+    </>
   );
 }
 
