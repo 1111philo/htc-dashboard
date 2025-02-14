@@ -35,8 +35,11 @@ export default function EditServiceForm({
       return;
     }
 
-    let duplicateService = services.some((service) => service.name === newServiceName)
-    if (duplicateService) {
+    if (isDuplicateService(
+      service,
+      services,
+      newServiceName
+    )) {
       setFeedback({
         text: "Service already exists.",
         isError: true
@@ -108,4 +111,22 @@ export default function EditServiceForm({
       </div>
     </>
   )
+}
+
+function isDuplicateService(
+  service: ServiceType,
+  services: ServiceType[],
+  newServiceName: String
+): boolean {
+  if (newServiceName.toLowerCase() === service.name.toLowerCase()) {
+    return false;
+  }
+  let duplicateService = services.some(
+    (service) =>
+      service.name.toLowerCase() === newServiceName.toLowerCase()
+  )
+  if (duplicateService) {
+    return true;
+  }
+  return false;
 }
