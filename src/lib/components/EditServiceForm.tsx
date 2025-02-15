@@ -17,12 +17,19 @@ export default function EditServiceForm({
   setShowEditServiceModal
 } : EditServiceFormProps) {
   const navigate = useNavigate();
-  const [newServiceName, setNewServiceName] = useState<String>("");
-  const [newQuota, setNewQuota] = useState<Number>();
+  const [newServiceName, setNewServiceName] = useState<string>(service.name);
+  const [newQuota, setNewQuota] = useState<number | null>(hasQuota);
   const [feedback, setFeedback] = useState({
     text: "",
     isError: false,
   })
+
+  function hasQuota() {
+    if (service.quota) {
+      return service.quota
+    }
+    return null;
+  }
 
   const handleClose = () => { setShowEditServiceModal(false) }
 
@@ -35,8 +42,11 @@ export default function EditServiceForm({
       return;
     }
 
-    let duplicateService = services.some((service) => service.name === newServiceName)
-    if (duplicateService) {
+    if (isDuplicateService(
+      service,
+      services,
+      newServiceName
+    )) {
       setFeedback({
         text: "Service already exists.",
         isError: true
@@ -70,7 +80,7 @@ export default function EditServiceForm({
         <h2 className="mb-3">Edit Service</h2>
 
         <FeedbackMessage
-          message={feedback} 
+          message={feedback}
           className="my-3"
         />
 
@@ -79,6 +89,7 @@ export default function EditServiceForm({
             <Form.Control
               type="text"
               onChange={(e) => setNewServiceName(e.target.value)}
+              value={newServiceName}
               placeholder="New Service Name"
             />
           </Form.Group>
@@ -87,6 +98,7 @@ export default function EditServiceForm({
             <Form.Control
               type="number"
               onChange={(e) => setNewQuota(parseInt(e.target.value))}
+              value={`${Number.isNaN(newQuota) ? '' : newQuota}`}
               placeholder="Optional Quota"
             />
           </Form.Group>
@@ -108,4 +120,22 @@ export default function EditServiceForm({
       </div>
     </>
   )
+}
+
+function isDuplicateService(
+  service: ServiceType,
+  services: ServiceType[],
+  newServiceName: String
+): boolean {
+  if (newServiceName.toLowerCase() === service.name.toLowerCase()) {
+    return false;
+  }
+  let duplicateService = services.some(
+    (service) =>
+      service.name.toLowerCase() === newServiceName.toLowerCase()
+  )
+  if (duplicateService) {
+    return true;
+  }
+  return false;
 }
