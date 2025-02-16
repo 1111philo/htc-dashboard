@@ -2,12 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { readableDateTime } from "../utils";
-import { updateGuestServiceStatus } from "../api";
+import { getAvailableSlots, updateGuestServiceStatus } from "../api";
 import { Button, Dropdown, Form, Table } from "react-bootstrap";
 
 interface QueuedTableProps {
   guestsQueued: GuestResponse[];
-  availableSlots: number[] | undefined;
   service: ServiceType;
 }
 
@@ -18,7 +17,6 @@ interface SlotIntention {
 
 export default function QueuedTable({
   guestsQueued,
-  availableSlots,
   service,
 }: QueuedTableProps) {
   const queryClient = useQueryClient();
@@ -26,6 +24,7 @@ export default function QueuedTable({
   const [assignmentDisabled, setAssignmentDisabled] = useState<boolean>(true);
   const [slotIntentions, setSlotIntentions] =
     useState<SlotIntention[]>(createSlotIntentionObjects);
+  const [availableSlotOptions, setAvailableSlotOptions] = useState<number[]>([])
 
   useEffect(() => {
     setSlotIntentions(createSlotIntentionObjects())
@@ -38,6 +37,15 @@ export default function QueuedTable({
     )
   }, [slotIntentions])
 
+  useEffect(() => {
+    async function fetchSlotOptions() {
+      const availableSlots = await getAvailableSlots(service)
+      setAvailableSlotOptions(availableSlots)
+    }
+
+    fetchSlotOptions()
+  }, [])
+
   function createSlotIntentionObjects(): SlotIntention[] {
     const slotIntentions = guestsQueued.map((g) => {
       return {
@@ -46,6 +54,13 @@ export default function QueuedTable({
       }
     });
     return slotIntentions;
+  }
+
+  function updateSlotNumIntentions(e, i: number) {
+    const updatedSlotNumIntentions = [...slotIntentions];
+    updatedSlotNumIntentions[i] =
+      { ...updatedSlotNumIntentions[i], slotNumIntention: e.target.value };
+    setSlotIntentions(updatedSlotNumIntentions);
   }
 
   const { mutateAsync: moveToSlottedMutation } = useMutation({
@@ -62,7 +77,7 @@ export default function QueuedTable({
               prevSlotIntentions.filter((si) => si.guest.guest_id !== guest.guest_id)
             );
           } catch (e) {
-            console.error("Failed to place guest in slot. Here's why:", e)
+            console.error("Failed to place guest in slot:", e)
           }
         }
       }
@@ -79,6 +94,12 @@ export default function QueuedTable({
       queryClient.invalidateQueries()
     }
   })
+
+  function removeSlotOption(slotChoice: number) {
+    setAvailableSlotOptions((prevOptions) =>
+      availableSlotOptions?.filter((choice) => choice !== slotChoice)
+    )
+  }
 
   return (
     <div>
@@ -125,15 +146,13 @@ export default function QueuedTable({
                           <Form.Select
                             aria-label="Select which slot to assign"
                             onChange={(e) => {
-                              const updatedSlotNumIntentions = [...slotIntentions];
-                              updatedSlotNumIntentions[i] =
-                                { ...updatedSlotNumIntentions[i], slotNumIntention: e.target.value };
-                              setSlotIntentions(updatedSlotNumIntentions);
+                              removeSlotOption(+e.target.value)
+                              updateSlotNumIntentions(e, i)
                             }}
                             className="me-4"
                           >
                             <option>Slot #</option>
-                            {availableSlots?.map((slotNum, i) => {
+                            {availableSlotOptions?.map((slotNum, i) => {
                               return (
                                 <option key={`${slotNum}-${i}`}>{slotNum}</option>
                               );
