@@ -1,4 +1,4 @@
-import { useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { readableDateTime } from '../utils';
 import { updateGuestServiceStatus } from '../api';
@@ -28,7 +28,6 @@ export default function CompletedTable({ guestsCompleted }: CompletedTableProps)
         <thead>
           <tr>
             <th>Time Requested</th>
-            <th>Guest ID</th>
             <th>Guest Name</th>
             <th>Actions</th>
           </tr>
@@ -42,8 +41,11 @@ export default function CompletedTable({ guestsCompleted }: CompletedTableProps)
               return (
                 <tr key={`${guest.guest_id}-${i}`}>
                   <td>{timeRequested}</td>
-                  <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{guest.guest_id}</td>
-                  <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{fullName}</td>
+                  <td>
+                    <Link to="/guests/$guestId" params={{ guestId: guest.guest_id }}>
+                      {fullName}
+                    </Link>
+                  </td>
                   <td>
                     <Button
                       variant="outline-primary"
