@@ -22,41 +22,44 @@ export default function CompletedTable({ guestsCompleted }: CompletedTableProps)
   })
 
   return (
-    <Table responsive={true}>
-      <thead>
-        <tr>
-          <th>Time Requested</th>
-          <th>Guest ID</th>
-          <th>Guest Name</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {guestsCompleted?.map(
-          (guest, i) => {
-            const fullName = guest.first_name + " " + guest.last_name;
-            const timeRequested = readableDateTime(guest.created_at);
+    <>
+      <h2>Completed</h2>
+      <Table responsive={true}>
+        <thead>
+          <tr>
+            <th>Time Requested</th>
+            <th>Guest ID</th>
+            <th>Guest Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {guestsCompleted?.map(
+            (guest, i) => {
+              const fullName = guest.first_name + " " + guest.last_name;
+              const timeRequested = readableDateTime(guest.created_at);
 
-            return (
-              <tr key={`${guest.guest_id}-${i}`}>
-                <td>{timeRequested}</td>
-                <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{guest.guest_id}</td>
-                <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{fullName}</td>
-                <td>
-                  <Button
-                    variant="outline-primary"
-                    onClick={() =>
-                      moveToQueuedMutation(guest)
-                    }
-                  >
-                    Move to Queue
-                  </Button>
-                </td>
-              </tr>
-            );
-          }
-        )}
-      </tbody>
-    </Table>
+              return (
+                <tr key={`${guest.guest_id}-${i}`}>
+                  <td>{timeRequested}</td>
+                  <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{guest.guest_id}</td>
+                  <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{fullName}</td>
+                  <td>
+                    <Button
+                      variant="outline-primary"
+                      onClick={() =>
+                        moveToQueuedMutation(guest)
+                      }
+                    >
+                      Move to Queue
+                    </Button>
+                  </td>
+                </tr>
+              );
+            }
+          )}
+        </tbody>
+      </Table>
+    </>
   );
 }

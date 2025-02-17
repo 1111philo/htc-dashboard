@@ -46,6 +46,20 @@ export function sortByTimeDescending(
   return arr;
 }
 
+export function sortByTimeAscending(
+  arr: GuestService[] | GuestNotification[],
+  key: string
+): GuestService[] | GuestNotification[] {
+  arr.sort((a, b) => {
+    const aTime = new Date(a[key]);
+    const bTime = new Date(b[key]);
+    if (bTime < aTime) return 1;
+    if (bTime > aTime) return -1;
+    return 0;
+  });
+  return arr;
+}
+
 /** To be used when sending form data  */
 export function trimStringValues(entries: Object) {
   for (const key in entries) {

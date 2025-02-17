@@ -143,9 +143,11 @@ function ServiceView() {
         ""
       )}
 
-      <h2>Queue</h2>
       {isQueuedPending ? (
-        <p>Loading...</p>
+        <>
+          <h2>Queue</h2>
+          <p>Loading...</p>
+        </>
       ) : (
         <QueuedTable
           guestsQueued={guestsQueued}
@@ -154,9 +156,11 @@ function ServiceView() {
         />
       )}
 
-      <h2>Completed</h2>
       {isCompletedPending ? (
-        <p>Loading...</p>
+        <>
+          <h2>Completed</h2>
+          <p>Loading...</p>
+        </>
       ) : (
         <CompletedTable guestsCompleted={guestsCompleted} />
       )}
