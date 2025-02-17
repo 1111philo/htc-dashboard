@@ -1,4 +1,4 @@
-import { Link, useNavigate } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { readableDateTime } from '../utils';
 import { updateGuestServiceStatus } from '../api';
@@ -11,7 +11,6 @@ interface CompletedTableProps {
 
 export default function CompletedTable({ guestsCompleted }: CompletedTableProps) {
   const queryClient = useQueryClient();
-  const navigate = useNavigate()
 
   const { mutateAsync: moveToQueuedMutation } = useMutation({
     mutationFn: (guest: GuestResponse): Promise<number> =>
