@@ -61,10 +61,7 @@ function ServiceView() {
     queryFn: () => fetchServiceGuestsCompleted(service.service_id),
     queryKey: ["guestsCompleted"],
   });
-  const { data: availableSlots } = useQuery({
-    queryFn: () => getAvailableSlots(service),
-    queryKey: ["availableSLots"],
-  });
+
   const deleteService = async () => {
     const proceed = confirm("Are you sure you want to delete this service?");
     if (!proceed) return;
@@ -151,7 +148,6 @@ function ServiceView() {
       ) : (
         <QueuedTable
           guestsQueued={guestsQueued}
-          availableSlots={availableSlots}
           service={service}
         />
       )}

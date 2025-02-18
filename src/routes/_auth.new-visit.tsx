@@ -20,6 +20,8 @@ interface LoaderData {
   serviceTypes: ServiceType[];
 }
 
+const DEFAULT_SERVICE_NAME = "Courtyard";
+
 export const Route = createFileRoute("/_auth/new-visit")({
   component: NewVisitView,
   loader: async ({ context }): Promise<LoaderData> => {
@@ -73,10 +75,16 @@ function NewVisitView() {
   // default to the first service being selected
   useEffect(() => {
     if (!serviceTypes.length) return;
+    let defaultService = serviceTypes.find(
+      (s) => s.name === DEFAULT_SERVICE_NAME
+    );
+    if (!defaultService) {
+      defaultService = serviceTypes[0];
+    }
     setSelectedServicesOpt([
       {
-        value: serviceTypes[0].service_id.toString(),
-        label: serviceTypes[0].name,
+        value: defaultService.service_id.toString(),
+        label: defaultService.name,
       },
     ]);
   }, []);
