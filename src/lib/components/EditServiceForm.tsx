@@ -14,43 +14,42 @@ interface EditServiceFormProps {
 export default function EditServiceForm({
   service,
   services,
-  setShowEditServiceModal
-} : EditServiceFormProps) {
+  setShowEditServiceModal,
+}: EditServiceFormProps) {
   const navigate = useNavigate();
   const [newServiceName, setNewServiceName] = useState<string>(service.name);
   const [newQuota, setNewQuota] = useState<number | null>(hasQuota);
   const [feedback, setFeedback] = useState({
     text: "",
     isError: false,
-  })
+  });
+  const [queueable, setQueueable] = useState<boolean>(service.queueable);
 
   function hasQuota() {
     if (service.quota) {
-      return service.quota
+      return service.quota;
     }
     return null;
   }
 
-  const handleClose = () => { setShowEditServiceModal(false) }
+  const handleClose = () => {
+    setShowEditServiceModal(false);
+  };
 
   const handleSaveService = async () => {
     if (!newServiceName) {
       setFeedback({
         text: "Service must be named",
-        isError: true
-      })
+        isError: true,
+      });
       return;
     }
 
-    if (isDuplicateService(
-      service,
-      services,
-      newServiceName
-    )) {
+    if (isDuplicateService(service, services, newServiceName)) {
       setFeedback({
         text: "Service already exists.",
-        isError: true
-      })
+        isError: true,
+      });
       return;
     }
 
@@ -62,27 +61,25 @@ export default function EditServiceForm({
           body: {
             name: newServiceName,
             quota: newQuota,
-            service_id: service.service_id
-          }
-        }
+            queueable: queueable,
+            service_id: service.service_id,
+          },
+        },
       }).response
-    ).statusCode
+    ).statusCode;
 
     if (updateResponse === 200) {
       handleClose();
-      navigate({ to: location.pathname, replace: true })
+      navigate({ to: location.pathname, replace: true });
     }
-  }
+  };
 
   return (
     <>
       <div className="p-3">
         <h2 className="mb-3">Edit Service</h2>
 
-        <FeedbackMessage
-          message={feedback}
-          className="my-3"
-        />
+        <FeedbackMessage message={feedback} className="my-3" />
 
         <Form>
           <Form.Group className="mb-3" controlId="serviceName">
@@ -98,28 +95,32 @@ export default function EditServiceForm({
             <Form.Control
               type="number"
               onChange={(e) => setNewQuota(parseInt(e.target.value))}
-              value={`${Number.isNaN(newQuota) ? '' : newQuota}`}
+              value={`${Number.isNaN(newQuota) ? "" : newQuota}`}
               placeholder="Optional Quota"
             />
           </Form.Group>
+
+          <Form.Group className="mb-3" controlId="serviceQueue">
+            <Form.Check
+              type="checkbox"
+              onChange={(e) => setQueueable(!queueable)}
+              checked={queueable}
+              label="Include Queue?"
+            />
+          </Form.Group>
+
           <div className="d-flex justify-content-between">
-            <Button
-              variant="danger"
-              onClick={handleClose}
-            >
+            <Button variant="danger" onClick={handleClose}>
               Cancel
             </Button>
-            <Button
-              variant="primary"
-              onClick={handleSaveService}
-            >
+            <Button variant="primary" onClick={handleSaveService}>
               Save changes
             </Button>
           </div>
         </Form>
       </div>
     </>
-  )
+  );
 }
 
 function isDuplicateService(
@@ -131,9 +132,8 @@ function isDuplicateService(
     return false;
   }
   let duplicateService = services.some(
-    (service) =>
-      service.name.toLowerCase() === newServiceName.toLowerCase()
-  )
+    (service) => service.name.toLowerCase() === newServiceName.toLowerCase()
+  );
   if (duplicateService) {
     return true;
   }

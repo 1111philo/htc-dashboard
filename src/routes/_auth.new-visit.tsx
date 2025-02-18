@@ -233,10 +233,8 @@ function NewVisitView() {
     /** Map services to `Select` options */
     function servicesOpts() {
       return (
-        serviceTypes?.map((s: ServiceType) => ({
-          value: s.service_id.toString(),
-          label: s.name,
-        })) ?? []
+        serviceTypes?.map((s: ServiceType) => convertServiceTypeToOption(s)) ??
+        []
       );
     }
 
