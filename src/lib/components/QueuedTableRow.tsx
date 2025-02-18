@@ -14,7 +14,7 @@ interface SlotIntention {
   slotNumIntention: string;
 }
 interface QueuedTableRowProps {
-  guest: Guest;
+  guest: GuestResponse;
   service: ServiceType;
   availableSlotOptions: number[];
   setAvailableSlotOptions: React.Dispatch<React.SetStateAction<number[]>>;
@@ -31,24 +31,28 @@ export function QueuedTableRow({
   slotIntentions,
   setSlotIntentions,
   i
-}) {
+}: QueuedTableRowProps) {
   const queryClient = useQueryClient();
   const [slotChoice, setSlotChoice] = useState<string>("Slot #");
   const fullName = guest.first_name + " " + guest.last_name;
   const timeRequested = readableDateTime(guest.queued_at);
 
-  function updateSlotNumIntentions(e, i: number) {
+  function updateSlotNumIntentions(e, i: number, restore: boolean = false) {
     const updatedSlotNumIntentions = [...slotIntentions];
-    updatedSlotNumIntentions[i] =
-      { ...updatedSlotNumIntentions[i], slotNumIntention: e.target.value };
+    if (restore) {
+      updatedSlotNumIntentions[i] =
+      { ...updatedSlotNumIntentions[i], slotNumIntention: "Slot #" };
+    } else {
+      updatedSlotNumIntentions[i] =
+        { ...updatedSlotNumIntentions[i], slotNumIntention: e.target.value };
+    }
     setSlotIntentions(updatedSlotNumIntentions);
   }
 
   function updateSlotOptions(slotChoice: string, opt: "restore" | "remove" ) {
-    // if (slotChoice === "Slot #") return;
     if (opt === "restore" && slotChoice !== "Slot #") {
       // only restore if number doesn't already exist in availableSlotOptions
-      if (!availableSlotOptions.some((so) => so === slotChoice)) {
+      if (!availableSlotOptions.some((so) => so === +slotChoice)) {
         setAvailableSlotOptions(
           (prevOpts) => [...prevOpts, +slotChoice].sort((a, b) => a - b)
         )
@@ -68,6 +72,7 @@ export function QueuedTableRow({
       queryClient.invalidateQueries()
     }
   })
+
   return (
     <tr>
       <td>{i + 1}</td>
@@ -85,8 +90,9 @@ export function QueuedTableRow({
                 aria-label="Select which slot to assign"
                 value={slotChoice}
                 onClick={(e) => {
-                  updateSlotOptions(e.target.value, "restore")
                   setSlotChoice("Slot #")
+                  updateSlotOptions(e.target.value, "restore")
+                  updateSlotNumIntentions(e, i, true)
                 }}
                 onChange={(e) => {
                   setSlotChoice(e.target.value)
