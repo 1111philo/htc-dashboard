@@ -44,7 +44,7 @@ export default function QueuedTable({
     }
 
     fetchSlotOptions()
-  }, [])
+  }, [guestsQueued])
 
   function createSlotIntentionObjects(): SlotIntention[] {
     const slotIntentions = guestsQueued.map((g) => {
