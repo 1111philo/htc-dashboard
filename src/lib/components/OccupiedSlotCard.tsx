@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Timer } from '.'
+import { readableTime } from '../utils';
 import { updateGuestServiceStatus } from '../api';
 import {
   Button,
@@ -22,7 +22,6 @@ export default function OccupiedSlotCard({
   slotNum
 }: OccupiedSlotCardProps) {
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const [isExpired, setIsExpired] = useState(false);
 
   const { mutateAsync: moveToCompletedMutation } = useMutation({
@@ -41,7 +40,7 @@ export default function OccupiedSlotCard({
     }
   })
 
-  const nameAndID = `(${guest?.guest_id}) ${guest?.first_name} ${guest?.last_name}`;
+  const fullName = `${guest?.first_name} ${guest?.last_name}`;
   const slotStart = guest.slotted_at
   const slotStatusColor = isExpired ? "danger" : "warning"
   const slotIndicatorStyle = `bg-${slotStatusColor} rounded d-flex justify-content-center align-items-center`
@@ -57,18 +56,15 @@ export default function OccupiedSlotCard({
                 xs={6}
                 className="d-flex flex-column justify-content-between fs-5"
               >
-                <span onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{nameAndID}</span>
-                {/* TIMER DISPLAY FOR FUTURE RELEASE
-                {serviceName === "Shower" && (
-                  <>
-                    // Default length of shower is 20min
-                    <Timer
-                      slotStart={slotStart!}
-                      slotTimeLength={20}
-                      setIsExpired={setIsExpired}
-                    ></Timer>
-                  </>
-                )} */}
+                <span>
+                  <Link to="/guests/$guestId" params={{ guestId: guest.guest_id }}>
+                    {fullName}
+                  </Link>
+                </span>
+                <p>
+                  start:
+                  <span className='fst-italic'>{` ${readableTime(slotStart)}`}</span>
+                </p>
               </Col>
               <Col xs={5} className="d-flex flex-row justify-content-end">
                 <Button

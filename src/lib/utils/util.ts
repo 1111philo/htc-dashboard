@@ -13,9 +13,25 @@ export function readableDateTime(ISODateString: string): string {
     year: "numeric",
     month: "numeric",
     day: "numeric",
+    hour: 'numeric',
+    minute: 'numeric',
+    second: undefined,
+    hour12: true
   };
 
-  return `${ISODate.toLocaleDateString("en-US", options)} ${ISODate.toLocaleTimeString("en-US")}`;
+  return ISODate.toLocaleTimeString("en-US", options);
+}
+
+export function readableTime(ISODateString: string): string {
+  const ISODate = new Date(ISODateString);
+  const options: Intl.DateTimeFormatOptions = {
+    hour: 'numeric',
+    minute: 'numeric',
+    second: undefined,
+    hour12: true
+  };
+
+  return ISODate.toLocaleTimeString("en-US", options);
 }
 
 export function isEven(num) {
