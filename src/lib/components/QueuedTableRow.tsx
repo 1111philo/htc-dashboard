@@ -1,56 +1,101 @@
+import { useState } from 'react';
+import { Link } from '@tanstack/react-router';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { updateGuestServiceStatus } from '../api';
+import { readableDateTime } from "../utils";
+import {
+  Button,
+  Dropdown,
+  Form
+} from 'react-bootstrap';
 
+interface SlotIntention {
+  guest: GuestResponse;
+  slotNumIntention: string;
+}
+interface QueuedTableRowProps {
+  guest: Guest;
+  service: ServiceType;
+  availableSlotOptions: number[];
+  setAvailableSlotOptions: React.Dispatch<React.SetStateAction<number[]>>;
+  slotIntentions: SlotIntention[];
+  setSlotIntentions: React.Dispatch<React.SetStateAction<SlotIntention[]>>;
+  i: number;
+}
 
-export function QueuedTableRow() {
+export function QueuedTableRow({
+  guest,
+  service,
+  availableSlotOptions,
+  setAvailableSlotOptions,
+  slotIntentions,
+  setSlotIntentions,
+  i
+}) {
+  const queryClient = useQueryClient();
+  const [slotChoice, setSlotChoice] = useState<string>("Slot #");
   const fullName = guest.first_name + " " + guest.last_name;
   const timeRequested = readableDateTime(guest.queued_at);
 
+  function updateSlotNumIntentions(e, i: number) {
+    const updatedSlotNumIntentions = [...slotIntentions];
+    updatedSlotNumIntentions[i] =
+      { ...updatedSlotNumIntentions[i], slotNumIntention: e.target.value };
+    setSlotIntentions(updatedSlotNumIntentions);
+  }
+
+  const { mutateAsync: moveToCompletedMutation } = useMutation({
+    mutationFn: (guest: GuestResponse): Promise<number> =>
+      updateGuestServiceStatus("Completed", guest, null),
+    onSuccess: () => {
+      queryClient.invalidateQueries()
+    }
+  })
   return (
-    <tr key={`${guest.guest_id}-${i}`}>
+    <tr>
       <td>{i + 1}</td>
       <td>{timeRequested}</td>
-      <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{guest.guest_id}</td>
-      <td onClick={() => navigate({ to: `/guests/${guest.guest_id}` })}>{fullName}</td>
+      <td>
+        <Link to="/guests/$guestId" params={{ guestId: guest.guest_id }}>
+          {fullName}
+        </Link>
+      </td>
       <td>
         <div className="d-flex flex-column justify-content-end">
           {service.quota ? (
-            <>
-              <FeedbackMessage
-                message={feedback}
-              />
-              <div className="d-flex flex-row">
-                <Form.Select
-                  aria-label="Select which slot to assign"
-                  onChange={(e) => setSlotNumAssigned(+e.target.value)}
-                >
-                  <option>Slot #</option>
-                  {availableSlots?.map((slotNum, i) => {
-                    return (
-                      <option key={`${slotNum}-${i}`}>{slotNum}</option>
-                    );
-                  })}
-                </Form.Select>
-                <Button
-                  className="flex-grow-1 me-2"
-                  onClick={() =>
-                    moveToSlottedMutation(guest)
-                  }
-                >
-                  Assign
-                </Button>
-                <Dropdown drop='down' autoClose={true}>
-                  <Dropdown.Toggle  variant='outline-primary' />
-                  <Dropdown.Menu>
-                    <Dropdown.Item
-                      onClick={() =>
-                        moveToCompletedMutation(guest)
-                      }
-                    >
-                      Move to Completed
-                    </Dropdown.Item>
-                  </Dropdown.Menu>
-                </Dropdown>
-              </div>
-            </>
+            <div className="d-flex flex-row">
+              <Form.Select
+                aria-label="Select which slot to assign"
+                value={slotChoice}
+                onClick={(e) => {
+                  setSlotChoice("Slot #")
+                }}
+                onChange={(e) => {
+                  setSlotChoice(e.target.value)
+                  updateSlotNumIntentions(e, i)
+                }}
+                className="me-4"
+              >
+                <option>{slotChoice}</option>
+                {availableSlotOptions?.map((slotNum, i) => {
+                  return (
+                    <option key={`${slotNum}-${i}`}>{slotNum}</option>
+                  );
+                })}
+              </Form.Select>
+              <Dropdown drop='down' autoClose={true}>
+                <Dropdown.Toggle  variant='outline-primary' />
+                <Dropdown.Menu>
+                  <Dropdown.Item
+                    onClick={() =>
+                      moveToCompletedMutation(guest)
+                    }
+                  >
+                    Move to Completed
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </div>
           ) : (
             <Button
               variant="primary"
