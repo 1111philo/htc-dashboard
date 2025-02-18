@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { readableDateTime } from "../utils";
 import { getAvailableSlots, updateGuestServiceStatus } from "../api";
-import { Button, Dropdown, Form, Table } from "react-bootstrap";
+import { Button, Table } from "react-bootstrap";
 import { QueuedTableRow } from "./QueuedTableRow";
 
 interface QueuedTableProps {
@@ -79,7 +77,6 @@ export default function QueuedTable({
       queryClient.invalidateQueries()
     }
   })
-
 
   return (
     <div>
