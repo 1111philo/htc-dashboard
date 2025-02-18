@@ -108,10 +108,12 @@ export async function updateGuestServiceStatus(
 export async function getAvailableSlots(service): Promise<number[]> {
   const { service_id, quota } = service;
 
-  let totalSlots = Array.from({ length: quota }, (_, i) => i + 1);
+  let possibleSlotIds = Array.from({ length: quota }, (_, i) => i + 1);
   const guestsSlotted = await fetchServiceGuestsSlotted(service_id);
   const occupiedSlots = guestsSlotted.map((g) => g.slot_id);
-  const availableSlots = totalSlots.reduce(
+
+  // compare possibleSlotIds with occupied slots, deduce available slots
+  const availableSlots = possibleSlotIds.reduce(
     (accum: number[], curr: number, i) => {
       if (!occupiedSlots.includes(curr)) {
         accum.push(curr);
