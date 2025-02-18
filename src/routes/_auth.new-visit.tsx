@@ -14,6 +14,7 @@ import {
   guestOptLabel,
   readableDateTime,
   trimStringValues,
+  convertServiceTypeToOption,
 } from "../lib/utils";
 
 interface LoaderData {
@@ -50,6 +51,23 @@ function NewVisitView() {
 
   const [notifications, setNotifications] = useState<GuestNotification[]>([]);
 
+  const getDefaultService: () => ServiceType | undefined = () => {
+    if (!serviceTypes.length) return;
+    let defaultService = serviceTypes.find(
+      (s) => s.name === DEFAULT_SERVICE_NAME
+    );
+    if (!defaultService) defaultService = serviceTypes[0];
+    return defaultService;
+  };
+  const setDefaultService = () => {
+    const defaultService = getDefaultService();
+    if (!defaultService) {
+      setSelectedServicesOpt([]);
+    } else {
+      setSelectedServicesOpt([convertServiceTypeToOption(defaultService)]);
+    }
+  };
+
   // set selected guest to new guest if exists
   useEffect(() => {
     if (!newGuest) return;
@@ -75,18 +93,11 @@ function NewVisitView() {
   // default to the first service being selected
   useEffect(() => {
     if (!serviceTypes.length) return;
-    let defaultService = serviceTypes.find(
-      (s) => s.name === DEFAULT_SERVICE_NAME
-    );
+    let defaultService = getDefaultService();
     if (!defaultService) {
       defaultService = serviceTypes[0];
     }
-    setSelectedServicesOpt([
-      {
-        value: defaultService.service_id.toString(),
-        label: defaultService.name,
-      },
-    ]);
+    setSelectedServicesOpt([convertServiceTypeToOption(defaultService)]);
   }, []);
 
   return (
@@ -256,7 +267,7 @@ function NewVisitView() {
 
   function clear() {
     setSelectedGuestOpt(null);
-    setSelectedServicesOpt([]);
+    setDefaultService();
     setNotifications([]);
   }
 }
