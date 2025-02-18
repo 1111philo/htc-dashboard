@@ -10,7 +10,11 @@ import {
 import { addGuest, getGuestData, getGuestsWithQuery } from "../lib/api/guest";
 import { addVisit } from "../lib/api/visit";
 import { toggleGuestNotificationStatus } from "../lib/api/notification";
-import { guestOptLabel, readableDateTime, trimStringValues } from "../lib/utils";
+import {
+  guestOptLabel,
+  readableDateTime,
+  trimStringValues,
+} from "../lib/utils";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
@@ -66,6 +70,17 @@ function NewVisitView() {
     });
   }, [selectedGuestOpt]);
 
+  // default to the first service being selected
+  useEffect(() => {
+    if (!serviceTypes.length) return;
+    setSelectedServicesOpt([
+      {
+        value: serviceTypes[0].service_id.toString(),
+        label: serviceTypes[0].name,
+      },
+    ]);
+  }, []);
+
   return (
     <>
       <h1 className="mb-4">Add New Visit</h1>
@@ -101,7 +116,7 @@ function NewVisitView() {
   async function onSubmitNewGuestForm(
     guest: Partial<Guest>
   ): Promise<number | null> {
-    trimStringValues(guest)
+    trimStringValues(guest);
     const guest_id = await addGuest(guest);
     if (!guest_id) return null;
     setShowNewGuestModal(false);
@@ -189,7 +204,7 @@ function NewVisitView() {
           type="submit"
           onClick={logVisit}
           className="mt-4 d-block m-auto"
-          disabled={!selectedServicesOpt.length}
+          disabled={!selectedServicesOpt.length || !selectedGuestOpt}
         >
           Log Visit
         </Button>
