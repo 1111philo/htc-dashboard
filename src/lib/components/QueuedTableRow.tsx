@@ -44,6 +44,23 @@ export function QueuedTableRow({
     setSlotIntentions(updatedSlotNumIntentions);
   }
 
+  function updateSlotOptions(slotChoice: string, opt: "restore" | "remove" ) {
+    // if (slotChoice === "Slot #") return;
+    if (opt === "restore" && slotChoice !== "Slot #") {
+      // only restore if number doesn't already exist in availableSlotOptions
+      if (!availableSlotOptions.some((so) => so === slotChoice)) {
+        setAvailableSlotOptions(
+          (prevOpts) => [...prevOpts, +slotChoice].sort((a, b) => a - b)
+        )
+      }
+    }
+    if (opt === "remove") {
+      setAvailableSlotOptions((prevOpts) =>
+        prevOpts.filter((opt) => opt !== +slotChoice)
+      )
+    }
+  }
+
   const { mutateAsync: moveToCompletedMutation } = useMutation({
     mutationFn: (guest: GuestResponse): Promise<number> =>
       updateGuestServiceStatus("Completed", guest, null),
@@ -68,10 +85,12 @@ export function QueuedTableRow({
                 aria-label="Select which slot to assign"
                 value={slotChoice}
                 onClick={(e) => {
+                  updateSlotOptions(e.target.value, "restore")
                   setSlotChoice("Slot #")
                 }}
                 onChange={(e) => {
                   setSlotChoice(e.target.value)
+                  updateSlotOptions(e.target.value, "remove")
                   updateSlotNumIntentions(e, i)
                 }}
                 className="me-4"
