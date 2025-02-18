@@ -68,6 +68,7 @@ interface ServiceType {
   service_id: number;
   name: string;
   quota: number | null;
+  queueable: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -98,7 +99,7 @@ interface AddUserAPIResponse {
   user_id: number;
 }
 
-type GetUserAPIResponse = User
+type GetUserAPIResponse = User;
 
 interface GetUsersAPIResponse {
   total: number;
