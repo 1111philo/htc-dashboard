@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { readableDateTime } from "../utils";
 import { getAvailableSlots, updateGuestServiceStatus } from "../api";
 import { Button, Dropdown, Form, Table } from "react-bootstrap";
+import { QueuedTableRow } from "./QueuedTableRow";
 
 interface QueuedTableProps {
   guestsQueued: GuestResponse[];
@@ -55,13 +56,6 @@ export default function QueuedTable({
     return slotIntentions;
   }
 
-  function updateSlotNumIntentions(e, i: number) {
-    const updatedSlotNumIntentions = [...slotIntentions];
-    updatedSlotNumIntentions[i] =
-      { ...updatedSlotNumIntentions[i], slotNumIntention: e.target.value };
-    setSlotIntentions(updatedSlotNumIntentions);
-  }
-
   const { mutateAsync: moveToSlottedMutation } = useMutation({
     mutationFn: async (): Promise<number> | undefined => {
       for (const slotIntention of slotIntentions) {
@@ -86,19 +80,6 @@ export default function QueuedTable({
     }
   })
 
-  const { mutateAsync: moveToCompletedMutation } = useMutation({
-    mutationFn: (guest: GuestResponse): Promise<number> =>
-      updateGuestServiceStatus("Completed", guest, null),
-    onSuccess: () => {
-      queryClient.invalidateQueries()
-    }
-  })
-
-  function removeSlotOption(slotChoice: number) {
-    setAvailableSlotOptions((prevOptions) =>
-      availableSlotOptions?.filter((choice) => choice !== slotChoice)
-    )
-  }
 
   return (
     <div>
@@ -127,66 +108,18 @@ export default function QueuedTable({
         </thead>
         <tbody>
           {guestsQueued?.map(
-            (guest, i) => {
-              const fullName = guest.first_name + " " + guest.last_name;
-              const timeRequested = readableDateTime(guest.queued_at);
-
-              return (
-                <tr key={`${guest.guest_id}-${i}`}>
-                  <td>{i + 1}</td>
-                  <td>{timeRequested}</td>
-                  <td>
-                    <Link to="/guests/$guestId" params={{ guestId: guest.guest_id }}>
-                      {fullName}
-                    </Link>
-                  </td>
-                  <td>
-                    <div className="d-flex flex-column justify-content-end">
-                      {service.quota ? (
-                        <div className="d-flex flex-row">
-                          <Form.Select
-                            aria-label="Select which slot to assign"
-                            onChange={(e) => {
-                              removeSlotOption(+e.target.value)
-                              updateSlotNumIntentions(e, i)
-                            }}
-                            className="me-4"
-                          >
-                            <option>Slot #</option>
-                            {availableSlotOptions?.map((slotNum, i) => {
-                              return (
-                                <option key={`${slotNum}-${i}`}>{slotNum}</option>
-                              );
-                            })}
-                          </Form.Select>
-                          <Dropdown drop='down' autoClose={true}>
-                            <Dropdown.Toggle  variant='outline-primary' />
-                            <Dropdown.Menu>
-                              <Dropdown.Item
-                                onClick={() =>
-                                  moveToCompletedMutation(guest)
-                                }
-                              >
-                                Move to Completed
-                              </Dropdown.Item>
-                            </Dropdown.Menu>
-                          </Dropdown>
-                        </div>
-                      ) : (
-                        <Button
-                          variant="primary"
-                          onClick={() =>
-                            moveToCompletedMutation(guest)
-                          }
-                        >
-                          Move to Completed
-                        </Button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            }
+            (guest, i) => (
+              <QueuedTableRow
+                guest={guest}
+                service={service}
+                availableSlotOptions={availableSlotOptions}
+                setAvailableSlotOptions={setAvailableSlotOptions}
+                slotIntentions={slotIntentions}
+                setSlotIntentions={setSlotIntentions}
+                i={i}
+                key={`${guest.guest_id}-${i}`}
+              />
+            )
           )}
         </tbody>
       </Table>
