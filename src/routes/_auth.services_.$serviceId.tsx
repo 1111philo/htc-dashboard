@@ -149,17 +149,20 @@ function ServiceView() {
         <QueuedTable
           guestsQueued={guestsQueued}
           service={service}
+          queueable={service.queueable}
         />
       )}
 
-      {isCompletedPending ? (
-        <>
-          <h2>Completed</h2>
-          <p>Loading...</p>
-        </>
-      ) : (
-        <CompletedTable guestsCompleted={guestsCompleted} />
-      )}
+      {service.queueable ? (
+        isCompletedPending ? (
+          <>
+            <h2>Completed</h2>
+            <p>Loading...</p>
+          </>
+        ) : (
+          <CompletedTable guestsCompleted={guestsCompleted} />
+        )
+      ) : null}
     </>
   );
 }
