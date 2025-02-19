@@ -140,16 +140,18 @@ function ServiceView() {
         ""
       )}
 
-      {service.queueable ? (
-        isQueuedPending ? (
-          <>
-            <h2>Queue</h2>
-            <p>Loading...</p>
-          </>
-        ) : (
-          <QueuedTable guestsQueued={guestsQueued} service={service} />
-        )
-      ) : null}
+      {isQueuedPending ? (
+        <>
+          <h2>Queue</h2>
+          <p>Loading...</p>
+        </>
+      ) : (
+        <QueuedTable
+          guestsQueued={guestsQueued}
+          service={service}
+          queueable={service.queueable}
+        />
+      )}
 
       {service.queueable ? (
         isCompletedPending ? (
