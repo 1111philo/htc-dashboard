@@ -28,6 +28,7 @@ export default function CompletedTable({ guestsCompleted }: CompletedTableProps)
           <tr>
             <th>Time Requested</th>
             <th>Guest Name</th>
+            <th>Last Slot #</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -45,6 +46,7 @@ export default function CompletedTable({ guestsCompleted }: CompletedTableProps)
                       {fullName}
                     </Link>
                   </td>
+                  <td>{guest.slot_id}</td>
                   <td>
                     <Button
                       variant="outline-primary"
