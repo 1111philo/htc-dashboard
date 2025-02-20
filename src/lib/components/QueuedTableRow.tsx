@@ -26,7 +26,7 @@ export function QueuedTableRow({
   setAvailableSlotOptions,
   slotIntentions,
   setSlotIntentions,
-  i
+  i,
 }: QueuedTableRowProps) {
   const queryClient = useQueryClient();
   const [slotChoice, setSlotChoice] = useState<string>("Slot #");
@@ -81,6 +81,7 @@ export function QueuedTableRow({
         <Link to="/guests/$guestId" params={{ guestId: guest.guest_id }}>
           {fullName}
         </Link>
+        {guest.has_notification && <span>❗</span>}
       </td>
 
       {service.queueable && (
