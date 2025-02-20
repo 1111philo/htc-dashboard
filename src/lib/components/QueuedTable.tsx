@@ -127,6 +127,7 @@ export default function QueuedTable({
             />
           ))}
         </tbody>
+        <div style={{ paddingBottom: "40px" }}></div>
       </Table>
     </div>
   );
