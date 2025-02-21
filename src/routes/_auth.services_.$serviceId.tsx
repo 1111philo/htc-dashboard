@@ -148,6 +148,7 @@ function ServiceView() {
       ) : (
         <QueuedTable
           guestsQueued={guestsQueued}
+          guestsCompleted={guestsCompleted}
           service={service}
           queueable={service.queueable}
         />
