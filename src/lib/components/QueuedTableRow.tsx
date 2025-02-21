@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateGuestServiceStatus } from "../api";
 import { readableDateTime } from "../utils";
@@ -16,6 +15,7 @@ interface QueuedTableRowProps {
   setAvailableSlotOptions: React.Dispatch<React.SetStateAction<number[]>>;
   slotIntentions: SlotIntention[];
   setSlotIntentions: React.Dispatch<React.SetStateAction<SlotIntention[]>>;
+  guestLink: JSX.Element;
   i: number;
 }
 
@@ -26,6 +26,7 @@ export function QueuedTableRow({
   setAvailableSlotOptions,
   slotIntentions,
   setSlotIntentions,
+  guestLink,
   i,
 }: QueuedTableRowProps) {
   const queryClient = useQueryClient();
@@ -78,10 +79,10 @@ export function QueuedTableRow({
       <td>{i + 1}</td>
       <td>{timeRequested}</td>
       <td>
-        <Link to="/guests/$guestId" params={{ guestId: guest.guest_id }}>
-          {fullName}
-        </Link>
-        {guest.has_notification && <span>❗</span>}
+        {guestLink}
+        {guest.has_notification && (
+          <span data-testid="has-notification-icon">❗</span>
+        )}
       </td>
 
       {service.queueable && (
@@ -110,7 +111,10 @@ export function QueuedTableRow({
                   })}
                 </Form.Select>
                 <Dropdown drop="down" autoClose={true}>
-                  <Dropdown.Toggle variant="outline-primary" />
+                  <Dropdown.Toggle
+                    variant="outline-primary"
+                    data-testid="queued-table-row-dropdown"
+                  />
                   <Dropdown.Menu>
                     <Dropdown.Item
                       onClick={() => moveToCompletedMutation(guest)}
