@@ -6,6 +6,7 @@ import { QueuedTableRow } from "./QueuedTableRow";
 
 interface QueuedTableProps {
   guestsQueued: GuestResponse[];
+  guestsCompleted: GuestResponse[];
   service: ServiceType;
 }
 
@@ -16,6 +17,7 @@ interface SlotIntention {
 
 export default function QueuedTable({
   guestsQueued,
+  guestsCompleted,
   service,
 }: QueuedTableProps) {
   const queryClient = useQueryClient();
@@ -45,7 +47,7 @@ export default function QueuedTable({
     }
 
     fetchSlotOptions();
-  }, [guestsQueued]);
+  }, [guestsQueued, guestsCompleted]);
 
   function createSlotIntentionObjects(): SlotIntention[] {
     const slotIntentions = guestsQueued.map((g) => {

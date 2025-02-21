@@ -1,7 +1,7 @@
 /** API calls related to Services */
 
 import * as API from "aws-amplify/api";
-import { sortByTimeAscending } from "../utils";
+import { sortByTimeAscending, sortByTimeDescending } from "../utils";
 
 export async function fetchServiceByID(serviceId: number) {
   const serviceResponse = await API.post({
@@ -52,20 +52,17 @@ export async function fetchServiceGuestsSlotted(
 }
 
 export async function fetchServiceGuestsQueued(serviceId: number) {
-  const guestsQueuedResponse = await (
-    API.post({
-      apiName: "auth",
-      path: "/serviceGuestsQueued",
-      options: {
-        body: {
-          service_id: serviceId
-        }
-      }
-    }).response
-  )
-  const unsortedGuestsQueued = (await guestsQueuedResponse.body.json())
-  // TODO: resolve unsortedQuestsQueued into an object that is accepted in sortByTimeDescending
-  const guestsQueued = sortByTimeAscending(unsortedGuestsQueued, 'queued_at')
+  const guestsQueuedResponse = await API.post({
+    apiName: "auth",
+    path: "/serviceGuestsQueued",
+    options: {
+      body: {
+        service_id: serviceId,
+      },
+    },
+  }).response;
+  const unsortedGuestsQueued = await guestsQueuedResponse.body.json();
+  const guestsQueued = sortByTimeAscending(unsortedGuestsQueued, "queued_at");
   return guestsQueued;
 }
 
@@ -79,7 +76,11 @@ export async function fetchServiceGuestsCompleted(serviceId: number) {
       },
     },
   }).response;
-  const guestsCompleted = (await guestsCompletedResponse.body.json())!;
+  const unsortedGuestsCompleted = (await guestsCompletedResponse.body.json())!;
+  const guestsCompleted = sortByTimeDescending(
+    unsortedGuestsCompleted,
+    "completed_at"
+  );
   return guestsCompleted;
 }
 
