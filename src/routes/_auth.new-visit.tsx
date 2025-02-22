@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
@@ -7,33 +7,32 @@ import {
   NewGuestForm,
   GuestSelectSearch,
 } from "../lib/components";
-import { addGuest, getGuestData, getGuestsWithQuery } from "../lib/api/guest";
+import { addGuest, getGuestData } from "../lib/api/guest";
 import { addVisit } from "../lib/api/visit";
 import { toggleGuestNotificationStatus } from "../lib/api/notification";
-import {
-  guestOptLabel,
-  readableDateTime,
-  trimStringValues,
-  convertServiceTypeToOption,
-} from "../lib/utils";
+import { readableDateTime, trimStringValues } from "../lib/utils";
+
+const DEFAULT_SERVICE_NAME = "courtyard";
 
 interface LoaderData {
   serviceTypes: ServiceType[];
+  defaultService: ServiceType | null;
 }
-
-const DEFAULT_SERVICE_NAME = "Courtyard";
 
 export const Route = createFileRoute("/_auth/new-visit")({
   component: NewVisitView,
   loader: async ({ context }): Promise<LoaderData> => {
     let { serviceTypes } = context;
     serviceTypes = serviceTypes ?? [];
-    return { serviceTypes };
+    const defaultService =
+      serviceTypes.find((s) => s.name.toLowerCase() === DEFAULT_SERVICE_NAME) ??
+      null;
+    return { serviceTypes, defaultService };
   },
 });
 
 function NewVisitView() {
-  const { serviceTypes } = Route.useLoaderData();
+  const { serviceTypes, defaultService } = Route.useLoaderData();
 
   const [feedback, setFeedback] = useState<UserMessage>({
     text: "",
@@ -50,34 +49,7 @@ function NewVisitView() {
 
   const [selectedServicesOpt, setSelectedServicesOpt] = useState<
     ReactSelectOption[]
-  >([]); // array bc this Select is set to multi
-
-  const getDefaultService: () => ServiceType | undefined = () => {
-    if (!serviceTypes.length) return;
-    let defaultService = serviceTypes.find(
-      (s) => s.name === DEFAULT_SERVICE_NAME
-    );
-    if (!defaultService) defaultService = serviceTypes[0];
-    return defaultService;
-  };
-  const setDefaultService = () => {
-    const defaultService = getDefaultService();
-    if (!defaultService) {
-      setSelectedServicesOpt([]);
-    } else {
-      setSelectedServicesOpt([convertServiceTypeToOption(defaultService)]);
-    }
-  };
-
-  // default to the first service being selected
-  useEffect(() => {
-    if (!serviceTypes.length) return;
-    let defaultService = getDefaultService();
-    if (!defaultService) {
-      defaultService = serviceTypes[0];
-    }
-    setSelectedServicesOpt([convertServiceTypeToOption(defaultService)]);
-  }, []);
+  >(defaultService ? [serviceTypeOptionFrom(defaultService)] : []); // array bc this Select is set to multi
 
   return (
     <>
@@ -220,8 +192,7 @@ function NewVisitView() {
     /** Map services to `Select` options */
     function servicesOpts() {
       return (
-        serviceTypes?.map((s: ServiceType) => convertServiceTypeToOption(s)) ??
-        []
+        serviceTypes?.map((s: ServiceType) => serviceTypeOptionFrom(s)) ?? []
       );
     }
 
@@ -252,7 +223,13 @@ function NewVisitView() {
 
   function clear() {
     setSelectedGuest(null);
-    setDefaultService();
     setNotifications([]);
   }
+}
+
+function serviceTypeOptionFrom(service: ServiceType): ReactSelectOption {
+  return {
+    value: service.service_id.toString(),
+    label: service.name,
+  };
 }
