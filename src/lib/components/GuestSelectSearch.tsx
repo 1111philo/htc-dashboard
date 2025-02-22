@@ -3,11 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import Select from "react-select";
 import { useDebouncedCallback } from "use-debounce";
 import { getGuestsWithQuery } from "../api";
-import {
-  guestOptLabel,
-  guestSelectOptionFrom,
-  guestSelectOptsFrom,
-} from "../utils";
+import { guestSelectOptionFrom, guestSelectOptsFrom } from "../utils";
 
 import { Form } from "react-bootstrap";
 
@@ -19,40 +15,39 @@ export default function GuestSelectSearch({
   selectedGuestOpt,
   setSelectedGuestOpt,
 }) {
-  const [guestSelectOpts, setGuestSelectOpts] = useState<
-    { value: string; label: string }[]
-  >([]);
-
   const [searchText, setSearchText] = useState("");
   const [debouncedSearchText, setDebouncedSearchText] = useState("");
 
-  const { data, isLoading, error } = useQuery({
+  const { data: guests } = useQuery({
     queryKey: ["guests"],
-    queryFn: () => {
+    queryFn: async () => {
       setDebouncedSearchText("");
-      getGuestsWithQuery(searchText.trim()).then((guestsResponse) => {
-        setGuestSelectOpts(guestSelectOptsFrom(guestsResponse.rows));
-      });
+      const { rows: guests } = await getGuestsWithQuery(
+        debouncedSearchText.trim()
+      );
+      return guests;
     },
     enabled: !!debouncedSearchText,
   });
 
   const updateSearch = useDebouncedCallback(
-    (searchText) => setDebouncedSearchText(searchText),
+    (searchVal) => setDebouncedSearchText(searchVal),
     SEARCH_DEBOUNCE_MS
   );
 
+  const options = newGuest
+    ? guestSelectOptionFrom(newGuest)
+    : guestSelectOptsFrom(guests ?? []);
+
   return (
-    <Form className="mt-3 my-5">
-      <Form.Group className="mb-3" controlId="formUID">
+    <Form className="mt-3 my-5" onSubmit={(e) => e.preventDefault()}>
+      <Form.Group className="mb-3">
         <Form.Label>
           <i>Search by UID, Name, or Birthday (YYYY-MM-DD):</i>
         </Form.Label>
         <Select
           id="user-dropdown"
-          options={newGuest ? guestSelectOptionFrom(newGuest) : guestSelectOpts}
-          defaultValue={selectedGuestOpt}
-          defaultInputValue={searchText}
+          options={options}
           value={selectedGuestOpt}
           onChange={(newVal) => setSelectedGuestOpt(newVal)}
           onInputChange={onChangeInput}
@@ -63,8 +58,8 @@ export default function GuestSelectSearch({
     </Form>
   );
 
-  function onChangeInput(val) {
+  function onChangeInput(val: string) {
     setSearchText(val);
-    val && updateSearch(val.trim());
+    updateSearch(val.trim());
   }
 }
