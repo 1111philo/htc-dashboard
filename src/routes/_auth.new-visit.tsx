@@ -78,7 +78,7 @@ function NewVisitView() {
         />
       </div>
 
-      {!!notifications.length && <Notifications data={notifications} />}
+      {!!notifications.length && <Notifications notifications={notifications} />}
 
       <RequestedServices data={serviceTypes} />
     </>
@@ -110,57 +110,6 @@ function NewVisitView() {
   function onCloseNewGuestForm() {
     if (!confirm("Discard the new guest?")) return;
     setShowNewGuestModal(false);
-  }
-
-  function Notifications({ data }) {
-    return (
-      <div className="pb-5">
-        <h2>Notifications ({notifications.length})</h2>
-        <Table>
-          <tbody>
-            {notifications.map((n: GuestNotification) => {
-              const [date, time] = readableDateTime(n.created_at).split(" ");
-              return (
-                <tr key={n.notification_id} className="align-middle">
-                  <td>
-                    {date} <br /> {time}
-                  </td>
-                  <td>{n.message}</td>
-                  <td>
-                    <Form.Select
-                      onChange={async () =>
-                        await updateNotificationStatus(
-                          n.notification_id,
-                          n.status
-                        )
-                      }
-                      style={{ minWidth: "11ch" }}
-                      data-notification-id={n.notification_id}
-                    >
-                      <option value="Active">ACTIVE</option>
-                      <option value="Archived">Archive</option>
-                    </Form.Select>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </Table>
-      </div>
-    );
-
-    async function updateNotificationStatus(
-      notificationId: number,
-      status: GuestNotificationStatus
-    ) {
-      const success = await toggleGuestNotificationStatus(notificationId);
-      if (success) return;
-      // unsuccessful -> revert value
-      const notificationSelect = document.querySelector(
-        `[data-notification-id="${notificationId}"]`
-      ) as HTMLSelectElement | null;
-      notificationSelect!.value = status;
-    }
   }
 
   function RequestedServices({ data }) {
@@ -224,6 +173,60 @@ function NewVisitView() {
   function clear() {
     setSelectedGuest(null);
     setNotifications([]);
+  }
+}
+
+interface NProps {
+  notifications: GuestNotification[];
+}
+function Notifications({ notifications }: NProps) {
+  return (
+    <div className="pb-5">
+      <h2>Notifications ({notifications.length})</h2>
+      <Table>
+        <tbody>
+          {notifications.map((n: GuestNotification) => {
+            const [date, time] = readableDateTime(n.created_at).split(" ");
+            return (
+              <tr key={n.notification_id} className="align-middle">
+                <td>
+                  {date} <br /> {time}
+                </td>
+                <td>{n.message}</td>
+                <td>
+                  <Form.Select
+                    onChange={async () =>
+                      await updateNotificationStatus(
+                        n.notification_id,
+                        n.status
+                      )
+                    }
+                    style={{ minWidth: "11ch" }}
+                    data-notification-id={n.notification_id}
+                  >
+                    <option value="Active">ACTIVE</option>
+                    <option value="Archived">Archive</option>
+                  </Form.Select>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </Table>
+    </div>
+  );
+
+  async function updateNotificationStatus(
+    notificationId: number,
+    status: GuestNotificationStatus
+  ) {
+    const success = await toggleGuestNotificationStatus(notificationId);
+    if (success) return;
+    // unsuccessful -> revert value
+    const notificationSelect = document.querySelector(
+      `[data-notification-id="${notificationId}"]`
+    ) as HTMLSelectElement | null;
+    notificationSelect!.value = status;
   }
 }
 
