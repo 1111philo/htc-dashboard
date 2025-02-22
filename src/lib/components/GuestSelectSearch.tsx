@@ -1,12 +1,16 @@
-import { useState } from 'react';
-import Select from 'react-select';
+import { useState } from "react";
+import Select from "react-select";
 import { useDebouncedCallback } from "use-debounce";
-import { getGuestsWithQuery } from '../api';
-import { guestOptLabel, guestLookupOpts } from '../utils';
+import { getGuestsWithQuery } from "../api";
+import { guestOptLabel, guestLookupOpts } from "../utils";
 
-import { Form } from 'react-bootstrap';
+import { Form } from "react-bootstrap";
 
-export default function GuestSelectSearch({ newGuest, selectedGuestOpt, setSelectedGuestOpt }) {
+export default function GuestSelectSearch({
+  newGuest,
+  selectedGuestOpt,
+  setSelectedGuestOpt,
+}) {
   const [guestSelectOpts, setGuestSelectOpts] = useState<
     { value: string; label: string }[]
   >([]);
