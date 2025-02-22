@@ -99,10 +99,12 @@ function NewVisitView() {
         />
       </Modal>
 
-      <GuestSelectSearch
-        selectedGuest={selectedGuest}
-        onSelect={onSelectGuest}
-      />
+      <div className="mb-5">
+        <GuestSelectSearch
+          selectedGuest={selectedGuest}
+          onSelect={onSelectGuest}
+        />
+      </div>
 
       {!!notifications.length && <Notifications data={notifications} />}
 
