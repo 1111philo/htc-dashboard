@@ -8,7 +8,7 @@ import {
   Services,
 } from "../lib/components";
 import { deleteGuest, getGuestData } from "../lib/api";
-import { sortByTimeDescending } from "../lib/utils";
+import { paddedId, sortByTimeDescending } from "../lib/utils";
 
 interface LoaderData {
   guest: Guest;
@@ -94,7 +94,7 @@ export default function GuestProfileView() {
     isError: false,
   });
 
-  const guestId = guest.guest_id.toString().padStart(5, "0");
+  const guestId = paddedId(guest.guest_id);
 
   return (
     <>

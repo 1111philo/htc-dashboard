@@ -108,3 +108,7 @@ export function convertServiceTypeToOption(
     label: service.name,
   };
 }
+
+export function paddedId(id: number): string {
+  return id.toString().padStart(5, "0");
+}

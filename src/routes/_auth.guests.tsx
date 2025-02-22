@@ -12,7 +12,7 @@ import {
 } from "../lib/components";
 import { addGuest, getGuestsData, getGuestsWithQuery } from "../lib/api/guest";
 import { useDebouncedCallback } from "use-debounce";
-import { trimStringValues } from "../lib/utils";
+import { paddedId, trimStringValues } from "../lib/utils";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -204,7 +204,7 @@ function GuestsTable({ rows /* setSortedRows */ }) {
             >
               <td>
                 <span className="badge bg-primary rounded-pill">
-                  {g.guest_id.toString().padStart(5, "0")}
+                  {paddedId(g.guest_id)}
                 </span>
               </td>
               <td>{g.first_name}</td>
