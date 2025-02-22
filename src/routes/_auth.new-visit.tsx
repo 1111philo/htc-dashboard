@@ -41,15 +41,16 @@ function NewVisitView() {
   });
 
   const [showNewGuestModal, setShowNewGuestModal] = useState(false);
-  const [newGuest, setNewGuest] = useState<Partial<Guest> | null>(null);
 
-  const [selectedGuestOpt, setSelectedGuestOpt] =
-    useState<ReactSelectOption | null>(null);
+  const [selectedGuest, setSelectedGuest] = useState<Partial<Guest> | null>(
+    null
+  );
+
+  const [notifications, setNotifications] = useState<GuestNotification[]>([]);
+
   const [selectedServicesOpt, setSelectedServicesOpt] = useState<
     ReactSelectOption[]
   >([]); // array bc this Select is set to multi
-
-  const [notifications, setNotifications] = useState<GuestNotification[]>([]);
 
   const getDefaultService: () => ServiceType | undefined = () => {
     if (!serviceTypes.length) return;
@@ -67,28 +68,6 @@ function NewVisitView() {
       setSelectedServicesOpt([convertServiceTypeToOption(defaultService)]);
     }
   };
-
-  // set selected guest to new guest if exists
-  useEffect(() => {
-    if (!newGuest) return;
-    setSelectedGuestOpt({
-      value: newGuest.guest_id?.toString()!,
-      label: guestOptLabel(newGuest),
-    });
-  }, [newGuest]);
-
-  // get notifications from selected guest
-  useEffect(() => {
-    if (!selectedGuestOpt) return;
-    getGuestData(+selectedGuestOpt.value).then((g) => {
-      if (!g.guest_notifications) return; // new guest is partial, so no notifications key
-      setNotifications(
-        (g.guest_notifications as GuestNotification[]).filter(
-          (n: GuestNotification) => n.status === "Active"
-        )
-      );
-    });
-  }, [selectedGuestOpt]);
 
   // default to the first service being selected
   useEffect(() => {
@@ -121,9 +100,8 @@ function NewVisitView() {
       </Modal>
 
       <GuestSelectSearch
-        newGuest={newGuest}
-        selectedGuestOpt={selectedGuestOpt}
-        setSelectedGuestOpt={setSelectedGuestOpt}
+        selectedGuest={selectedGuest}
+        onSelect={onSelectGuest}
       />
 
       {!!notifications.length && <Notifications data={notifications} />}
@@ -131,6 +109,13 @@ function NewVisitView() {
       <RequestedServices data={serviceTypes} />
     </>
   );
+
+  async function onSelectGuest(guest: Guest) {
+    setSelectedGuest(guest);
+    const { guest_notifications } = await getGuestData(guest.guest_id);
+    if (!guest_notifications) return;
+    setNotifications(guest_notifications.filter((n) => n.status === "Active"));
+  }
 
   async function onSubmitNewGuestForm(
     guest: Partial<Guest>
@@ -144,7 +129,7 @@ function NewVisitView() {
       isError: false,
     });
     const newGuest: Partial<Guest> = { ...guest, guest_id };
-    setNewGuest(newGuest);
+    setSelectedGuest(newGuest);
     return guest_id;
   }
 
@@ -223,7 +208,7 @@ function NewVisitView() {
           type="submit"
           onClick={logVisit}
           className="mt-4 d-block m-auto"
-          disabled={!selectedServicesOpt.length || !selectedGuestOpt}
+          disabled={!selectedServicesOpt.length || !selectedGuest}
         >
           Log Visit
         </Button>
@@ -243,7 +228,7 @@ function NewVisitView() {
       if (!selectedServicesOpt.length) return;
       // TODO validate "form"
       const v: Partial<Visit> = {
-        guest_id: +selectedGuestOpt!.value,
+        guest_id: selectedGuest?.guest_id,
         service_ids: selectedServicesOpt.map(({ value }) => +value),
       };
       const visitId = await addVisit(v);
@@ -264,7 +249,7 @@ function NewVisitView() {
   }
 
   function clear() {
-    setSelectedGuestOpt(null);
+    setSelectedGuest(null);
     setDefaultService();
     setNotifications([]);
   }
