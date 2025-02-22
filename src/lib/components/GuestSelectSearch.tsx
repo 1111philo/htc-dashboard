@@ -52,22 +52,20 @@ export default function GuestSelectSearch({ selectedGuest, onSelect }: Props) {
   );
 
   return (
-    <Form className="mt-3 my-5" onSubmit={(e) => e.preventDefault()}>
-      <Form.Group className="mb-3">
-        <Form.Label>
-          <i>Search by UID, Name, or Birthday (YYYY-MM-DD):</i>
-        </Form.Label>
-        <Select
-          id="user-dropdown"
-          options={options}
-          value={selection}
-          onChange={onChange}
-          onInputChange={onChangeInput}
-          menuIsOpen={!!searchText}
-          placeholder={"Search for a guest..."}
-        />
-      </Form.Group>
-    </Form>
+    <Form.Group className="mb-3">
+      <Form.Label>
+        <i>Search by UID, Name, or Birthday (YYYY-MM-DD):</i>
+      </Form.Label>
+      <Select
+        id="user-dropdown"
+        options={options}
+        value={selection}
+        onChange={onChange}
+        onInputChange={onChangeInput}
+        menuIsOpen={!!searchText}
+        placeholder={"Search for a guest..."}
+      />
+    </Form.Group>
   );
 
   function onChangeInput(val: string) {
