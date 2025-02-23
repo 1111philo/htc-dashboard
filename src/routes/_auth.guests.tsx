@@ -101,7 +101,7 @@ function GuestsView() {
       <Modal show={showNewGuestModal}>
         <NewGuestForm
           onSubmit={onSubmitNewGuestForm}
-          onCancel={onCancelNewGuestForm}
+          onCancel={() => setShowNewGuestModal(false)}
         />
       </Modal>
 
@@ -139,10 +139,6 @@ function GuestsView() {
       isError: false,
     });
     setSortedGuests([newGuest as Guest, ...sortedGuests]);
-  }
-
-  function onCancelNewGuestForm() {
-    setShowNewGuestModal(false);
   }
 }
 

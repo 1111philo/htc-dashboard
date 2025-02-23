@@ -74,7 +74,7 @@ function NewVisitView() {
       <Modal show={showNewGuestModal}>
         <NewGuestForm
           onSubmit={onSubmitNewGuestForm}
-          onCancel={onCloseNewGuestForm}
+          onCancel={() => setShowNewGuestModal(false)}
         />
       </Modal>
 
@@ -118,15 +118,6 @@ function NewVisitView() {
     </>
   );
 
-  async function onSelectGuest(guest: Guest | Partial<Guest>) {
-    setSelectedGuest(guest);
-    const { guest_notifications } = guest;
-    guest_notifications?.length &&
-      setNotifications(
-        guest_notifications.filter((n) => n.status === "Active")
-      );
-  }
-
   function onSubmitNewGuestForm(newGuest: Partial<Guest>) {
     setShowNewGuestModal(false);
     setFeedback({
@@ -136,17 +127,21 @@ function NewVisitView() {
     setSelectedGuest(newGuest);
   }
 
+  async function onSelectGuest(guest: Guest | Partial<Guest>) {
+    setSelectedGuest(guest);
+    const { guest_notifications } = guest;
+    guest_notifications?.length &&
+      setNotifications(
+        guest_notifications.filter((n) => n.status === "Active")
+      );
+  }
+
   function onSubmitNotificationForm(notificationId: number) {
     setShowNotificationModal(false);
     setFeedback({
       text: `Notification created successfully! ID: ${notificationId}`,
       isError: false,
     });
-  }
-
-  function onCloseNewGuestForm() {
-    if (!confirm("Discard the new guest?")) return;
-    setShowNewGuestModal(false);
   }
 
   function onSelectServices(serviceIds: number[]) {
