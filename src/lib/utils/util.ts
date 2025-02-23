@@ -100,11 +100,10 @@ export function guestFormRequirementsSatisfied(guest: Partial<Guest>): boolean {
   return requiredCount >= MIN_REQUIRED_COUNT;
 }
 
-export function convertServiceTypeToOption(
-  service: ServiceType
-): ReactSelectOption {
-  return {
-    value: service.service_id.toString(),
-    label: service.name,
-  };
+export function paddedId(id: number): string {
+  return id.toString().padStart(5, "0");
+}
+
+export function blankUserMessage(): UserMessage {
+  return { text: "", isError: false }
 }

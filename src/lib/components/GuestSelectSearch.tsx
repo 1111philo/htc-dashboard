@@ -1,51 +1,80 @@
-import { useState } from 'react';
-import Select from 'react-select';
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import Select, { SingleValue } from "react-select";
 import { useDebouncedCallback } from "use-debounce";
-import { getGuestsWithQuery } from '../api';
-import { guestOptLabel, guestLookupOpts } from '../utils';
+import { getGuestsWithQuery } from "../api";
+import { guestSelectOptionFrom, guestSelectOptsFrom } from "../utils";
 
-import { Form } from 'react-bootstrap';
+import { Form } from "react-bootstrap";
 
-export default function GuestSelectSearch({ newGuest, selectedGuestOpt, setSelectedGuestOpt }) {
-  const [guestSelectOpts, setGuestSelectOpts] = useState<
-    { value: string; label: string }[]
-  >([]);
+const SEARCH_DEBOUNCE_MS = 650;
 
+interface Props {
+  selectedGuest: Guest | Partial<Guest> | null;
+  onSelect: (g: Partial<Guest> | null) => void;
+}
+
+/** Shows results only if there's a query. Does not auto-populate with all guests. */
+export default function GuestSelectSearch({ selectedGuest, onSelect }: Props) {
   const [searchText, setSearchText] = useState("");
+  const [debouncedSearchText, setDebouncedSearchText] = useState("");
 
-  const executeSearch = useDebouncedCallback((searchText) => {
-    getGuestsWithQuery(searchText.trim()).then((guestsResponse) => {
-      setGuestSelectOpts(guestLookupOpts(guestsResponse.rows));
-    });
-  }, 500);
+  const { data: guests } = useQuery({
+    queryKey: ["guests"],
+    queryFn: async () => {
+      setDebouncedSearchText(""); // clear for next search
+      const { rows: guests } = (await getGuestsWithQuery(
+        debouncedSearchText.trim()
+      )) as GuestsAPIResponse;
+      return guests;
+    },
+    enabled: !!debouncedSearchText,
+  });
 
-  return (
-    <Form className="mt-3 my-5">
-      <Form.Group className="mb-3" controlId="formUID">
-        <Form.Label>
-          <i>Search by UID, Name, or Birthday (YYYY-MM-DD):</i>
-        </Form.Label>
-        <Select
-          id="user-dropdown"
-          options={
-            newGuest
-              ? [{ value: newGuest.guest_id, label: guestOptLabel(newGuest) }]
-              : guestSelectOpts
-          }
-          defaultValue={selectedGuestOpt}
-          defaultInputValue={searchText}
-          value={selectedGuestOpt}
-          onChange={(newVal) => setSelectedGuestOpt(newVal)}
-          onInputChange={onChangeInput}
-          menuIsOpen={!!searchText}
-          placeholder={"Search for a guest..."}
-        />
-      </Form.Group>
-    </Form>
+  const updateSearch = useDebouncedCallback(
+    (searchVal) => setDebouncedSearchText(searchVal),
+    SEARCH_DEBOUNCE_MS
   );
 
-  function onChangeInput(val) {
+  const [selection, setSelection] = useState<GuestSelectOption | null>(null);
+
+  const options = searchText
+    ? guestSelectOptsFrom(guests ?? [])
+    : selectedGuest
+      ? [guestSelectOptionFrom(selectedGuest)]
+      : [];
+
+  // update the selection when selected guest changes
+  useEffect(
+    () =>
+      setSelection(selectedGuest ? guestSelectOptionFrom(selectedGuest) : null),
+    [selectedGuest]
+  );
+
+  return (
+    <Form.Group className="mb-3">
+      <Form.Label className="fst-italic">
+        Search by UID, Name, or Birthday (YYYY-MM-DD):
+      </Form.Label>
+      <Select
+        id="user-dropdown"
+        options={options}
+        value={selection}
+        onChange={onChange}
+        onInputChange={onChangeInput}
+        menuIsOpen={!!searchText}
+        placeholder={"Search for a guest..."}
+      />
+    </Form.Group>
+  );
+
+  function onChangeInput(val: string) {
     setSearchText(val);
-    val && executeSearch(val.trim());
+    updateSearch(val.trim());
+  }
+
+  function onChange(selection: SingleValue<GuestSelectOption>) {
+    setSelection(selection);
+    onSelect(selection?.guest ?? null);
   }
 }

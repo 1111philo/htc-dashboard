@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Button, Form } from "react-bootstrap";
 import { FeedbackMessage } from "../components";
 import { deleteUser, updateUser } from "../api";
-import { trimStringValues } from "../utils";
+import { paddedId, trimStringValues } from "../utils";
 
 interface Props {
   user: User;
@@ -91,7 +91,7 @@ function UserForm({ user, isOwnAccount, setFeedback }: UFProps) {
         await saveEditedUser(e)
       }
     >
-      <h4>ID: {user.user_id.toString().padStart(5, "0")}</h4>
+      <h4>ID: {paddedId(user.user_id)}</h4>
       <Form.Group className="mb-3">
         <Form.Label className="fst-italic">Full Name</Form.Label>
         <Form.Control

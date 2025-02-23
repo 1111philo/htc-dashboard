@@ -1,14 +1,18 @@
-/** Make string for option label */
-export function guestOptLabel(g: Guest) {
-  return `${g.guest_id} : ${g.first_name} ${g.last_name} : ${g.dob}`;
-}
+import { paddedId } from "./util";
 
 /** Map guests to `Select` options */
-export function guestLookupOpts(guests: Guest[]): ReactSelectOption[] {
-  return guests.map((g) => {
-    return {
-      value: g.guest_id.toString(),
-      label: guestOptLabel(g),
-    };
-  });
+export function guestSelectOptsFrom(guests: Guest[]): GuestSelectOption[] {
+  return guests.map((g) => guestSelectOptionFrom(g));
+}
+
+export function guestSelectOptionFrom(
+  guest: Guest | Partial<Guest>
+): GuestSelectOption {
+  return { value: String(guest.guest_id), label: guestOptLabel(guest), guest };
+}
+
+/** Make string for option label */
+export function guestOptLabel(g: Guest | Partial<Guest>) {
+  const NOT_PROVIDED = "[Not Provided]";
+  return `${paddedId(g.guest_id!)} : ${g.first_name ?? NOT_PROVIDED} ${g.last_name ?? NOT_PROVIDED} : ${g.dob ?? NOT_PROVIDED}`;
 }
