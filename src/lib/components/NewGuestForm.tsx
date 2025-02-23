@@ -1,24 +1,29 @@
-import { Button, Form } from "react-bootstrap";
-import { FeedbackMessage } from "./";
-import { guestFormRequirementsSatisfied, today } from "../utils";
 import { useState } from "react";
+import { Button, Form } from "react-bootstrap";
+import { addGuest } from "../api";
+import {
+  blankUserMessage,
+  guestFormRequirementsSatisfied,
+  today,
+  trimStringValues,
+} from "../utils";
+import { FeedbackMessage } from "./";
 
 interface NewGuestFormProps {
-  onSubmit: (guest: Partial<Guest>) => Promise<number | null>;
-  onClose: () => void;
+  onSubmit: (newGuest: Partial<Guest>) => void;
+  onCancel: () => void;
 }
 
 // TODO: require at least N fields to be filled (currently 2)
-export default function NewGuestForm(props: NewGuestFormProps) {
-  const { onSubmit, onClose } = props;
-  const [formFeedback, setFormFeedback] = useState<UserMessage>({
-    text: "",
-    isError: false,
-  });
+export default function NewGuestForm({
+  onSubmit,
+  onCancel,
+}: NewGuestFormProps) {
+  const [feedback, setFeedback] = useState<UserMessage>(blankUserMessage());
   return (
     <div className="p-3">
       <h2 className="mb-3">Add New Guest</h2>
-      <FeedbackMessage message={formFeedback} className="my-3" />
+      <FeedbackMessage message={feedback} className="my-3" />
       <Form onSubmit={async (e) => await submitForm(e)}>
         <Form.Group className="mb-3">
           <Form.Label>First Name</Form.Label>
@@ -43,7 +48,7 @@ export default function NewGuestForm(props: NewGuestFormProps) {
           <Form.Control id="input-case-manager" name="case_manager" />
         </Form.Group>
         <div className="d-flex justify-content-between">
-          <Button variant="danger" type="button" onClick={onClose}>
+          <Button variant="danger" type="button" onClick={onClickCancel}>
             Cancel
           </Button>
           <Button variant="primary" type="submit">
@@ -54,27 +59,31 @@ export default function NewGuestForm(props: NewGuestFormProps) {
     </div>
   );
 
+  function onClickCancel() {
+    if (!confirm("Discard the new guest?")) return;
+    onCancel();
+  }
+
   async function submitForm(e) {
     e.preventDefault();
     const guest = Object.fromEntries(new FormData(e.target)) as Partial<Guest>;
+    trimStringValues(guest);
     if (!guestFormRequirementsSatisfied(guest)) {
-      setFormFeedback({
+      setFeedback({
         text: "At least 2 of the following are required: First Name, Last Name, Birthday",
         isError: true,
       });
       return;
-    } else {
-      setFormFeedback({ text: "", isError: false });
     }
-    const guest_id = await onSubmit(guest);
+    const guest_id = await addGuest(guest);
     if (!guest_id) {
-      setFormFeedback({
+      setFeedback({
         text: "Failed to create guest. Try again in a few.",
         isError: true,
       });
       return;
-    } else {
-      setFormFeedback({ text: "", isError: false });
     }
+    setFeedback(blankUserMessage());
+    onSubmit({ ...guest, guest_id });
   }
 }

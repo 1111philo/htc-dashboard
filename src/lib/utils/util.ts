@@ -104,6 +104,6 @@ export function paddedId(id: number): string {
   return id.toString().padStart(5, "0");
 }
 
-export function newUserMessage(): UserMessage {
+export function blankUserMessage(): UserMessage {
   return { text: "", isError: false }
 }

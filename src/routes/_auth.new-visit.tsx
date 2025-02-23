@@ -1,24 +1,23 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
-import {
-  FeedbackMessage,
-  NewGuestForm,
-  GuestSelectSearch,
-} from "../lib/components";
-import { addGuest, getGuestData } from "../lib/api/guest";
-import { addVisit } from "../lib/api/visit";
+import Select from "react-select";
+import { getGuestData } from "../lib/api/guest";
 import {
   addGuestNotification,
   toggleGuestNotificationStatus,
 } from "../lib/api/notification";
+import { addVisit } from "../lib/api/visit";
 import {
-  newUserMessage as blankUserMessage,
-  newUserMessage,
+  blankUserMessage,
   readableDateTime,
   trimStringValues,
 } from "../lib/utils";
+import {
+  FeedbackMessage,
+  GuestSelectSearch,
+  NewGuestForm,
+} from "../lib/components";
 
 const DEFAULT_SERVICE_NAME = "courtyard";
 
@@ -76,7 +75,7 @@ function NewVisitView() {
       <Modal show={showNewGuestModal}>
         <NewGuestForm
           onSubmit={onSubmitNewGuestForm}
-          onClose={onCloseNewGuestForm}
+          onCancel={onCloseNewGuestForm}
         />
       </Modal>
 
@@ -122,33 +121,26 @@ function NewVisitView() {
 
   async function onSelectGuest(guest: Guest) {
     setSelectedGuest(guest);
-    const { guest_notifications } = await getGuestData(guest.guest_id);
+    const { guest_notifications } = (await getGuestData(guest.guest_id)) ?? {};
     if (!guest_notifications) return;
     setNotifications(guest_notifications.filter((n) => n.status === "Active"));
   }
 
-  async function onSubmitNewGuestForm(
-    guest: Partial<Guest>
-  ): Promise<number | null> {
-    trimStringValues(guest);
-    const guest_id = await addGuest(guest);
-    if (!guest_id) return null;
+  function onSubmitNewGuestForm(newGuest: Partial<Guest>) {
     setShowNewGuestModal(false);
     setFeedback({
-      text: `Guest created successfully! ID: ${guest_id}`,
+      text: `Guest created successfully! ID: ${newGuest.guest_id}`,
       isError: false,
     });
-    const newGuest: Partial<Guest> = { ...guest, guest_id };
     setSelectedGuest(newGuest);
-    return guest_id;
   }
 
-  async function onSubmitNotificationForm(notificationId: number) {
+  function onSubmitNotificationForm(notificationId: number) {
+    setShowNotificationModal(false);
     setFeedback({
       text: `Notification created successfully! ID: ${notificationId}`,
       isError: false,
     });
-    setShowNotificationModal(false);
   }
 
   function onCloseNewGuestForm() {
@@ -244,7 +236,7 @@ function NotificationForm({ guest, onCancel, onSubmit }: NFProps) {
       });
       return;
     }
-    setFeedback(newUserMessage());
+    setFeedback(blankUserMessage());
     onSubmit(notificationId);
   }
 }

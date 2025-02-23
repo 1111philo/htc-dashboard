@@ -2,22 +2,22 @@ import { useEffect, useState } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Button, Modal } from "react-bootstrap";
 // import { ArrowUpDown as SortIcon } from "lucide-react";
+import { useDebouncedCallback } from "use-debounce";
+import { getGuestsData, getGuestsWithQuery } from "../lib/api/guest";
+import { blankUserMessage, paddedId } from "../lib/utils";
 import {
-  NewGuestForm,
+  DataTable,
   FeedbackMessage,
+  HScroll,
+  NewGuestForm,
   TableFilter,
   TablePager,
-  HScroll,
-  DataTable,
 } from "../lib/components";
-import { addGuest, getGuestsData, getGuestsWithQuery } from "../lib/api/guest";
-import { useDebouncedCallback } from "use-debounce";
-import { paddedId, trimStringValues } from "../lib/utils";
 
 const ITEMS_PER_PAGE = 10;
 
 interface LoaderData {
-  // TODO: request a route for this page -- when i query guests, i need active_notification_count!!! -- maybe stick this into getGuests - otherwise, I'm making a request for each guest in the table just to get notification counts
+  // TODO: request a route for this page -- when i query guests, i need active_notification_count! -- maybe stick this into getGuests - otherwise, I'm making a request for each guest in the table just to get notification counts
   guests: Guest[];
   totalGuestCount: number;
   page: number;
@@ -85,10 +85,7 @@ function GuestsView() {
 
   const [showNewGuestModal, setShowNewGuestModal] = useState(false);
 
-  const [feedback, setFeedback] = useState<UserMessage>({
-    text: "",
-    isError: false,
-  });
+  const [feedback, setFeedback] = useState<UserMessage>(blankUserMessage());
 
   return (
     <>
@@ -104,7 +101,7 @@ function GuestsView() {
       <Modal show={showNewGuestModal}>
         <NewGuestForm
           onSubmit={onSubmitNewGuestForm}
-          onClose={onCloseNewGuestForm}
+          onCancel={onCancelNewGuestForm}
         />
       </Modal>
 
@@ -135,24 +132,16 @@ function GuestsView() {
     executeSearch();
   }
 
-  async function onSubmitNewGuestForm(
-    guest: Partial<Guest>
-  ): Promise<number | null> {
-    trimStringValues(guest)
-    const guest_id = await addGuest(guest);
-    if (!guest_id) return null;
+  function onSubmitNewGuestForm(newGuest: Partial<Guest>) {
     setShowNewGuestModal(false);
     setFeedback({
-      text: `Guest created successfully! ID: ${guest_id}`,
+      text: `Guest created successfully! ID: ${newGuest.guest_id}`,
       isError: false,
     });
-    const newGuest: Partial<Guest> = { ...guest, guest_id };
     setSortedGuests([newGuest as Guest, ...sortedGuests]);
-    return guest_id;
   }
 
-  function onCloseNewGuestForm() {
-    if (!confirm("Discard the new guest?")) return;
+  function onCancelNewGuestForm() {
     setShowNewGuestModal(false);
   }
 }
