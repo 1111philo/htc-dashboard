@@ -91,8 +91,16 @@ interface GuestDataAPIResponse extends Guest {
   total: number;
 }
 
+interface GuestNotificationsAPIResponse extends PaginationInfo {
+  rows: GuestNotification[];
+}
+
 interface GuestsAPIResponse extends PaginationInfo {
   rows: Guest[];
+}
+
+interface AddGuestAPIResponse {
+  guest_id: number;
 }
 
 interface AddUserAPIResponse {
@@ -110,6 +118,10 @@ interface GetUsersAPIResponse {
 
 interface GetVisitsAPIResponse extends PaginationInfo {
   rows: Visit[];
+}
+
+interface AddGuestNotificationAPIResponse {
+  notification_id: number;
 }
 
 interface GuestResponse {
@@ -143,6 +155,10 @@ interface AppContext {
 interface ReactSelectOption {
   value: string;
   label: string;
+}
+
+interface GuestSelectOption extends ReactSelectOption {
+  guest: Partial<Guest>;
 }
 
 /** Feedback shown to the user on submit event or similar. */

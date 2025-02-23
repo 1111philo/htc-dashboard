@@ -1,101 +1,90 @@
-import { useState } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 
-import * as API from 'aws-amplify/api'
+import * as API from "aws-amplify/api";
 
-import { FeedbackMessage, GuestSelectSearch } from '../lib/components'
+import { FeedbackMessage, GuestSelectSearch } from "../lib/components";
 import { Button, Form } from "react-bootstrap";
 
-export const Route = createFileRoute('/_auth/new-notification')({
+export const Route = createFileRoute("/_auth/new-notification")({
   component: NewNotificationView,
-})
+});
 
 function NewNotificationView() {
-
   return (
     <>
       <h1>Add New Notification</h1>
       <AddNewNotificationForm />
     </>
-  )
+  );
 }
 
 function AddNewNotificationForm() {
+  const [selectedGuest, setSelectedGuest] = useState<Guest | null>(null);
 
-  const [selectedGuestOpt, setSelectedGuestOpt] = useState<ReactSelectOption | null>();
   const [message, setMessage] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState({
     text: "",
-    isError: false
-  })
+    isError: false,
+  });
 
   const handleCreateNotification = async (e) => {
-    if (selectedGuestOpt === undefined) {
+    e.preventDefault();
+
+    if (!selectedGuest) {
       setFeedbackMessage({
         text: "Notification must include a guest",
-        isError: true
+        isError: true,
       });
       return;
     }
 
-    const response = await (
+    const response = (
       await API.post({
-        apiName: 'auth',
-        path: '/addGuestNotification',
+        apiName: "auth",
+        path: "/addGuestNotification",
         options: {
           body: {
-            guest_id: +selectedGuestOpt.value,
+            guest_id: selectedGuest.guest_id,
             message: message,
-            status: 'Active',
+            status: "Active",
           },
         },
       }).response
-    ).statusCode
+    ).statusCode;
 
     if (response === 200) {
       setFeedbackMessage({
         text: "Notification created!",
-        isError: false
+        isError: false,
       });
-      setSelectedGuestOpt(null);
+      setSelectedGuest(null);
       setMessage("");
     }
-  }
-
-  const handleEnter = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault()
-      handleCreateNotification(e)
-    }
-  }
+  };
 
   return (
     <>
-      <FeedbackMessage
-        message={feedbackMessage}
-      />
+      <FeedbackMessage message={feedbackMessage} />
 
-      <GuestSelectSearch
-        newGuest={undefined}
-        selectedGuestOpt={selectedGuestOpt}
-        setSelectedGuestOpt={setSelectedGuestOpt}
-      />
-
-      <Form id="new-notification">
+      <Form id="new-notification" onSubmit={handleCreateNotification}>
+        <GuestSelectSearch
+          selectedGuest={selectedGuest}
+          onSelect={(guest) => setSelectedGuest(guest)}
+        />
         <Form.Group className="mb-3" controlId="message">
           <Form.Control
             type="text"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleEnter}
             placeholder="Message (optional)"
           />
         </Form.Group>
 
-        <Button variant="primary" onClick={handleCreateNotification}>
+        <Button type="submit" variant="primary">
           Create Notification
         </Button>
       </Form>
     </>
-  )
+  );
 }
