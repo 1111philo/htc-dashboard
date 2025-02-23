@@ -14,7 +14,7 @@ export async function addGuest(g: Partial<Guest>): Promise<number | null> {
       (await response.body.json()) as any as AddGuestAPIResponse;
     return guest_id;
   } catch (err) {
-    console.error("There was an issue adding the guest:", err);
+    console.error("There was a problem adding the guest:", err);
     return null;
   }
 }
@@ -29,7 +29,7 @@ export async function updateGuest(g: Partial<Guest>): Promise<boolean> {
     const { success } = (await response.body.json()) as any as SuccessResponse;
     return success;
   } catch (err) {
-    console.error(err);
+    console.error("There was a problem updating the guest:", err);
     return false;
   }
 }
@@ -44,7 +44,7 @@ export async function deleteGuest(id): Promise<boolean> {
     const { success } = (await response.body.json()) as any as SuccessResponse;
     return success;
   } catch (err) {
-    console.error(err);
+    console.error("There was a problem deleting the guest:", err);
     return false;
   }
 }
@@ -60,7 +60,7 @@ export async function getGuestData(
     }).response;
     return (await response.body.json()) as any as GuestDataAPIResponse;
   } catch (err) {
-    console.error("There was an issue getting the guests's data:", err);
+    console.error("There was a problem getting the guests's data:", err);
     return null;
   }
 }
@@ -78,7 +78,7 @@ export async function getGuests(
     }).response;
     return (await response.body.json()) as any as GuestsAPIResponse;
   } catch (err) {
-    console.error(err);
+    console.error("There was a problem getting guests:", err);
     return null;
   }
 }
@@ -113,7 +113,7 @@ export async function getGuestsWithQuery(
     }).response;
     return (await response.body.json()) as any as GuestsAPIResponse;
   } catch (err) {
-    console.error(err);
+    console.error("There was a problem querying guests:", err);
     return null;
   }
 }
