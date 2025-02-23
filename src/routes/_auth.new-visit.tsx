@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import Select from "react-select";
+import { getGuestData } from "../lib/api";
 import {
   addGuestNotification,
   toggleGuestNotificationStatus,
@@ -10,6 +11,7 @@ import { addVisit } from "../lib/api/visit";
 import {
   blankUserMessage,
   readableDateTime,
+  sortByTimeDescending,
   trimStringValues,
 } from "../lib/utils";
 import {
@@ -52,7 +54,9 @@ function NewVisitView() {
     Guest | Partial<Guest> | null
   >(null);
 
-  const [notifications, setNotifications] = useState<GuestNotification[]>([]);
+  const [notifications, setNotifications] = useState<
+    GuestNotification[] | Partial<GuestNotification>[]
+  >([]);
 
   const [selectedServiceIds, setSelectedServiceIds] = useState<number[]>(
     defaultService?.service_id ? [defaultService.service_id] : []
@@ -129,19 +133,25 @@ function NewVisitView() {
 
   async function onSelectGuest(guest: Guest | Partial<Guest>) {
     setSelectedGuest(guest);
-    const { guest_notifications } = guest;
+    const { guest_notifications } = (await getGuestData(guest.guest_id!))!;
     guest_notifications?.length &&
       setNotifications(
-        guest_notifications.filter((n) => n.status === "Active")
+        sortByTimeDescending(
+          guest_notifications.filter((n) => n.status === "Active"),
+          "created_at"
+        ) as GuestNotification[]
       );
   }
 
-  function onSubmitNotificationForm(notificationId: number) {
+  function onSubmitNotificationForm(
+    newNotification: Partial<GuestNotification>
+  ) {
     setShowNotificationModal(false);
     setFeedback({
-      text: `Notification created successfully! ID: ${notificationId}`,
+      text: `Notification created successfully! ID: ${newNotification.notification_id}`,
       isError: false,
     });
+    setNotifications([newNotification as GuestNotification, ...notifications]);
   }
 
   function onSelectServices(serviceIds: number[]) {
@@ -179,11 +189,10 @@ function NewVisitView() {
 interface NFProps {
   guest: Guest | Partial<Guest>;
   onCancel: () => void;
-  onSubmit: (notificationId: number) => void;
+  onSubmit: (notification: GuestNotification) => void;
 }
 function NotificationForm({ guest, onCancel, onSubmit }: NFProps) {
   const [feedback, setFeedback] = useState<UserMessage>(blankUserMessage());
-
   return (
     <div className="p-3">
       <h3 className="mb-3">New Notification</h3>
@@ -193,6 +202,7 @@ function NotificationForm({ guest, onCancel, onSubmit }: NFProps) {
       <FeedbackMessage message={feedback} className="my-3" />
       <Form onSubmit={async (e) => await submitForm(e)}>
         <Form.Control name="guest_id" value={guest.guest_id} hidden readOnly />
+        <Form.Control name="status" value={"Active"} hidden readOnly />
         <Form.Group className="mb-3">
           <Form.Label>Message</Form.Label>
           <Form.Control
@@ -217,15 +227,15 @@ function NotificationForm({ guest, onCancel, onSubmit }: NFProps) {
   async function submitForm(e) {
     e.preventDefault();
     const notification = Object.fromEntries(
-      new FormData(e.target)
+      new FormData(e.target) as any
     ) as GuestNotification;
     trimStringValues(notification);
     if (!notification.message.length) {
       setFeedback({ text: "A message is required.", isError: true });
       return;
     }
-    const notificationId = await addGuestNotification(notification);
-    if (!notificationId) {
+    const notification_id = await addGuestNotification(notification);
+    if (!notification_id) {
       setFeedback({
         text: "Failed to add the notification. Try again in a few.",
         isError: true,
@@ -233,12 +243,12 @@ function NotificationForm({ guest, onCancel, onSubmit }: NFProps) {
       return;
     }
     setFeedback(blankUserMessage());
-    onSubmit(notificationId);
+    onSubmit({ ...notification, notification_id });
   }
 }
 
 interface NProps {
-  notifications: GuestNotification[];
+  notifications: GuestNotification[] | Partial<GuestNotification>[];
   showForm: () => void;
 }
 function Notifications({ notifications, showForm }: NProps) {
