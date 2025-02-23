@@ -10,7 +10,7 @@ import { Form } from "react-bootstrap";
 const SEARCH_DEBOUNCE_MS = 650;
 
 interface Props {
-  selectedGuest: Guest | null;
+  selectedGuest: Guest | Partial<Guest> | null;
   onSelect: (g: Guest) => void;
 }
 

@@ -41,13 +41,13 @@ function NewVisitView() {
 
   const [showNewGuestModal, setShowNewGuestModal] = useState(false);
 
-  const [selectedGuest, setSelectedGuest] = useState<Partial<Guest> | null>(
-    null
-  );
+  const [selectedGuest, setSelectedGuest] = useState<
+    Guest | Partial<Guest> | null
+  >(null);
 
   const [notifications, setNotifications] = useState<GuestNotification[]>([]);
 
-  const [selectedServicesOpt, setSelectedServicesOpt] = useState<
+  const [selectedServicesOpts, setSelectedServicesOpts] = useState<
     ReactSelectOption[]
   >(defaultService ? [serviceTypeOptionFrom(defaultService)] : []); // array bc this Select is set to multi
 
@@ -78,9 +78,19 @@ function NewVisitView() {
         />
       </div>
 
-      {!!notifications.length && <Notifications notifications={notifications} />}
+      {!!notifications.length && (
+        <Notifications notifications={notifications} />
+      )}
 
-      <RequestedServices data={serviceTypes} />
+      <RequestedServices
+        serviceTypes={serviceTypes}
+        selectedServicesOpts={selectedServicesOpts}
+        setSelectedServicesOpts={setSelectedServicesOpts}
+        selectedGuest={selectedGuest}
+        setShowNewGuestModal={setShowNewGuestModal}
+        setFeedback={setFeedback}
+        clear={clear}
+      />
     </>
   );
 
@@ -112,67 +122,12 @@ function NewVisitView() {
     setShowNewGuestModal(false);
   }
 
-  function RequestedServices({ data }) {
-    return (
-      <div>
-        <h2>Requested Services</h2>
-        <p>
-          <i>Select at least 1</i>
-        </p>
-        <Select
-          isMulti
-          options={servicesOpts()}
-          value={selectedServicesOpt}
-          onChange={(newVal: []) => {
-            setSelectedServicesOpt(newVal);
-          }}
-        />
-        <Button
-          type="submit"
-          onClick={logVisit}
-          className="mt-4 d-block m-auto"
-          disabled={!selectedServicesOpt.length || !selectedGuest}
-        >
-          Log Visit
-        </Button>
-      </div>
-    );
-
-    /** Map services to `Select` options */
-    function servicesOpts() {
-      return (
-        serviceTypes?.map((s: ServiceType) => serviceTypeOptionFrom(s)) ?? []
-      );
-    }
-
-    async function logVisit(e) {
-      e.preventDefault();
-      if (!selectedServicesOpt.length) return;
-      // TODO validate "form"
-      const v: Partial<Visit> = {
-        guest_id: selectedGuest?.guest_id,
-        service_ids: selectedServicesOpt.map(({ value }) => +value),
-      };
-      const visitId = await addVisit(v);
-      if (!visitId) {
-        setFeedback({
-          text: "Failed to create the visit. Try again in a few.",
-          isError: true,
-        });
-        return;
-      }
-      setShowNewGuestModal(false);
-      setFeedback({
-        text: `Visit created successfully! ID: ${visitId}`,
-        isError: false,
-      });
-      clear();
-    }
-  }
-
   function clear() {
     setSelectedGuest(null);
     setNotifications([]);
+    setSelectedServicesOpts(
+      defaultService ? [serviceTypeOptionFrom(defaultService)] : []
+    );
   }
 }
 
@@ -227,6 +182,81 @@ function Notifications({ notifications }: NProps) {
       `[data-notification-id="${notificationId}"]`
     ) as HTMLSelectElement | null;
     notificationSelect!.value = status;
+  }
+}
+
+interface SProps {
+  serviceTypes: ServiceType[];
+  selectedServicesOpts: ReactSelectOption[];
+  setSelectedServicesOpts: (val: ReactSelectOption[]) => void;
+  selectedGuest: Guest | Partial<Guest> | null;
+  setShowNewGuestModal: (show: boolean) => void;
+  setFeedback: (feedbackMsg: UserMessage) => void;
+  clear: () => void;
+}
+function RequestedServices({
+  serviceTypes,
+  selectedServicesOpts,
+  setSelectedServicesOpts,
+  selectedGuest,
+  setShowNewGuestModal,
+  setFeedback,
+  clear,
+}: SProps) {
+  return (
+    <div>
+      <h2>Requested Services</h2>
+      <p>
+        <i>Select at least 1</i>
+      </p>
+      <Select
+        isMulti
+        options={servicesOpts()}
+        value={selectedServicesOpts}
+        onChange={(newVal: ReactSelectOption[]) =>
+          setSelectedServicesOpts(newVal)
+        }
+      />
+      <Button
+        type="submit"
+        onClick={logVisit}
+        className="mt-4 d-block m-auto"
+        disabled={!selectedServicesOpts.length || !selectedGuest}
+      >
+        Log Visit
+      </Button>
+    </div>
+  );
+
+  /** Map services to `Select` options */
+  function servicesOpts() {
+    return (
+      serviceTypes?.map((s: ServiceType) => serviceTypeOptionFrom(s)) ?? []
+    );
+  }
+
+  async function logVisit(e) {
+    e.preventDefault();
+    if (!selectedServicesOpts.length) return;
+    // TODO validate "form"
+    const v: Partial<Visit> = {
+      guest_id: selectedGuest?.guest_id,
+      service_ids: selectedServicesOpts.map(({ value }) => +value),
+    };
+    const visitId = await addVisit(v);
+    if (!visitId) {
+      setFeedback({
+        text: "Failed to create the visit. Try again in a few.",
+        isError: true,
+      });
+      return;
+    }
+    setShowNewGuestModal(false);
+    setFeedback({
+      text: `Visit created successfully! ID: ${visitId}`,
+      isError: false,
+    });
+    clear();
   }
 }
 
