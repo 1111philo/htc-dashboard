@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import Select from "react-select";
 import { Button, Form, Modal, Table } from "react-bootstrap";
@@ -47,9 +47,9 @@ function NewVisitView() {
 
   const [notifications, setNotifications] = useState<GuestNotification[]>([]);
 
-  const [selectedServicesOpts, setSelectedServicesOpts] = useState<
-    ReactSelectOption[]
-  >(defaultService ? [serviceTypeOptionFrom(defaultService)] : []); // array bc this Select is set to multi
+  const [selectedServiceIds, setSelectedServiceIds] = useState<number[]>(
+    defaultService?.service_id ? [defaultService.service_id] : []
+  );
 
   return (
     <>
@@ -84,13 +84,19 @@ function NewVisitView() {
 
       <RequestedServices
         serviceTypes={serviceTypes}
-        selectedServicesOpts={selectedServicesOpts}
-        setSelectedServicesOpts={setSelectedServicesOpts}
-        selectedGuest={selectedGuest}
-        setShowNewGuestModal={setShowNewGuestModal}
-        setFeedback={setFeedback}
-        clear={clear}
+        defaultService={defaultService}
+        selectedServiceIds={selectedServiceIds}
+        onSelect={onSelectServices}
       />
+
+      <Button
+        type="submit"
+        onClick={logVisit}
+        className="mt-4 d-block m-auto"
+        disabled={!selectedServiceIds.length || !selectedGuest}
+      >
+        Log Visit
+      </Button>
     </>
   );
 
@@ -122,12 +128,35 @@ function NewVisitView() {
     setShowNewGuestModal(false);
   }
 
+  function onSelectServices(serviceIds: number[]) {
+    setSelectedServiceIds(serviceIds);
+  }
+
+  async function logVisit() {
+    if (!selectedServiceIds.length || !selectedGuest) return;
+    const visit: Partial<Visit> = {
+      guest_id: selectedGuest?.guest_id,
+      service_ids: selectedServiceIds,
+    };
+    const visitId = await addVisit(visit);
+    if (!visitId) {
+      setFeedback({
+        text: "Failed to create the visit. Try again in a few.",
+        isError: true,
+      });
+      return;
+    }
+    setFeedback({
+      text: `Visit created successfully! ID: ${visitId}`,
+      isError: false,
+    });
+    clear();
+  }
+
   function clear() {
     setSelectedGuest(null);
     setNotifications([]);
-    setSelectedServicesOpts(
-      defaultService ? [serviceTypeOptionFrom(defaultService)] : []
-    );
+    setSelectedServiceIds(defaultService ? [defaultService.service_id] : []);
   }
 }
 
@@ -187,22 +216,29 @@ function Notifications({ notifications }: NProps) {
 
 interface SProps {
   serviceTypes: ServiceType[];
-  selectedServicesOpts: ReactSelectOption[];
-  setSelectedServicesOpts: (val: ReactSelectOption[]) => void;
-  selectedGuest: Guest | Partial<Guest> | null;
-  setShowNewGuestModal: (show: boolean) => void;
-  setFeedback: (feedbackMsg: UserMessage) => void;
-  clear: () => void;
+  defaultService: ServiceType | null;
+  selectedServiceIds: number[];
+  onSelect: (serviceIds: number[]) => void;
 }
 function RequestedServices({
   serviceTypes,
-  selectedServicesOpts,
-  setSelectedServicesOpts,
-  selectedGuest,
-  setShowNewGuestModal,
-  setFeedback,
-  clear,
+  defaultService,
+  selectedServiceIds,
+  onSelect,
 }: SProps) {
+  const [selectedServicesOpts, setSelectedServicesOpts] = useState<
+    ReactSelectOption[]
+  >(defaultService ? [serviceTypeOptionFrom(defaultService)] : []);
+
+  // update select opts when selected service IDs array changes
+  useEffect(() => {
+    setSelectedServicesOpts(
+      serviceTypes
+        .filter((s) => selectedServiceIds.includes(s.service_id))
+        .map((s) => serviceTypeOptionFrom(s))
+    );
+  }, [selectedServiceIds]);
+
   return (
     <div>
       <h2>Requested Services</h2>
@@ -213,50 +249,22 @@ function RequestedServices({
         isMulti
         options={servicesOpts()}
         value={selectedServicesOpts}
-        onChange={(newVal: ReactSelectOption[]) =>
-          setSelectedServicesOpts(newVal)
-        }
+        onChange={onChange}
       />
-      <Button
-        type="submit"
-        onClick={logVisit}
-        className="mt-4 d-block m-auto"
-        disabled={!selectedServicesOpts.length || !selectedGuest}
-      >
-        Log Visit
-      </Button>
     </div>
   );
+
+  function onChange(selections: ReactSelectOption[]) {
+    setSelectedServicesOpts(selections);
+    const selectedServiceIds = selections.map((s) => +s.value);
+    onSelect(selectedServiceIds);
+  }
 
   /** Map services to `Select` options */
   function servicesOpts() {
     return (
       serviceTypes?.map((s: ServiceType) => serviceTypeOptionFrom(s)) ?? []
     );
-  }
-
-  async function logVisit(e) {
-    e.preventDefault();
-    if (!selectedServicesOpts.length) return;
-    // TODO validate "form"
-    const v: Partial<Visit> = {
-      guest_id: selectedGuest?.guest_id,
-      service_ids: selectedServicesOpts.map(({ value }) => +value),
-    };
-    const visitId = await addVisit(v);
-    if (!visitId) {
-      setFeedback({
-        text: "Failed to create the visit. Try again in a few.",
-        isError: true,
-      });
-      return;
-    }
-    setShowNewGuestModal(false);
-    setFeedback({
-      text: `Visit created successfully! ID: ${visitId}`,
-      isError: false,
-    });
-    clear();
   }
 }
 
