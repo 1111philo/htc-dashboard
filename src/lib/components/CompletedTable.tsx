@@ -26,8 +26,9 @@ export default function CompletedTable({ guestsCompleted }: CompletedTableProps)
       <Table responsive={true}>
         <thead>
           <tr>
-            <th>Time Requested</th>
+            <th>Time Completed</th>
             <th>Guest Name</th>
+            <th>Last Slot #</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -35,16 +36,17 @@ export default function CompletedTable({ guestsCompleted }: CompletedTableProps)
           {guestsCompleted?.map(
             (guest, i) => {
               const fullName = guest.first_name + " " + guest.last_name;
-              const timeRequested = readableDateTime(guest.created_at);
+              const timeCompleted = readableDateTime(guest.completed_at);
 
               return (
                 <tr key={`${guest.guest_id}-${i}`}>
-                  <td>{timeRequested}</td>
+                  <td>{timeCompleted}</td>
                   <td>
                     <Link to="/guests/$guestId" params={{ guestId: guest.guest_id }}>
                       {fullName}
                     </Link>
                   </td>
+                  <td>{guest.slot_id}</td>
                   <td>
                     <Button
                       variant="outline-primary"

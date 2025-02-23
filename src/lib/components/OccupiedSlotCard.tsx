@@ -26,7 +26,7 @@ export default function OccupiedSlotCard({
 
   const { mutateAsync: moveToCompletedMutation } = useMutation({
     mutationFn: (guest: GuestResponse): Promise<number> =>
-      updateGuestServiceStatus("Completed", guest, null),
+      updateGuestServiceStatus("Completed", guest, guest.slot_id),
     onSuccess: () => {
       queryClient.invalidateQueries()
     }

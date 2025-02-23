@@ -3,9 +3,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAvailableSlots, updateGuestServiceStatus } from "../api";
 import { Button, Table } from "react-bootstrap";
 import { QueuedTableRow } from "./QueuedTableRow";
+import { Link } from "@tanstack/react-router";
 
 interface QueuedTableProps {
   guestsQueued: GuestResponse[];
+  guestsCompleted: GuestResponse[];
   service: ServiceType;
 }
 
@@ -16,6 +18,7 @@ interface SlotIntention {
 
 export default function QueuedTable({
   guestsQueued,
+  guestsCompleted,
   service,
 }: QueuedTableProps) {
   const queryClient = useQueryClient();
@@ -45,7 +48,7 @@ export default function QueuedTable({
     }
 
     fetchSlotOptions();
-  }, [guestsQueued]);
+  }, [guestsQueued, guestsCompleted]);
 
   function createSlotIntentionObjects(): SlotIntention[] {
     const slotIntentions = guestsQueued.map((g) => {
@@ -114,18 +117,26 @@ export default function QueuedTable({
           </tr>
         </thead>
         <tbody>
-          {guestsQueued?.map((guest, i) => (
-            <QueuedTableRow
-              guest={guest}
-              service={service}
-              availableSlotOptions={availableSlotOptions}
-              setAvailableSlotOptions={setAvailableSlotOptions}
-              slotIntentions={slotIntentions}
-              setSlotIntentions={setSlotIntentions}
-              i={i}
-              key={`${guest.guest_id}-${i}`}
-            />
-          ))}
+          {guestsQueued?.map((guest, i) => {
+            const guestLink = (
+              <Link to="/guests/$guestId" params={{ guestId: guest.guest_id }}>
+                {guest.first_name} {guest.last_name}
+              </Link>
+            );
+            return (
+              <QueuedTableRow
+                guest={guest}
+                service={service}
+                availableSlotOptions={availableSlotOptions}
+                setAvailableSlotOptions={setAvailableSlotOptions}
+                slotIntentions={slotIntentions}
+                setSlotIntentions={setSlotIntentions}
+                guestLink={guestLink}
+                i={i}
+                key={`${guest.guest_id}-${i}`}
+              />
+            );
+          })}
         </tbody>
         <div style={{ paddingBottom: "40px" }}></div>
       </Table>
