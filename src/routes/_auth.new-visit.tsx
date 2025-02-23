@@ -9,8 +9,16 @@ import {
 } from "../lib/components";
 import { addGuest, getGuestData } from "../lib/api/guest";
 import { addVisit } from "../lib/api/visit";
-import { toggleGuestNotificationStatus } from "../lib/api/notification";
-import { readableDateTime, trimStringValues } from "../lib/utils";
+import {
+  addGuestNotification,
+  toggleGuestNotificationStatus,
+} from "../lib/api/notification";
+import {
+  newUserMessage as blankUserMessage,
+  newUserMessage,
+  readableDateTime,
+  trimStringValues,
+} from "../lib/utils";
 
 const DEFAULT_SERVICE_NAME = "courtyard";
 
@@ -40,6 +48,7 @@ function NewVisitView() {
   });
 
   const [showNewGuestModal, setShowNewGuestModal] = useState(false);
+  const [showAddNotificationModal, setShowNotificationModal] = useState(false);
 
   const [selectedGuest, setSelectedGuest] = useState<
     Guest | Partial<Guest> | null
@@ -78,8 +87,19 @@ function NewVisitView() {
         />
       </div>
 
-      {!!notifications.length && (
-        <Notifications notifications={notifications} />
+      <Modal show={showAddNotificationModal}>
+        <NotificationForm
+          guest={selectedGuest as Partial<Guest>}
+          onCancel={() => setShowNotificationModal(false)}
+          onSubmit={onSubmitNotificationForm}
+        />
+      </Modal>
+
+      {selectedGuest && (
+        <Notifications
+          notifications={notifications}
+          showForm={() => setShowNotificationModal(true)}
+        />
       )}
 
       <RequestedServices
@@ -123,6 +143,14 @@ function NewVisitView() {
     return guest_id;
   }
 
+  async function onSubmitNotificationForm(notificationId: number) {
+    setFeedback({
+      text: `Notification created successfully! ID: ${notificationId}`,
+      isError: false,
+    });
+    setShowNotificationModal(false);
+  }
+
   function onCloseNewGuestForm() {
     if (!confirm("Discard the new guest?")) return;
     setShowNewGuestModal(false);
@@ -160,13 +188,78 @@ function NewVisitView() {
   }
 }
 
+interface NFProps {
+  guest: Guest | Partial<Guest>;
+  onCancel: () => void;
+  onSubmit: (notificationId: number) => void;
+}
+function NotificationForm({ guest, onCancel, onSubmit }: NFProps) {
+  const [feedback, setFeedback] = useState<UserMessage>(blankUserMessage());
+
+  return (
+    <div className="p-3">
+      <h3 className="mb-3">New Notification</h3>
+      <h4>
+        To: {guest.first_name ?? ""} {guest.last_name ?? ""}
+      </h4>
+      <FeedbackMessage message={feedback} className="my-3" />
+      <Form onSubmit={async (e) => await submitForm(e)}>
+        <Form.Control name="guest_id" value={guest.guest_id} hidden readOnly />
+        <Form.Group className="mb-3">
+          <Form.Label>Message</Form.Label>
+          <Form.Control
+            name="message"
+            as="textarea"
+            minLength={4}
+            maxLength={256}
+          />
+        </Form.Group>
+        <div className="d-flex justify-content-between">
+          <Button variant="danger" type="button" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button variant="primary" type="submit">
+            Submit
+          </Button>
+        </div>
+      </Form>
+    </div>
+  );
+
+  async function submitForm(e) {
+    e.preventDefault();
+    const notification = Object.fromEntries(
+      new FormData(e.target)
+    ) as GuestNotification;
+    trimStringValues(notification);
+    if (!notification.message.length) {
+      setFeedback({ text: "A message is required.", isError: true });
+      return;
+    }
+    const notificationId = await addGuestNotification(notification);
+    if (!notificationId) {
+      setFeedback({
+        text: "Failed to add the notification. Try again in a few.",
+        isError: true,
+      });
+      return;
+    }
+    setFeedback(newUserMessage());
+    onSubmit(notificationId);
+  }
+}
+
 interface NProps {
   notifications: GuestNotification[];
+  showForm: () => void;
 }
-function Notifications({ notifications }: NProps) {
+function Notifications({ notifications, showForm }: NProps) {
   return (
     <div className="pb-5">
-      <h2>Notifications ({notifications.length})</h2>
+      <div className="d-flex justify-content-between align-items-center mb-2">
+        <h2>Notifications ({notifications.length})</h2>
+        <Button onClick={showForm}>Add Notification</Button>
+      </div>
       <Table>
         <tbody>
           {notifications.map((n: GuestNotification) => {
@@ -241,16 +334,16 @@ function RequestedServices({
 
   return (
     <div>
-      <h2>Requested Services</h2>
-      <p>
-        <i>Select at least 1</i>
-      </p>
-      <Select
-        isMulti
-        options={servicesOpts()}
-        value={selectedServicesOpts}
-        onChange={onChange}
-      />
+      <h2 className="mb-4">Requested Services</h2>
+      <Form.Group>
+        <Form.Label className="fst-italic">Select at least 1</Form.Label>
+        <Select
+          isMulti
+          options={servicesOpts()}
+          value={selectedServicesOpts}
+          onChange={onChange}
+        />
+      </Form.Group>
     </div>
   );
 

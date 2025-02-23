@@ -112,6 +112,10 @@ interface GetVisitsAPIResponse extends PaginationInfo {
   rows: Visit[];
 }
 
+interface AddGuestNotificationAPIResponse {
+  notification_id: number;
+}
+
 interface GuestResponse {
   queued_at: string;
   created_at: string;

@@ -103,3 +103,7 @@ export function guestFormRequirementsSatisfied(guest: Partial<Guest>): boolean {
 export function paddedId(id: number): string {
   return id.toString().padStart(5, "0");
 }
+
+export function newUserMessage(): UserMessage {
+  return { text: "", isError: false }
+}

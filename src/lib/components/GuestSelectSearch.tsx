@@ -53,8 +53,8 @@ export default function GuestSelectSearch({ selectedGuest, onSelect }: Props) {
 
   return (
     <Form.Group className="mb-3">
-      <Form.Label>
-        <i>Search by UID, Name, or Birthday (YYYY-MM-DD):</i>
+      <Form.Label className="fst-italic">
+        Search by UID, Name, or Birthday (YYYY-MM-DD):
       </Form.Label>
       <Select
         id="user-dropdown"

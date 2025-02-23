@@ -14,7 +14,25 @@ export async function toggleGuestNotificationStatus(
     const { success } = (await response.body.json()) as SuccessResponse;
     return success;
   } catch (err) {
-    console.error(err)
-    return false
+    console.error(err);
+    return false;
+  }
+}
+
+export async function addGuestNotification(
+  n: GuestNotification
+): Promise<number | null> {
+  try {
+    const response = await API.post({
+      apiName: "auth",
+      path: "/addGuestNotification",
+      options: { body: { ...n, status: "Active" } },
+    }).response;
+    const { notification_id } =
+      (await response.body.json()) as AddGuestNotificationAPIResponse;
+    return notification_id;
+  } catch (err) {
+    console.error("There was a problem adding the notification:", err);
+    return null;
   }
 }
