@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button, Form } from "react-bootstrap";
-import { addGuest } from "../api";
+import { addGuest, getGuestData } from "../api";
 import {
   blankUserMessage,
   guestFormRequirementsSatisfied,
@@ -10,11 +10,10 @@ import {
 import { FeedbackMessage } from "./";
 
 interface NewGuestFormProps {
-  onSubmit: (newGuest: Partial<Guest>) => void;
+  onSubmit: (newGuest: Guest | Partial<Guest>) => void;
   onCancel: () => void;
 }
 
-// TODO: require at least N fields to be filled (currently 2)
 export default function NewGuestForm({
   onSubmit,
   onCancel,
@@ -66,16 +65,18 @@ export default function NewGuestForm({
 
   async function submitForm(e) {
     e.preventDefault();
-    const guest = Object.fromEntries(new FormData(e.target)) as Partial<Guest>;
-    trimStringValues(guest);
-    if (!guestFormRequirementsSatisfied(guest)) {
+    const partialGuest = Object.fromEntries(
+      new FormData(e.target)
+    ) as Partial<Guest>;
+    trimStringValues(partialGuest);
+    if (!guestFormRequirementsSatisfied(partialGuest)) {
       setFeedback({
         text: "At least 2 of the following are required: First Name, Last Name, Birthday",
         isError: true,
       });
       return;
     }
-    const guest_id = await addGuest(guest);
+    const guest_id = await addGuest(partialGuest);
     if (!guest_id) {
       setFeedback({
         text: "Failed to create guest. Try again in a few.",
@@ -84,6 +85,8 @@ export default function NewGuestForm({
       return;
     }
     setFeedback(blankUserMessage());
-    onSubmit({ ...guest, guest_id });
+    const { total, ...guest } = (await getGuestData(guest_id))!;
+    !total && console.error("There was a problem getting the guest's data.");
+    onSubmit(guest ?? { ...partialGuest, guest_id });
   }
 }

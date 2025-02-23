@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Button, Form, Modal, Table } from "react-bootstrap";
 import Select from "react-select";
-import { getGuestData } from "../lib/api/guest";
 import {
   addGuestNotification,
   toggleGuestNotificationStatus,
@@ -119,11 +118,13 @@ function NewVisitView() {
     </>
   );
 
-  async function onSelectGuest(guest: Guest) {
+  async function onSelectGuest(guest: Guest | Partial<Guest>) {
     setSelectedGuest(guest);
-    const { guest_notifications } = (await getGuestData(guest.guest_id)) ?? {};
-    if (!guest_notifications) return;
-    setNotifications(guest_notifications.filter((n) => n.status === "Active"));
+    const { guest_notifications } = guest;
+    guest_notifications?.length &&
+      setNotifications(
+        guest_notifications.filter((n) => n.status === "Active")
+      );
   }
 
   function onSubmitNewGuestForm(newGuest: Partial<Guest>) {

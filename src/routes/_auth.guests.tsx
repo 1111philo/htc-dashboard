@@ -132,7 +132,7 @@ function GuestsView() {
     executeSearch();
   }
 
-  function onSubmitNewGuestForm(newGuest: Partial<Guest>) {
+  function onSubmitNewGuestForm(newGuest: Guest | Partial<Guest>) {
     setShowNewGuestModal(false);
     setFeedback({
       text: `Guest created successfully! ID: ${newGuest.guest_id}`,
