@@ -95,6 +95,10 @@ interface GuestsAPIResponse extends PaginationInfo {
   rows: Guest[];
 }
 
+interface AddGuestAPIResponse {
+  guest_id: number;
+}
+
 interface AddUserAPIResponse {
   user_id: number;
 }
