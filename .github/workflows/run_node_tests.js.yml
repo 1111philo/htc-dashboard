@@ -5,9 +5,9 @@ name: Run Tests
 
 on:
   push:
-    branches: [ "staging" ]
+    branches: [ staging ]
   pull_request:
-    branches: [ "main", "staging" ]
+    branches: [ main, staging ]
 
 jobs:
   build:
