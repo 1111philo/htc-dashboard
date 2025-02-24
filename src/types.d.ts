@@ -122,6 +122,7 @@ interface GetVisitsAPIResponse extends PaginationInfo {
 
 interface AddGuestNotificationAPIResponse {
   notification_id: number;
+  notification: GuestNotification;
 }
 
 interface GuestResponse {
