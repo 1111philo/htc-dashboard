@@ -115,8 +115,8 @@ function UsersView() {
         queryRoute="/users"
         page={page}
         totalPages={totalPages}
-        paginatedDataLength={sortedUsers.length}
-        rowsCount={totalUserCount}
+        rowsPerPage={sortedUsers.length}
+        totalRows={totalUserCount}
       />
     </>
   );
