@@ -5,18 +5,21 @@ import App from "../App";
 
 export const Route = createFileRoute("/_auth")({
   component: App,
-  beforeLoad: async () => {
+  beforeLoad: async ({ context }) => {
     const { authUser } = useGlobalStore.getState();
     if (!authUser) {
       throw redirect({ to: "/" });
     }
     const authUserIsAdmin = authUser?.role === "admin";
     const { serviceTypes } = await fetchGlobalData();
-    return { serviceTypes, authUser, authUserIsAdmin };
+    return {
+      ...context,
+      authUser,
+      serviceTypes,
+      authUserIsAdmin,
+    };
   },
-  loader: ({ context }) => {
-    return context;
-  },
+  loader: ({ context }) => context,
 });
 
 async function fetchGlobalData() {
