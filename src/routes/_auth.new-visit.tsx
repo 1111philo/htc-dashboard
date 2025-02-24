@@ -59,7 +59,7 @@ function NewVisitView() {
   >([]);
 
   const [selectedServiceIds, setSelectedServiceIds] = useState<number[]>(
-    defaultService?.service_id ? [defaultService.service_id] : []
+    defaultService?.service_id ? [defaultService.service_id] : [],
   );
 
   return (
@@ -138,14 +138,12 @@ function NewVisitView() {
       setNotifications(
         sortByTimeDescending(
           guest_notifications.filter((n) => n.status === "Active"),
-          "created_at"
-        ) as GuestNotification[]
+          "created_at",
+        ) as GuestNotification[],
       );
   }
 
-  function onSubmitNotificationForm(
-    newNotification: Partial<GuestNotification>
-  ) {
+  function onSubmitNotificationForm(newNotification: GuestNotification) {
     setShowNotificationModal(false);
     setFeedback({
       text: `Notification created successfully! ID: ${newNotification.notification_id}`,
@@ -226,16 +224,16 @@ function NotificationForm({ guest, onCancel, onSubmit }: NFProps) {
 
   async function submitForm(e) {
     e.preventDefault();
-    const notification = Object.fromEntries(
-      new FormData(e.target) as any
+    const partialNotification = Object.fromEntries(
+      new FormData(e.target) as any,
     ) as GuestNotification;
-    trimStringValues(notification);
-    if (!notification.message.length) {
+    trimStringValues(partialNotification);
+    if (!partialNotification.message.length) {
       setFeedback({ text: "A message is required.", isError: true });
       return;
     }
-    const notification_id = await addGuestNotification(notification);
-    if (!notification_id) {
+    const notification = await addGuestNotification(partialNotification);
+    if (!notification) {
       setFeedback({
         text: "Failed to add the notification. Try again in a few.",
         isError: true,
@@ -243,7 +241,7 @@ function NotificationForm({ guest, onCancel, onSubmit }: NFProps) {
       return;
     }
     setFeedback(blankUserMessage());
-    onSubmit({ ...notification, notification_id });
+    onSubmit(notification);
   }
 }
 
@@ -273,7 +271,7 @@ function Notifications({ notifications, showForm }: NProps) {
                     onChange={async () =>
                       await updateNotificationStatus(
                         n.notification_id,
-                        n.status
+                        n.status,
                       )
                     }
                     style={{ minWidth: "11ch" }}
@@ -293,13 +291,13 @@ function Notifications({ notifications, showForm }: NProps) {
 
   async function updateNotificationStatus(
     notificationId: number,
-    status: GuestNotificationStatus
+    status: GuestNotificationStatus,
   ) {
     const success = await toggleGuestNotificationStatus(notificationId);
     if (success) return;
     // unsuccessful -> revert value
     const notificationSelect = document.querySelector(
-      `[data-notification-id="${notificationId}"]`
+      `[data-notification-id="${notificationId}"]`,
     ) as HTMLSelectElement | null;
     notificationSelect!.value = status;
   }
@@ -326,7 +324,7 @@ function RequestedServices({
     setSelectedServicesOpts(
       serviceTypes
         .filter((s) => selectedServiceIds.includes(s.service_id))
-        .map((s) => serviceTypeOptionFrom(s))
+        .map((s) => serviceTypeOptionFrom(s)),
     );
   }, [selectedServiceIds]);
 
