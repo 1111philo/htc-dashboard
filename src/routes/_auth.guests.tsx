@@ -121,8 +121,8 @@ function GuestsView() {
         queryRoute="/guests"
         page={page}
         totalPages={totalPages}
-        paginatedDataLength={sortedGuests.length}
-        rowsCount={totalGuestCount}
+        rowsPerPage={sortedGuests.length}
+        totalRows={totalGuestCount}
       />
     </>
   );

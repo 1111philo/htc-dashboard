@@ -5,36 +5,58 @@ interface Props {
   queryRoute: "/guests" | "/users";
   page: number;
   totalPages: number;
-  paginatedDataLength;
-  rowsCount;
+  rowsPerPage: number;
+  totalRows: number;
 }
 
-export default function TablePager(props: Props) {
-  const { queryRoute, page, totalPages, paginatedDataLength, rowsCount } =
-    props;
+export default function TablePager({
+  queryRoute,
+  page,
+  totalPages,
+  rowsPerPage,
+  totalRows,
+}: Props) {
+  const pageLinks =
+    page === 1
+      ? [1, 2, 3]
+      : page === totalPages
+        ? [totalPages - 2, totalPages - 1, totalPages]
+        : [page - 1, page, page + 1];
+
   return (
     <div className="d-flex justify-content-between align-items-center text-muted">
       <small>
-        Showing {paginatedDataLength} of {rowsCount || "???"} {queryRoute === "/guests" ? "guests" : "users"}
+        Showing {rowsPerPage} of {totalRows}{" "}
+        {queryRoute === "/guests" ? "guests" : "users"}
       </small>
 
       <Pagination className="mb-0">
+        <Pagination.First
+          as={Link}
+          to={queryRoute}
+          search={{ page: 1 }}
+          disabled={page === 1}
+          title="First page"
+        />
+
         <Pagination.Prev
           as={Link}
           to={queryRoute}
           search={{ page: page === 1 ? page : page - 1 }}
           disabled={page === 1}
+          title={`Previous page (${page - 1})`}
         />
 
-        {[...Array(totalPages)].map((_, index) => (
+        {pageLinks.map((pageNum) => (
           <Pagination.Item
             as={Link}
-            key={index}
+            key={pageNum}
             to={queryRoute}
-            search={{ page: index + 1 }}
-            active={page === index + 1}
+            search={{ page: pageNum }}
+            active={page === pageNum}
+            title={`Page (${pageNum})`}
           >
-            {index + 1}
+            {pageNum}
           </Pagination.Item>
         ))}
 
@@ -43,7 +65,16 @@ export default function TablePager(props: Props) {
           disabled={page === totalPages}
           to={queryRoute}
           search={{ page: page + 1 }}
+          title={`Next page (${page + 1})`}
         ></Pagination.Next>
+
+        <Pagination.Last
+          as={Link}
+          to={queryRoute}
+          search={{ page: totalPages }}
+          disabled={page === totalPages}
+          title={`Last page (${totalPages})`}
+        />
       </Pagination>
     </div>
   );
