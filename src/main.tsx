@@ -1,19 +1,18 @@
 import ReactDOM from "react-dom/client";
-import { RouterProvider, } from "@tanstack/react-router";
+import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./router";
-import { LoginView } from "./routes/login";
-import * as auth from './lib/api/auth'
+import * as auth from "./lib/api/auth";
 
-declare module '@tanstack/react-router' {
+declare module "@tanstack/react-router" {
   interface Register {
-    router: typeof router
+    router: typeof router;
   }
 }
 
-auth.configure(); 
+auth.configure();
 
 const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
-  root.render(<RouterProvider router={router} />)
+  root.render(<RouterProvider router={router} />);
 }
