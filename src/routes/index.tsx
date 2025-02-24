@@ -3,13 +3,14 @@ import { useGlobalStore } from "../lib/utils";
 import { useState } from "react";
 import { initForgotPassword, login } from "../lib/api";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
+import { Route as NewVisitRoute } from "./_auth.new-visit";
 
 export const Route = createFileRoute("/")({
   component: IndexView,
   beforeLoad: async () => {
     const { authUser } = useGlobalStore.getState();
     if (authUser) {
-      return redirect({ to: "/new-visit", replace: true });
+      return redirect({ to: NewVisitRoute.path, replace: true });
     }
   },
 });
@@ -34,7 +35,7 @@ export function IndexView() {
       return;
     }
     setAuthUser(authUser);
-    navigate({ to: "/new-visit", replace: true });
+    navigate({ to: NewVisitRoute.path, replace: true });
   }
 
   async function resetPassword(setErrorMsg) {
