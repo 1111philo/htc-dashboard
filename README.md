@@ -1,37 +1,4 @@
-
-
-## Technicals
-For those who want to contribute, create an issue for it in this repo.
-### Frontend ([https://github.com/1111philo/apolis-app](https://github.com/1111philo/apolis-app))
-- React-based single page application
-- File-based routing with TanStack Router
-- React Bootstrap for UI components
-- Deployment: GitHub Actions to S3 and CloudFront
-
-### API ([https://github.com/1111philo/apolis-api](https://github.com/1111philo/apolis-api))
-- Node.js serverless functions on AWS Lambda
-- Authentication: Amazon Cognito
-- Supports GET and POST requests
-- Deployment: Production (apolis.app) and staging (apolis.dev)
-
-### DB ([https://github.com/1111philo/apolis-db](https://github.com/1111philo/apolis-db))
-- PostgreSQL
-- SQL queries for local setup
-
-## Additional Links
-- [Video overview of our stack as of 2/4/24](https://us06web.zoom.us/rec/share/L3O6v3vV6wljV0SJz87CeLvevRfK3V4z4Y5GlkSzXD4QPnjrApQiDk4xtUni1krd.2k59v7DioKcRWm9H)
-
-<!-- Improved compatibility of back to top link: See: https://github.com/othneildrew/Best-README-Template/pull/73 -->
 <a id="readme-top"></a>
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Don't forget to give the project a star!
-*** Thanks again! Now go create something AMAZING! :D
--->
-
-
 
 <!-- PROJECT SHIELDS -->
 <!--
@@ -41,89 +8,54 @@ For those who want to contribute, create an issue for it in this repo.
 *** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
 *** https://www.markdownguide.org/basic-syntax/#reference-style-links
 -->
-[![Contributors][contributors-shield]][contributors-url]
-[![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url]
-[![Issues][issues-shield]][issues-url]
-[![project_license][license-shield]][license-url]
-[![LinkedIn][linkedin-shield]][linkedin-url]
-
+[![Contributors][contributors-shield]][contributors-url] [![Stargazers][stars-shield]][stars-url] [![Issues][issues-shield]][issues-url] [![project_license][license-shield]][license-url]
 
 
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/github_username/repo_name">
+  <!-- <a href="https://github.com/github_username/repo_name">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
+  </a> -->
 
 <h3 align="center">apolis</h3>
 
   <p align="center">
-    project_description
+    Guest, service, and data management app for the Harry Tompson Center, an outreach organization for the unhoused.
     <br />
-    <a href="https://github.com/github_username/repo_name"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://github.com/github_username/repo_name">View Demo</a>
+    <a href="https://github.com/1111philo/apolis-app/issues/new?template=bug_report.md">Report Bug</a>
     &middot;
-    <a href="https://github.com/github_username/repo_name/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
-    &middot;
-    <a href="https://github.com/github_username/repo_name/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+    <a href="https://github.com/1111philo/apolis-app/issues/new?template=feature_request.md">Request Feature</a>
   </p>
 </div>
-
-
-
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-    <li><a href="#acknowledgments">Acknowledgments</a></li>
-  </ol>
-</details>
-
 
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-[![Product Name Screen Shot][product-screenshot]](https://example.com)
+The Harry Tompson Center in New Orleans, LA, US provides services for the unhoused. They regularly service 35,000+ visits and 4,000+ unique visitors every year. This app replaces their manual clipboard workflow, improving accuracy and ease of tracking their guests and impact in the community.
 
-Here's a blank template to get started. To avoid retyping too much info, do a search and replace with your text editor for the following: `github_username`, `repo_name`, `twitter_handle`, `linkedin_username`, `email_client`, `email`, `project_title`, `project_description`, `project_license`
+Live [staging deployment](https://apolis.dev/).
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+### Tech Stack
 
+#### Frontend ([https://github.com/1111philo/apolis-app](https://github.com/1111philo/apolis-app))
+- [React](https://react.dev/) based single page application
+- File-based routing with [TanStack Router](https://tanstack.com/router/latest)
+- [React-Bootstrap](https://react-bootstrap.github.io/) for UI components
+- [Vite](https://vite.dev/) for building.
+- Deployment: GitHub Actions to S3 and CloudFront
 
+#### API ([https://github.com/1111philo/apolis-api](https://github.com/1111philo/apolis-api))
+- [Node.js](https://nodejs.org/en) serverless functions on [AWS Lambda](https://aws.amazon.com/lambda/)
+- Authentication: [Amazon Cognito](https://aws.amazon.com/pm/cognito/)
+- Supports `GET` and `POST` requests
 
-### Built With
-
-* [![Next][Next.js]][Next-url]
-* [![React][React.js]][React-url]
-* [![Vue][Vue.js]][Vue-url]
-* [![Angular][Angular.io]][Angular-url]
-* [![Svelte][Svelte.dev]][Svelte-url]
-* [![Laravel][Laravel.com]][Laravel-url]
-* [![Bootstrap][Bootstrap.com]][Bootstrap-url]
-* [![JQuery][JQuery.com]][JQuery-url]
+#### DB ([https://github.com/1111philo/apolis-db](https://github.com/1111philo/apolis-db))
+- [PostgreSQL](https://www.postgresql.org/)
+- SQL queries for local setup
+#### video
+- [Video overview of our stack as of 2/4/24](https://us06web.zoom.us/rec/share/L3O6v3vV6wljV0SJz87CeLvevRfK3V4z4Y5GlkSzXD4QPnjrApQiDk4xtUni1krd.2k59v7DioKcRWm9H) - also has general walkthrough of the app
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -132,150 +64,118 @@ Here's a blank template to get started. To avoid retyping too much info, do a se
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+To get a local copy up and running follow the steps below.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* npm
-  ```sh
-  npm install npm@latest -g
-  ```
+Before running locally and/or working on **apolis**, you need installed:
+- [git](https://git-scm.com/downloads)
+- [node.js](https://nodejs.org/en/download)
+- [pnpm](https://pnpm.io/installation) (or [npm](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm) or [yarn](https://yarnpkg.com/getting-started/install))
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. Clone the repo:
    ```sh
-   git clone https://github.com/github_username/repo_name.git
+   git clone https://github.com/1111philo/apolis-app.git
    ```
-3. Install NPM packages
+2. Switch from the `main` branch to the `staging` branch. **This is the development branch, base all your working branches off** `staging`.
+    ```sh
+    git switch staging
+    ```
+3. Install npm packages:
    ```sh
-   npm install
+   pnpm install
    ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = 'ENTER YOUR API';
-   ```
-5. Change git remote url to avoid accidental pushes to base project
+4. Run the app in the local staging environment:
    ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v # confirm the changes
+   pnpm run start:staging
    ```
+
+#### User credentials for development
+
+**Users:** `admin@apolis.app`, `manager@apolis.app`,
+**Pass:** `apolis` (works for all)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
-<!-- USAGE EXAMPLES -->
-## Usage
+<!-- INFO ON API -->
+## API
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
+The values located in `/.env.staging` and `/.env.production` are used to interact with the respective API (staging and production environments have their own API).
 
-_For more examples, please refer to the [Documentation](https://example.com)_
+### Usage with Postman
+
+See our Postman collection [here](https://docs.apolis.dev/).
+The following steps are also covered in this [video](https://us06web.zoom.us/rec/share/z2HiTTEZ5q0Ebchj-eEwUpbwNeTWVv6TnLPBe8u3Z3VlvmbKriY4KUcyPHM7JK2K.RXsD-qNqN_CbaS6z) (passcode: \^D7^8@rh).
+
+1. Download the collection (or run Postman in the browser) by clicking the "Run in Postman" button at the top right of the [docs page](https://docs.apolis.dev/).
+
+**To send requests to the API, you must have an authentication token.**
+
+2. Under `/Public`, send the `Get Auth Token` request. You will receive a response like this:
+    ```json
+    {
+      "IdToken": "<string>",
+      "RefreshToken": "<string>",
+      "AccessToken": "<string>"
+    }
+    ```
+3. Highlight the string value of the `IdToken` field (quotes not included), right click the selection, click "Set as variable", choose the `token` variable.
+    > ⚠️ *if you don't see the* `token` *variable, ensure you are working in the* `Staging` *environment (there's a dropdown at the top right in the Postman app to choose the environment)*
+4. You are now authorized to send any API requests under the `/Auth` folder.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ROADMAP -->
-## Roadmap
-
-- [ ] Feature 1
-- [ ] Feature 2
-- [ ] Feature 3
-    - [ ] Nested Feature
-
-See the [open issues](https://github.com/github_username/repo_name/issues) for a full list of proposed features (and known issues).
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- CONTRIBUTING -->
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+See our [CONTRIBUTING.md](https://github.com/1111philo/apolis-app/blob/main/CONTRIBUTING.md).
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Top contributors:
 
-<a href="https://github.com/github_username/repo_name/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=github_username/repo_name" alt="contrib.rocks image" />
+<a href="https://github.com/1111philo/apolis-app/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=1111philo/apolis-app" alt="contrib.rocks image" />
 </a>
+
+
+<!-- ROADMAP -->
+## Roadmap
+
+See the [open issues](https://github.com/1111philo/apolis-app/issues) for a full list of proposed features (and known issues).
+
 
 
 
 <!-- LICENSE -->
 ## License
 
-Distributed under the project_license. See `LICENSE.txt` for more information.
+See [LICENSE](https://github.com/1111philo/apolis-app/blob/main/LICENSE).
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
-<!-- CONTACT -->
-## Contact
-
-Your Name - [@twitter_handle](https://twitter.com/twitter_handle) - email@email_client.com
-
-Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- ACKNOWLEDGMENTS -->
-## Acknowledgments
-
-* []()
-* []()
-* []()
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-
-
-<!-- MARKDOWN LINKS & IMAGES -->
+<!-- MARKDOWN LINKS -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo_name.svg?style=for-the-badge
-[contributors-url]: https://github.com/github_username/repo_name/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/github_username/repo_name.svg?style=for-the-badge
-[forks-url]: https://github.com/github_username/repo_name/network/members
-[stars-shield]: https://img.shields.io/github/stars/github_username/repo_name.svg?style=for-the-badge
-[stars-url]: https://github.com/github_username/repo_name/stargazers
-[issues-shield]: https://img.shields.io/github/issues/github_username/repo_name.svg?style=for-the-badge
-[issues-url]: https://github.com/github_username/repo_name/issues
-[license-shield]: https://img.shields.io/github/license/github_username/repo_name.svg?style=for-the-badge
-[license-url]: https://github.com/github_username/repo_name/blob/master/LICENSE.txt
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://linkedin.com/in/linkedin_username
+[contributors-shield]: https://img.shields.io/github/contributors/1111philo/apolis-app.svg?style=for-the-badge
+[contributors-url]: https://github.com/1111philo/apolis-app/graphs/contributors
+[stars-shield]: https://img.shields.io/github/stars/1111philo/apolis-app.svg?style=for-the-badge
+[stars-url]: https://github.com/1111philo/apolis-app/stargazers
+[issues-shield]: https://img.shields.io/github/issues/1111philo/apolis-app.svg?style=for-the-badge
+[issues-url]: https://github.com/1111philo/apolis-app/issues
+[license-shield]: https://img.shields.io/github/license/1111philo/apolis-app.svg?style=for-the-badge
+[license-url]: https://github.com/1111philo/apolis-app/blob/master/LICENSE.txt
 [product-screenshot]: images/screenshot.png
-[Next.js]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
-[Next-url]: https://nextjs.org/
+
 [React.js]: https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB
 [React-url]: https://reactjs.org/
-[Vue.js]: https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vuedotjs&logoColor=4FC08D
-[Vue-url]: https://vuejs.org/
-[Angular.io]: https://img.shields.io/badge/Angular-DD0031?style=for-the-badge&logo=angular&logoColor=white
-[Angular-url]: https://angular.io/
-[Svelte.dev]: https://img.shields.io/badge/Svelte-4A4A55?style=for-the-badge&logo=svelte&logoColor=FF3E00
-[Svelte-url]: https://svelte.dev/
-[Laravel.com]: https://img.shields.io/badge/Laravel-FF2D20?style=for-the-badge&logo=laravel&logoColor=white
-[Laravel-url]: https://laravel.com
-[Bootstrap.com]: https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white
-[Bootstrap-url]: https://getbootstrap.com
-[JQuery.com]: https://img.shields.io/badge/jQuery-0769AD?style=for-the-badge&logo=jquery&logoColor=white
-[JQuery-url]: https://jquery.com 
+[React-bootstrap.com]: https://img.shields.io/badge/React-Bootstrap?style=for-the-badge&logo=reactbootstrap&color=%23712DF9
+[React-bootstrap-url]: https://react-bootstrap.github.io/
+[postgres-badge]: https://img.shields.io/badge/Postgres-%2523316192.svg?style=for-the-badge&logo=postgresql&logoColor=white&color=%234169E1
+[postgres-url]: https://www.postgresql.org/
+[github-actions-badge]: https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white&color=%232088FF
+[github-actions-url]: https://github.com/features/actions
