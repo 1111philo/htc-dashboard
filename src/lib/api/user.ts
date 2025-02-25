@@ -10,9 +10,9 @@ export async function addUser(
     const response = await API.post({
       apiName: "auth",
       path: "/addUser",
-      options: { body: { ...(u as FormData) } },
+      options: { body: { ...u } },
     }).response;
-    const { user_id } = (await response.body.json()) as AddUserAPIResponse;
+    const { user_id } = (await response.body.json()) as any as AddUserAPIResponse;
     return user_id;
   } catch (err) {
     console.error(err);
@@ -27,7 +27,7 @@ export async function updateUser(u: Partial<User>): Promise<boolean> {
       path: "/updateUser",
       options: { body: { ...u } },
     }).response;
-    const { success } = (await response.body.json()) as SuccessResponse;
+    const { success } = (await response.body.json()) as any as SuccessResponse;
     return success;
   } catch (err) {
     console.error(err);
@@ -42,7 +42,7 @@ export async function deleteUser(id): Promise<boolean> {
       path: "/deleteUser",
       options: { body: { user_id: id } },
     }).response;
-    const { success } = (await response.body.json()) as SuccessResponse;
+    const { success } = (await response.body.json()) as any as SuccessResponse;
     return success;
   } catch (err) {
     console.error(err);
@@ -50,17 +50,36 @@ export async function deleteUser(id): Promise<boolean> {
   }
 }
 
-export async function getUser(sub: string): Promise<GetUserAPIResponse | null> {
+export async function getUserById(user_id: number): Promise<User | null> {
   try {
     const response = await API.post({
       apiName: "auth",
       path: "/getUser",
-      options: { body: { sub } },
+      options: { body: { user_id } },
     }).response;
-    const user = (await response.body.json()) as GetUserAPIResponse;
+    const getUserResp = (await response.body.json()) as any as GetUserAPIResponse;
+    const { error, ...user } = getUserResp;
+    if (error) throw new Error(error);
     return user;
   } catch (err) {
-    console.error(err);
+    console.error(`There was a problem getting the user:`, err);
+    return null;
+  }
+}
+
+export async function getUserByEmail(email: string): Promise<User | null> {
+  try {
+    const response = await API.post({
+      apiName: "auth",
+      path: "/getUser",
+      options: { body: { email } },
+    }).response;
+    const getUserResp = (await response.body.json()) as any as  GetUserAPIResponse;
+    const { error, ...user } = getUserResp;
+    if (error) throw new Error(error);
+    return user;
+  } catch (err) {
+    console.error(`There was a problem getting the user:`, err);
     return null;
   }
 }
@@ -75,7 +94,7 @@ export async function getUsers(
     path: "/getUsers",
     options: { body: { offset, limit } },
   }).response;
-  const usersResponse = (await response.body.json()) as GetUsersAPIResponse;
+  const usersResponse = (await response.body.json()) as any as GetUsersAPIResponse;
   return usersResponse;
 }
 
@@ -86,6 +105,6 @@ export async function getUsersWithQuery(query): Promise<GetUsersAPIResponse> {
     path: "/getUsers",
     options: { body: { query, offset: 0, limit: 50_000 } },
   }).response;
-  const usersResponse = (await response.body.json()) as GetUsersAPIResponse;
+  const usersResponse = (await response.body.json()) as any as GetUsersAPIResponse;
   return usersResponse;
 }

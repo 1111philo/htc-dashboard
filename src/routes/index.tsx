@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useGlobalStore } from "../lib/utils";
-import { initForgotPassword, login } from "../lib/api";
+import { getUserByEmail, initForgotPassword, login } from "../lib/api";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 
 export const Route = createFileRoute('/')({
@@ -65,15 +65,22 @@ function LoginView() {
 
   async function onSubmit(e) {
     e.preventDefault();
+    const email = e.target.email.value.trim();
     const authUser = await login(
-      e.target.email.value.trim(),
+      email,
       e.target.password.value.trim()
     );
     if (!authUser) {
       setErrorMsg('Incorrect username or password.');
       return;
     }
-    setAuthUser(authUser);
+    const dbUser = await getUserByEmail(email);
+    // TODO: Fix this weirdness. If no authUser, we say incorrect creds. If no dbUser, we say we couldn't find the email.
+    if (!dbUser) {
+      setErrorMsg(`Oops! We couldn't find a user with that email.`);
+      return;
+    }
+    setAuthUser({ ...authUser, ...dbUser });
     navigate({ to: '/new-visit', replace: true });
   }
 

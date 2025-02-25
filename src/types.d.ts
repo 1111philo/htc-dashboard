@@ -107,7 +107,9 @@ interface AddUserAPIResponse {
   user_id: number;
 }
 
-type GetUserAPIResponse = User;
+interface GetUserAPIResponse extends User {
+  error?: string;
+}
 
 interface GetUsersAPIResponse {
   total: number;
