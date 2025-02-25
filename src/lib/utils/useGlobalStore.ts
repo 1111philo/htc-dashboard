@@ -2,8 +2,8 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 interface GlobalStore {
-  authUser: AuthUser | null;
-  setAuthUser: (authUser: any) => void;
+  authUser: User | null;
+  setAuthUser: (authUser: User) => void;
 }
 
 export const useGlobalStore = create<GlobalStore>()(
@@ -15,6 +15,6 @@ export const useGlobalStore = create<GlobalStore>()(
     {
       name: "apolis-storage",
       partialize: (state) => ({ authUser: state.authUser }),
-    }
-  )
+    },
+  ),
 );
