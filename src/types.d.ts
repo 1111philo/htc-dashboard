@@ -24,10 +24,10 @@ interface User extends AuthUser {
 
 interface Guest {
   guest_id: number;
-  first_name: string;
-  last_name: string;
-  dob: string;
-  case_manager: string;
+  first_name: string | null;
+  last_name: string | null;
+  dob: string | null;
+  case_manager: string | null;
   guest_notifications: GuestNotification[];
   guest_services: GuestService[];
 }
@@ -107,7 +107,9 @@ interface AddUserAPIResponse {
   user_id: number;
 }
 
-type GetUserAPIResponse = User;
+interface GetUserAPIResponse extends User {
+  error?: string;
+}
 
 interface GetUsersAPIResponse {
   total: number;
@@ -122,6 +124,7 @@ interface GetVisitsAPIResponse extends PaginationInfo {
 
 interface AddGuestNotificationAPIResponse {
   notification_id: number;
+  notification: GuestNotification;
 }
 
 interface GuestResponse {

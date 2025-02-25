@@ -3,7 +3,7 @@
 import * as API from "aws-amplify/api";
 
 export async function toggleGuestNotificationStatus(
-  notificationId: number
+  notificationId: number,
 ): Promise<boolean> {
   try {
     const response = await API.post({
@@ -20,17 +20,17 @@ export async function toggleGuestNotificationStatus(
 }
 
 export async function addGuestNotification(
-  n: GuestNotification
-): Promise<number | null> {
+  n: Partial<GuestNotification>,
+): Promise<GuestNotification | null> {
   try {
     const response = await API.post({
       apiName: "auth",
       path: "/addGuestNotification",
       options: { body: { ...n, status: "Active" } },
     }).response;
-    const { notification_id } =
+    const { notification } =
       (await response.body.json()) as any as AddGuestNotificationAPIResponse;
-    return notification_id;
+    return notification;
   } catch (err) {
     console.error("There was a problem adding the notification:", err);
     return null;
@@ -38,7 +38,7 @@ export async function addGuestNotification(
 }
 
 export async function getGuestNotifications(
-  guest_id: number
+  guest_id: number,
 ): Promise<GuestNotificationsAPIResponse | null> {
   try {
     const response = await API.post({
@@ -50,7 +50,7 @@ export async function getGuestNotifications(
   } catch (err) {
     console.error(
       "There was a problem getting the guests's notifications:",
-      err
+      err,
     );
     return null;
   }

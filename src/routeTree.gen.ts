@@ -24,7 +24,7 @@ import { Route as AuthServicesServiceIdImport } from './routes/_auth.services_.$
 import { Route as AuthGuestsGuestIdImport } from './routes/_auth.guests_.$guestId'
 import { Route as AuthAdminUsersImport } from './routes/_auth._admin.users'
 import { Route as AuthAdminAddServiceImport } from './routes/_auth._admin.add-service'
-import { Route as AuthAdminUsersUserSubImport } from './routes/_auth._admin.users_.$userSub'
+import { Route as AuthAdminUsersUserIdImport } from './routes/_auth._admin.users_.$userId'
 
 // Create/Update Routes
 
@@ -104,9 +104,9 @@ const AuthAdminAddServiceRoute = AuthAdminAddServiceImport.update({
   getParentRoute: () => AuthAdminRoute,
 } as any)
 
-const AuthAdminUsersUserSubRoute = AuthAdminUsersUserSubImport.update({
-  id: '/users_/$userSub',
-  path: '/users/$userSub',
+const AuthAdminUsersUserIdRoute = AuthAdminUsersUserIdImport.update({
+  id: '/users_/$userId',
+  path: '/users/$userId',
   getParentRoute: () => AuthAdminRoute,
 } as any)
 
@@ -205,11 +205,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthServicesServiceIdImport
       parentRoute: typeof AuthImport
     }
-    '/_auth/_admin/users_/$userSub': {
-      id: '/_auth/_admin/users_/$userSub'
-      path: '/users/$userSub'
-      fullPath: '/users/$userSub'
-      preLoaderRoute: typeof AuthAdminUsersUserSubImport
+    '/_auth/_admin/users_/$userId': {
+      id: '/_auth/_admin/users_/$userId'
+      path: '/users/$userId'
+      fullPath: '/users/$userId'
+      preLoaderRoute: typeof AuthAdminUsersUserIdImport
       parentRoute: typeof AuthAdminImport
     }
   }
@@ -220,13 +220,13 @@ declare module '@tanstack/react-router' {
 interface AuthAdminRouteChildren {
   AuthAdminAddServiceRoute: typeof AuthAdminAddServiceRoute
   AuthAdminUsersRoute: typeof AuthAdminUsersRoute
-  AuthAdminUsersUserSubRoute: typeof AuthAdminUsersUserSubRoute
+  AuthAdminUsersUserIdRoute: typeof AuthAdminUsersUserIdRoute
 }
 
 const AuthAdminRouteChildren: AuthAdminRouteChildren = {
   AuthAdminAddServiceRoute: AuthAdminAddServiceRoute,
   AuthAdminUsersRoute: AuthAdminUsersRoute,
-  AuthAdminUsersUserSubRoute: AuthAdminUsersUserSubRoute,
+  AuthAdminUsersUserIdRoute: AuthAdminUsersUserIdRoute,
 }
 
 const AuthAdminRouteWithChildren = AuthAdminRoute._addFileChildren(
@@ -270,7 +270,7 @@ export interface FileRoutesByFullPath {
   '/users': typeof AuthAdminUsersRoute
   '/guests/$guestId': typeof AuthGuestsGuestIdRoute
   '/services/$serviceId': typeof AuthServicesServiceIdRoute
-  '/users/$userSub': typeof AuthAdminUsersUserSubRoute
+  '/users/$userId': typeof AuthAdminUsersUserIdRoute
 }
 
 export interface FileRoutesByTo {
@@ -286,7 +286,7 @@ export interface FileRoutesByTo {
   '/users': typeof AuthAdminUsersRoute
   '/guests/$guestId': typeof AuthGuestsGuestIdRoute
   '/services/$serviceId': typeof AuthServicesServiceIdRoute
-  '/users/$userSub': typeof AuthAdminUsersUserSubRoute
+  '/users/$userId': typeof AuthAdminUsersUserIdRoute
 }
 
 export interface FileRoutesById {
@@ -304,7 +304,7 @@ export interface FileRoutesById {
   '/_auth/_admin/users': typeof AuthAdminUsersRoute
   '/_auth/guests_/$guestId': typeof AuthGuestsGuestIdRoute
   '/_auth/services_/$serviceId': typeof AuthServicesServiceIdRoute
-  '/_auth/_admin/users_/$userSub': typeof AuthAdminUsersUserSubRoute
+  '/_auth/_admin/users_/$userId': typeof AuthAdminUsersUserIdRoute
 }
 
 export interface FileRouteTypes {
@@ -322,7 +322,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/guests/$guestId'
     | '/services/$serviceId'
-    | '/users/$userSub'
+    | '/users/$userId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -337,7 +337,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/guests/$guestId'
     | '/services/$serviceId'
-    | '/users/$userSub'
+    | '/users/$userId'
   id:
     | '__root__'
     | '/'
@@ -353,7 +353,7 @@ export interface FileRouteTypes {
     | '/_auth/_admin/users'
     | '/_auth/guests_/$guestId'
     | '/_auth/services_/$serviceId'
-    | '/_auth/_admin/users_/$userSub'
+    | '/_auth/_admin/users_/$userId'
   fileRoutesById: FileRoutesById
 }
 
@@ -409,7 +409,7 @@ export const routeTree = rootRoute
       "children": [
         "/_auth/_admin/add-service",
         "/_auth/_admin/users",
-        "/_auth/_admin/users_/$userSub"
+        "/_auth/_admin/users_/$userId"
       ]
     },
     "/_auth/guests": {
@@ -448,8 +448,8 @@ export const routeTree = rootRoute
       "filePath": "_auth.services_.$serviceId.tsx",
       "parent": "/_auth"
     },
-    "/_auth/_admin/users_/$userSub": {
-      "filePath": "_auth._admin.users_.$userSub.tsx",
+    "/_auth/_admin/users_/$userId": {
+      "filePath": "_auth._admin.users_.$userId.tsx",
       "parent": "/_auth/_admin"
     }
   }

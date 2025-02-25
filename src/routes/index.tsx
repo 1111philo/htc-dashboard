@@ -1,7 +1,7 @@
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useGlobalStore } from "../lib/utils";
 import { useState } from "react";
-import { initForgotPassword, login } from "../lib/api";
+import { getUserByEmail, initForgotPassword, login } from "../lib/api";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 import { Route as NewVisitRoute } from "./_auth.new-visit";
 
@@ -73,21 +73,27 @@ export function IndexView() {
       setErrorMsg("Email and password are required.");
       return;
     }
-    const authUser = await login(
-      e.target.email.value.trim(),
-      e.target.password.value.trim()
-    );
+    const email = e.target.email.value.trim();
+    const authUser = await login(email, e.target.password.value.trim());
     if (!authUser) {
       setErrorMsg("Incorrect username or password.");
       return;
     }
-    setAuthUser(authUser);
+    const dbUser = await getUserByEmail(email);
+    // TODO: Fix this weirdness. If no authUser, we say incorrect creds. If no dbUser, we say we couldn't find the email.
+    if (!dbUser) {
+      setErrorMsg(`Oops! We couldn't find a user with that email.`);
+      return;
+    }
+    setAuthUser({ ...authUser, ...dbUser });
     navigate({ to: NewVisitRoute.path, replace: true });
+
+    navigate({ to: "/new-visit", replace: true });
   }
 
   async function resetPassword(setErrorMsg) {
     const emailInput = document.getElementById(
-      "email-input"
+      "email-input",
     ) as HTMLInputElement;
     const email = emailInput.value;
     if (!email)
@@ -95,10 +101,10 @@ export function IndexView() {
     const success = await initForgotPassword(email);
     success
       ? setErrorMsg(
-          `Check your email for a password reset link from "no-reply@verificationemail.com."`
+          `Check your email for a password reset link from "no-reply@verificationemail.com."`,
         )
       : setErrorMsg(
-          "There was an issue resetting the password. Try again in a few."
+          "There was an issue resetting the password. Try again in a few.",
         );
   }
 }
