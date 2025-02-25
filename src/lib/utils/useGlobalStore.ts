@@ -15,6 +15,6 @@ export const useGlobalStore = create<GlobalStore>()(
     {
       name: "apolis-storage",
       partialize: (state) => ({ authUser: state.authUser }),
-    }
-  )
+    },
+  ),
 );

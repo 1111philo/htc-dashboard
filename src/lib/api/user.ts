@@ -4,7 +4,7 @@ import * as API from "aws-amplify/api";
 import { pageOffset } from "../utils";
 
 export async function addUser(
-  u: Partial<User> & { password: string }
+  u: Partial<User> & { password: string },
 ): Promise<number | null> {
   try {
     const response = await API.post({
@@ -12,7 +12,8 @@ export async function addUser(
       path: "/addUser",
       options: { body: { ...u } },
     }).response;
-    const { user_id } = (await response.body.json()) as any as AddUserAPIResponse;
+    const { user_id } =
+      (await response.body.json()) as any as AddUserAPIResponse;
     return user_id;
   } catch (err) {
     console.error(err);
@@ -57,7 +58,8 @@ export async function getUserById(user_id: number): Promise<User | null> {
       path: "/getUser",
       options: { body: { user_id } },
     }).response;
-    const getUserResp = (await response.body.json()) as any as GetUserAPIResponse;
+    const getUserResp =
+      (await response.body.json()) as any as GetUserAPIResponse;
     const { error, ...user } = getUserResp;
     if (error) throw new Error(error);
     return user;
@@ -74,7 +76,8 @@ export async function getUserByEmail(email: string): Promise<User | null> {
       path: "/getUser",
       options: { body: { email } },
     }).response;
-    const getUserResp = (await response.body.json()) as any as  GetUserAPIResponse;
+    const getUserResp =
+      (await response.body.json()) as any as GetUserAPIResponse;
     const { error, ...user } = getUserResp;
     if (error) throw new Error(error);
     return user;
@@ -86,7 +89,7 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 
 export async function getUsers(
   pageNum: number,
-  limit = 10
+  limit = 10,
 ): Promise<GetUsersAPIResponse> {
   const offset = pageOffset(pageNum);
   const response = await API.post({
@@ -94,7 +97,8 @@ export async function getUsers(
     path: "/getUsers",
     options: { body: { offset, limit } },
   }).response;
-  const usersResponse = (await response.body.json()) as any as GetUsersAPIResponse;
+  const usersResponse =
+    (await response.body.json()) as any as GetUsersAPIResponse;
   return usersResponse;
 }
 
@@ -105,6 +109,7 @@ export async function getUsersWithQuery(query): Promise<GetUsersAPIResponse> {
     path: "/getUsers",
     options: { body: { query, offset: 0, limit: 50_000 } },
   }).response;
-  const usersResponse = (await response.body.json()) as any as GetUsersAPIResponse;
+  const usersResponse =
+    (await response.body.json()) as any as GetUsersAPIResponse;
   return usersResponse;
 }

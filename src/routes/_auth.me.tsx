@@ -8,12 +8,12 @@ export const Route = createFileRoute("/_auth/me")({
     // user can only see their own account
     const { user_id } = context.authUser!;
     const user = await getUserById(user_id);
-    if (!user) throw redirect({ to: "/users", replace: true })
+    if (!user) throw redirect({ to: "/users", replace: true });
     return { user };
   },
 });
 
 function MyAccount() {
-  const { user } = Route.useLoaderData()
-  return <UserProfile user={user!} isOwnAccount={true} />
+  const { user } = Route.useLoaderData();
+  return <UserProfile user={user!} isOwnAccount={true} />;
 }
