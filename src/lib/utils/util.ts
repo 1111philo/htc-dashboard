@@ -50,7 +50,7 @@ export function pageOffset(pageNum: number): number {
 /** `key` param is the key with a datetime value to sort by. E.g. `obj.created_at` or `obj.updated_at` */
 export function sortByTimeDescending(
   arr: GuestService[] | GuestNotification[],
-  key: string
+  key: string,
 ): GuestService[] | GuestNotification[] {
   arr.sort((a, b) => {
     const aTime = new Date(a[key]);
@@ -64,7 +64,7 @@ export function sortByTimeDescending(
 
 export function sortByTimeAscending(
   arr: GuestService[] | GuestNotification[],
-  key: string
+  key: string,
 ): GuestService[] | GuestNotification[] {
   arr.sort((a, b) => {
     const aTime = new Date(a[key]);
@@ -105,5 +105,5 @@ export function paddedId(id: number): string {
 }
 
 export function blankUserMessage(): UserMessage {
-  return { text: "", isError: false }
+  return { text: "", isError: false };
 }

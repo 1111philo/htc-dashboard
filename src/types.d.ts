@@ -24,10 +24,10 @@ interface User extends AuthUser {
 
 interface Guest {
   guest_id: number;
-  first_name: string;
-  last_name: string;
-  dob: string;
-  case_manager: string;
+  first_name: string | null;
+  last_name: string | null;
+  dob: string | null;
+  case_manager: string | null;
   guest_notifications: GuestNotification[];
   guest_services: GuestService[];
 }
