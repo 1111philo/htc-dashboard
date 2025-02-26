@@ -12,11 +12,13 @@ export const Route = createFileRoute("/_auth")({
     }
     const authUserIsAdmin = authUser?.role === "admin";
     const { serviceTypes } = await fetchGlobalData();
-    return { serviceTypes, authUser, authUserIsAdmin };
+    return {
+      serviceTypes,
+      authUser,
+      authUserIsAdmin,
+    };
   },
-  loader: ({ context }) => {
-    return context;
-  },
+  loader: ({ context }) => context,
 });
 
 async function fetchGlobalData() {

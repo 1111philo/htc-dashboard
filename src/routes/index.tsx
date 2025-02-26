@@ -1,21 +1,25 @@
-import { useState } from "react";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useGlobalStore } from "../lib/utils";
+import { useState } from "react";
 import { getUserByEmail, initForgotPassword, login } from "../lib/api";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
+import { Route as NewVisitRoute } from "./_auth.new-visit";
 
 export const Route = createFileRoute("/")({
-  component: LoginView,
-  beforeLoad: async ({}) => {
+  component: IndexView,
+  beforeLoad: async () => {
     const { authUser } = useGlobalStore.getState();
-    if (authUser) throw redirect({ to: "/new-visit", replace: true });
+    if (authUser) {
+      return redirect({ to: NewVisitRoute.path, replace: true });
+    }
   },
 });
 
-function LoginView() {
+export function IndexView() {
   const [errorMsg, setErrorMsg] = useState("");
   const setAuthUser = useGlobalStore((state) => state.setAuthUser);
   const navigate = useNavigate();
+
   return (
     <Container className="vh-100 d-flex align-items-center justify-content-center">
       <Row>
@@ -45,7 +49,7 @@ function LoginView() {
                   <Button
                     variant="link"
                     className="text-decoration-none"
-                    onClick={async () => await resetPassword()}
+                    onClick={async () => await resetPassword(setErrorMsg)}
                   >
                     Forgot password?
                   </Button>
@@ -65,6 +69,10 @@ function LoginView() {
 
   async function onSubmit(e) {
     e.preventDefault();
+    if (!e.target?.email?.value || !e.target?.password?.value) {
+      setErrorMsg("Email and password are required.");
+      return;
+    }
     const email = e.target.email.value.trim();
     const authUser = await login(email, e.target.password.value.trim());
     if (!authUser) {
@@ -78,10 +86,12 @@ function LoginView() {
       return;
     }
     setAuthUser({ ...authUser, ...dbUser });
+    navigate({ to: NewVisitRoute.path, replace: true });
+
     navigate({ to: "/new-visit", replace: true });
   }
 
-  async function resetPassword() {
+  async function resetPassword(setErrorMsg) {
     const emailInput = document.getElementById(
       "email-input",
     ) as HTMLInputElement;
