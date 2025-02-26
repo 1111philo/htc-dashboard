@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAvailableSlots, updateGuestServiceStatus } from "../api";
 import { Button, Table } from "react-bootstrap";
 import { QueuedTableRow } from "./QueuedTableRow";
 import { Link } from "@tanstack/react-router";
@@ -9,9 +7,11 @@ interface QueuedTableProps {
   guestsQueued: GuestResponse[];
   guestsCompleted: GuestResponse[];
   service: ServiceType;
+  availableSlots: number[];
+  queueGuestsMutation: (arg: SlotIntention[]) => void;
 }
 
-interface SlotIntention {
+export interface SlotIntention {
   guest: GuestResponse;
   slotNumIntention: string;
 }
@@ -20,8 +20,9 @@ export default function QueuedTable({
   guestsQueued,
   guestsCompleted,
   service,
+  availableSlots,
+  queueGuestsMutation,
 }: QueuedTableProps) {
-  const queryClient = useQueryClient();
   const [assignmentDisabled, setAssignmentDisabled] = useState<boolean>(true);
   const [slotIntentions, setSlotIntentions] = useState<SlotIntention[]>(
     createSlotIntentionObjects
@@ -42,13 +43,8 @@ export default function QueuedTable({
   }, [slotIntentions]);
 
   useEffect(() => {
-    async function fetchSlotOptions() {
-      const availableSlots = await getAvailableSlots(service);
-      setAvailableSlotOptions(availableSlots);
-    }
-
-    fetchSlotOptions();
-  }, [guestsQueued, guestsCompleted]);
+    setAvailableSlotOptions(availableSlots);
+  }, [guestsQueued, guestsCompleted, availableSlots]);
 
   function createSlotIntentionObjects(): SlotIntention[] {
     const slotIntentions = guestsQueued.map((g) => {
@@ -60,36 +56,6 @@ export default function QueuedTable({
     return slotIntentions;
   }
 
-  const { mutateAsync: moveToSlottedMutation } = useMutation({
-    mutationFn: async (): Promise<number> | undefined => {
-      for (const slotIntention of slotIntentions) {
-        const { guest } = slotIntention;
-        // if the queued guest was assigned a number
-        if (slotIntention.slotNumIntention !== "Slot #") {
-          // update that guest's status
-          try {
-            await updateGuestServiceStatus(
-              "Slotted",
-              guest,
-              +slotIntention.slotNumIntention
-            );
-            // remove the now slotted guests from the slotIntentions array
-            setSlotIntentions((prevSlotIntentions) =>
-              prevSlotIntentions.filter(
-                (si) => si.guest.guest_id !== guest.guest_id
-              )
-            );
-          } catch (e) {
-            console.error("Failed to place guest in slot:", e);
-          }
-        }
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries();
-    },
-  });
-
   return (
     <div>
       <div className="d-flex justify-content-between">
@@ -99,7 +65,7 @@ export default function QueuedTable({
             className="me-4"
             onClick={async (e) => {
               e.preventDefault();
-              await moveToSlottedMutation();
+              await queueGuestsMutation(slotIntentions);
             }}
             disabled={assignmentDisabled}
           >
@@ -138,7 +104,6 @@ export default function QueuedTable({
             );
           })}
         </tbody>
-        <div style={{ paddingBottom: "40px" }}></div>
       </Table>
     </div>
   );

@@ -75,7 +75,7 @@ export function QueuedTableRow({
   });
 
   return (
-    <tr>
+    <tr className="queued-table-row">
       <td>{i + 1}</td>
       <td>{timeRequested}</td>
       <td>
