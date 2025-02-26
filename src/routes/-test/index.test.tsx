@@ -40,21 +40,15 @@ describe("the Index route", () => {
     });
   });
 
-  it("shows an error message if no fields are filled in and the user hits clicks 'forgot password' button", async () => {
+  it("shows an error message if no fields are filled in and the user clicks 'forgot password' button", async () => {
     const user = userEvent.setup();
     await user.click(screen.getByRole("button", { name: /forgot password/i }));
 
     await waitFor(() => {
-      expect(console.error).toHaveBeenCalledWith(
-        "There was an issue starting the password reset process:",
-        expect.objectContaining({
-          message: "username is required to resetPassword",
-          name: "EmptyResetPasswordUsername",
-        })
-      );
-
       expect(
-        screen.getByText(/issue resetting the password/i)
+        screen.getByText(
+          /please enter your email address to reset your password/i
+        )
       ).toBeInTheDocument();
     });
   });
