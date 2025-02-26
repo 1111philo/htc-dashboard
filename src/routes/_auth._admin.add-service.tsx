@@ -1,17 +1,13 @@
 import { useState } from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import * as API from 'aws-amplify/api'
-import { fetchServices } from '../lib/api'
 import { FeedbackMessage } from '../lib/components'
 
 import { Button, Form } from 'react-bootstrap'
 
 export const Route = createFileRoute('/_auth/_admin/add-service')({
   component: AddServiceView,
-  loader: async () => {
-    const services = await fetchServices()
-    return { services }
-  },
+  loader: ({ context }): AppContext => context,
 })
 
 function AddServiceView() {
@@ -24,7 +20,7 @@ function AddServiceView() {
 }
 
 function AddNewServiceForm() {
-  const { services } = Route.useLoaderData()
+  const { serviceTypes: services, refreshServices } = Route.useLoaderData()
   const navigate = useNavigate()
 
   const [newServiceName, setNewServiceName] = useState('')
@@ -56,7 +52,7 @@ function AddNewServiceForm() {
     }
 
     // send new service name and quota to api
-    const response = await await API.post({
+    const response = await API.post({
       apiName: 'auth',
       path: '/addService',
       options: {
@@ -69,9 +65,15 @@ function AddNewServiceForm() {
 
     if (response!.statusCode === 200) {
       setFeedback({ text: 'Success', isError: false })
-      const newService = await response.body.json()
+      const newService = (await response.body.json()) as any as ServiceType
+      await refreshServices()
       // route user to view for new service
-      navigate({ to: `/services/${newService!.service_id}` })
+      navigate({
+        to: "/services/$serviceId",
+        params: {
+          serviceId: newService!.service_id
+        }
+      })
     }
   }
 

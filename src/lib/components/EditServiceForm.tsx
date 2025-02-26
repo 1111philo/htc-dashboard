@@ -9,11 +9,13 @@ interface EditServiceFormProps {
   service: ServiceType;
   services: ServiceType[];
   setShowEditServiceModal: Dispatch<SetStateAction<boolean>>;
+  refreshServices: () => Promise<void>;
 }
 
 export default function EditServiceForm({
   service,
   services,
+  refreshServices,
   setShowEditServiceModal,
 }: EditServiceFormProps) {
   const navigate = useNavigate();
@@ -69,6 +71,7 @@ export default function EditServiceForm({
     ).statusCode;
 
     if (updateResponse === 200) {
+      await refreshServices();
       handleClose();
       navigate({ to: location.pathname, replace: true });
     }
