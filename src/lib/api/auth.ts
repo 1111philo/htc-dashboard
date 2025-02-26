@@ -1,6 +1,5 @@
 import * as Auth from "aws-amplify/auth";
 import { Amplify } from "aws-amplify";
-import { useGlobalStore } from "../utils";
 
 /* NOTE: 25.01.27: the login view renders outside of the routing
 system altogether (see `root.render` in main.tsx) to avoid showing

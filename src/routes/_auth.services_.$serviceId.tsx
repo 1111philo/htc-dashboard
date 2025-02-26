@@ -8,8 +8,6 @@ import {
   fetchServiceGuestsCompleted,
   fetchServiceGuestsQueued,
   fetchServiceGuestsSlotted,
-  fetchServices,
-  getAvailableSlots,
 } from "../lib/api";
 import {
   AvailableSlotCard,
@@ -25,24 +23,22 @@ export const Route = createFileRoute("/_auth/services_/$serviceId")({
   parseParams: (params): { serviceId: number } => {
     return { serviceId: parseInt(params.serviceId) };
   },
-  beforeLoad: async ({ params: { serviceId } }) => {
+  loader: async ({ context, params: { serviceId } }) => {
     const service = await fetchServiceByID(serviceId);
-    return { service };
-  },
-  loader: async ({ context: { service, authUserIsAdmin } }) => {
-    const services = await fetchServices();
-
-    return {
-      authUserIsAdmin,
-      service,
-      services,
-    };
-  },
+    return { ...context, service }
+  }
 });
 
 function ServiceView() {
   const navigate = useNavigate();
-  const { authUserIsAdmin, service, services } = Route.useLoaderData();
+
+  const {
+    authUserIsAdmin,
+    service,
+    serviceTypes: services,
+    refreshServices
+  } = Route.useLoaderData();
+
   const queryClient = useQueryClient();
   queryClient.invalidateQueries();
 
@@ -68,6 +64,7 @@ function ServiceView() {
 
     const deleteResponse = await deleteServiceData(service.service_id);
     if (deleteResponse === 200) {
+      await refreshServices()
       navigate({ to: "/new-visit", replace: true });
     }
   };
@@ -96,6 +93,7 @@ function ServiceView() {
         <EditServiceForm
           service={service}
           services={services}
+          refreshServices={refreshServices}
           setShowEditServiceModal={setShowEditServiceModal}
         />
       </Modal>

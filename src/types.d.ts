@@ -150,10 +150,10 @@ interface GuestResponse {
 // MISC
 
 interface AppContext {
-  // needed by: new visit view, guest profile view, services nav dropdown
   serviceTypes: ServiceType[];
   authUser: AuthUser | null;
   authUserIsAdmin: boolean;
+  refreshServices: () => Promise<void>;
 }
 
 interface ReactSelectOption {

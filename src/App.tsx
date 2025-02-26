@@ -11,7 +11,7 @@ import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 
 import * as auth from "./lib/api/auth";
 import { Route } from "./routes/_auth";
-import { capitalize, useGlobalStore } from "./lib/utils";
+import { capitalize, useAuthStore } from "./lib/utils";
 
 const queryClient = new QueryClient();
 
@@ -51,7 +51,7 @@ export default function App() {
 
 function AppNav({ authUserIsAdmin, authUser }) {
   const { serviceTypes } = Route.useLoaderData();
-  const setAuthUser = useGlobalStore((state) => state.setAuthUser);
+  const setAuthUser = useAuthStore((state) => state.setAuthUser);
   const LOGO_SIZE = "50px";
   const navigate = useNavigate()
   return (
