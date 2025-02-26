@@ -11,5 +11,5 @@ export const appContext: AppContext = {
 export const router = createRouter({
   routeTree,
   notFoundRoute,
-  context: appContext, 
+  context: appContext,
 });

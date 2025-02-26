@@ -3,19 +3,21 @@ import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "../lib/utils";
 import { getUserByEmail, initForgotPassword, login } from "../lib/api";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
+import { Route as NewVisitRoute } from "./_auth.new-visit";
 
 export const Route = createFileRoute("/")({
-  component: LoginView,
+  component: IndexView,
   beforeLoad: async ({}) => {
     const { authUser } = useAuthStore.getState();
-    if (authUser) throw redirect({ to: "/new-visit", replace: true });
+    if (authUser) throw redirect({ to: NewVisitRoute.path, replace: true });
   },
 });
 
-function LoginView() {
+export function IndexView() {
   const [errorMsg, setErrorMsg] = useState("");
   const setAuthUser = useAuthStore((state) => state.setAuthUser);
   const navigate = useNavigate();
+
   return (
     <Container className="vh-100 d-flex align-items-center justify-content-center">
       <Row>
@@ -45,7 +47,7 @@ function LoginView() {
                   <Button
                     variant="link"
                     className="text-decoration-none"
-                    onClick={async () => await resetPassword()}
+                    onClick={async () => await resetPassword(setErrorMsg)}
                   >
                     Forgot password?
                   </Button>
@@ -65,36 +67,46 @@ function LoginView() {
 
   async function onSubmit(e) {
     e.preventDefault();
-    const email = e.target.email.value.trim();
-    const authUser = await login(email, e.target.password.value.trim());
+
+    let { target: { email, password } } = e
+    email = email?.value.trim();
+    password = password?.value.trim()
+
+    if (!email || !password) {
+      setErrorMsg("Email and password are required.");
+      return;
+    }
+
+    const authUser = await login(email, password);
     if (!authUser) {
       setErrorMsg("Incorrect username or password.");
       return;
     }
+
     const dbUser = await getUserByEmail(email);
     // TODO: Fix this weirdness. If no authUser, we say incorrect creds. If no dbUser, we say we couldn't find the email.
     if (!dbUser) {
       setErrorMsg(`Oops! We couldn't find a user with that email.`);
       return;
     }
+
     setAuthUser({ ...authUser, ...dbUser });
-    navigate({ to: "/new-visit", replace: true });
+    navigate({ to: NewVisitRoute.path, replace: true });
   }
 
-  async function resetPassword() {
+  async function resetPassword(setErrorMsg) {
     const emailInput = document.getElementById(
       "email-input",
     ) as HTMLInputElement;
     const email = emailInput.value;
-    if (!email)
+    if (!email) {
       setErrorMsg("Please enter your email address to reset your password.");
+      return
+    }
     const success = await initForgotPassword(email);
-    success
-      ? setErrorMsg(
-          `Check your email for a password reset link from "no-reply@verificationemail.com."`,
-        )
-      : setErrorMsg(
-          "There was an issue resetting the password. Try again in a few.",
-        );
+    setErrorMsg(success
+      ? `Check your email for a password reset link from "no-reply@verificationemail.com."`
+      : "There was an issue resetting the password. Try again in a few."
+    )
   }
 }

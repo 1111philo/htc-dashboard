@@ -56,6 +56,7 @@ function ResetPasswordView() {
     const { email, code, confirm_password, password } = Object.fromEntries(
       new FormData(e.target)
     );
+    // TODO: validate: trim entries, check for presence of each, compare passwords, return early
     const success = await resetPassword(email, code, password);
     // TODO: handle invalid confirmation code
     if (!success) {
