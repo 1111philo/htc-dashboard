@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
   deleteServiceData,
@@ -8,6 +8,7 @@ import {
   fetchServiceGuestsCompleted,
   fetchServiceGuestsQueued,
   fetchServiceGuestsSlotted,
+  updateGuestServiceStatus,
 } from "../lib/api";
 import {
   AvailableSlotCard,
@@ -17,6 +18,7 @@ import {
   QueuedTable,
 } from "../lib/components";
 import { Button, Modal } from "react-bootstrap";
+import type { SlotIntention } from "../lib/components/QueuedTable";
 
 export const Route = createFileRoute("/_auth/services_/$serviceId")({
   component: ServiceView,
@@ -25,8 +27,8 @@ export const Route = createFileRoute("/_auth/services_/$serviceId")({
   },
   loader: async ({ context, params: { serviceId } }) => {
     const service = await fetchServiceByID(serviceId);
-    return { ...context, service }
-  }
+    return { ...context, service };
+  },
 });
 
 function ServiceView() {
@@ -36,13 +38,13 @@ function ServiceView() {
     authUserIsAdmin,
     service,
     serviceTypes: services,
-    refreshServices
+    refreshServices,
   } = Route.useLoaderData();
 
   const queryClient = useQueryClient();
-  queryClient.invalidateQueries();
-
+  const { authUserIsAdmin, service, serviceTypes } = Route.useLoaderData();
   const [showEditServiceModal, setShowEditServiceModal] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState<number[]>([]);
 
   const { data: guestsSlotted, isPending: isSlotsPending } = useQuery({
     queryFn: () => fetchServiceGuestsSlotted(service.service_id),
@@ -58,13 +60,59 @@ function ServiceView() {
     queryKey: ["guestsCompleted"],
   });
 
+  const { mutateAsync: moveToSlottedMutation } = useMutation({
+    mutationFn: async (slotIntentions: SlotIntention[]): Promise<void> => {
+      const newlySlotted: number[] = [];
+      for (const slotIntention of slotIntentions) {
+        const { guest } = slotIntention;
+        // if the queued guest was assigned a number
+        if (slotIntention.slotNumIntention !== "Slot #") {
+          const slotNum = +slotIntention.slotNumIntention;
+          try {
+            await updateGuestServiceStatus("Slotted", guest, slotNum);
+            newlySlotted.push(slotNum);
+          } catch (e) {
+            console.error("Failed to place guest in slot:", e);
+          }
+        }
+      }
+
+      const updatedAvailable = availableSlots.filter((slot) => {
+        return !newlySlotted.includes(slot);
+      });
+
+      setAvailableSlots(updatedAvailable);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+    },
+  });
+
+  useEffect(() => {
+    if (!service.queueable || !service.quota || !guestsSlotted) return;
+    let possibleSlotIds = Array(service.quota)
+      .fill(0)
+      .map((_, i) => i + 1);
+    const occupiedSlots = guestsSlotted.map((g) => g.slot_id);
+    setAvailableSlots(
+      possibleSlotIds.filter((id) => !occupiedSlots.includes(id))
+    );
+  }, [
+    isQueuedPending,
+    isCompletedPending,
+    isSlotsPending,
+    guestsCompleted,
+    guestsQueued,
+    guestsSlotted,
+  ]);
+
   const deleteService = async () => {
     const proceed = confirm("Are you sure you want to delete this service?");
     if (!proceed) return;
 
     const deleteResponse = await deleteServiceData(service.service_id);
     if (deleteResponse === 200) {
-      await refreshServices()
+      await refreshServices();
       navigate({ to: "/new-visit", replace: true });
     }
   };
@@ -149,6 +197,8 @@ function ServiceView() {
           guestsCompleted={guestsCompleted}
           service={service}
           queueable={service.queueable}
+          availableSlots={availableSlots}
+          queueGuestsMutation={moveToSlottedMutation}
         />
       )}
 
