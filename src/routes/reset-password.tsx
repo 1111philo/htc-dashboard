@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  createFileRoute,
-  useLoaderData,
-  useNavigate,
-} from "@tanstack/react-router";
-import { useGlobalStore } from "../lib/utils";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { resetPassword } from "../lib/api";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 
@@ -13,9 +8,6 @@ export const Route = createFileRoute("/reset-password")({
   loaderDeps: ({ search: { email, code } }) => {
     return { email, code };
   },
-  // loader: ({ deps: { email, code }}) => {
-  //   return { email, code }
-  // }
 });
 
 function ResetPasswordView() {

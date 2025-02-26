@@ -1,20 +1,20 @@
 import { useState } from "react";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useGlobalStore } from "../lib/utils";
+import { useAuthStore } from "../lib/utils";
 import { getUserByEmail, initForgotPassword, login } from "../lib/api";
 import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 
 export const Route = createFileRoute("/")({
   component: LoginView,
   beforeLoad: async ({}) => {
-    const { authUser } = useGlobalStore.getState();
+    const { authUser } = useAuthStore.getState();
     if (authUser) throw redirect({ to: "/new-visit", replace: true });
   },
 });
 
 function LoginView() {
   const [errorMsg, setErrorMsg] = useState("");
-  const setAuthUser = useGlobalStore((state) => state.setAuthUser);
+  const setAuthUser = useAuthStore((state) => state.setAuthUser);
   const navigate = useNavigate();
   return (
     <Container className="vh-100 d-flex align-items-center justify-content-center">
