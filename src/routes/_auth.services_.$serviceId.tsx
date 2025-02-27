@@ -42,7 +42,6 @@ function ServiceView() {
   } = Route.useLoaderData();
 
   const queryClient = useQueryClient();
-  const { authUserIsAdmin, service, serviceTypes } = Route.useLoaderData();
   const [showEditServiceModal, setShowEditServiceModal] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<number[]>([]);
 
