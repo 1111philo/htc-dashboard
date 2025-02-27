@@ -1,26 +1,29 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useGlobalStore } from "../lib/utils";
-import { fetchServices } from "../lib/api";
+import { useAuthStore, useServiceTypesStore } from "../lib/utils";
 import App from "../App";
 
 export const Route = createFileRoute("/_auth")({
   component: App,
-  beforeLoad: async () => {
-    const { authUser } = useGlobalStore.getState();
-    if (!authUser) {
-      throw redirect({ to: "/" });
-    }
-    const authUserIsAdmin = authUser?.role === "admin";
-    const { serviceTypes } = await fetchGlobalData();
-    return { serviceTypes, authUser, authUserIsAdmin };
-  },
-  loader: ({ context }) => {
-    return context;
-  },
-});
+  beforeLoad: async (): Promise<AppContext> => {
+    const { authUser } = useAuthStore.getState();
 
-async function fetchGlobalData() {
-  // get the current list of service types for services subnav
-  const serviceTypes = await fetchServices();
-  return { serviceTypes };
-}
+    if (!authUser) throw redirect({ to: "/" });
+
+    const authUserIsAdmin = authUser?.role === "admin";
+
+    const { serviceTypes: _serviceTypes, refreshServices } =
+      useServiceTypesStore.getState();
+
+    if (!_serviceTypes.length) await refreshServices();
+
+    const { serviceTypes } = useServiceTypesStore.getState();
+
+    return {
+      serviceTypes,
+      authUser,
+      authUserIsAdmin,
+      refreshServices,
+    };
+  },
+  loader: ({ context }): AppContext => context,
+});

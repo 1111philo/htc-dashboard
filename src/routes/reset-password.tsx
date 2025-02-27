@@ -1,10 +1,5 @@
 import { useState } from "react";
-import {
-  createFileRoute,
-  useLoaderData,
-  useNavigate,
-} from "@tanstack/react-router";
-import { useGlobalStore } from "../lib/utils";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { resetPassword } from "../lib/api";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 
@@ -13,9 +8,6 @@ export const Route = createFileRoute("/reset-password")({
   loaderDeps: ({ search: { email, code } }) => {
     return { email, code };
   },
-  // loader: ({ deps: { email, code }}) => {
-  //   return { email, code }
-  // }
 });
 
 function ResetPasswordView() {
@@ -64,6 +56,7 @@ function ResetPasswordView() {
     const { email, code, confirm_password, password } = Object.fromEntries(
       new FormData(e.target)
     );
+    // TODO: validate: trim entries, check for presence of each, compare passwords, return early
     const success = await resetPassword(email, code, password);
     // TODO: handle invalid confirmation code
     if (!success) {

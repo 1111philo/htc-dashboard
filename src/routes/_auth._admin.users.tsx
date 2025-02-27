@@ -269,7 +269,7 @@ function UsersTable({ rows /* setSortedRows */ }) {
             <tr
               key={u.user_id}
               className="cursor-pointer"
-              onClick={() => navigate({ to: `/users/${u.sub}` })}
+              onClick={() => navigate({ to: `/users/${u.user_id}` })}
             >
               <td>{u.name}</td>
               <td>{u.email}</td>

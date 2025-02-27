@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { Form, Row, Col, InputGroup, Button } from "react-bootstrap";
 import { updateGuest } from "../api";
-import { guestFormRequirementsSatisfied, today, trimStringValues } from "../utils";
+import {
+  blankUserMessage,
+  guestFormRequirementsSatisfied,
+  today,
+  trimStringValues,
+} from "../utils";
 import { useNavigate } from "@tanstack/react-router";
 
 interface Props {
@@ -24,7 +29,7 @@ export default function GuestProfileForm({ guest, setViewFeedback }: Props) {
     (guest.dob || "") !== fields.dob ||
     (guest.case_manager || "") !== fields.case_manager;
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   return (
     <div className="mb-5">
       <Form onSubmit={(e) => saveEditedGuest(e, guest)}>
@@ -125,15 +130,13 @@ export default function GuestProfileForm({ guest, setViewFeedback }: Props) {
   async function saveEditedGuest(e: React.FormEvent, guest: Partial<Guest>) {
     e.preventDefault();
     const updatedGuest = { ...fields, guest_id: guest.guest_id };
-    trimStringValues(updatedGuest)
+    trimStringValues(updatedGuest);
     if (!guestFormRequirementsSatisfied(updatedGuest)) {
       setViewFeedback({
         text: "At least 2 of the following are required: First Name, Last Name, Birthday",
         isError: true,
       });
       return;
-    } else {
-      setViewFeedback({ text: "", isError: false });
     }
     if (
       !confirm(`Save changes?
@@ -144,6 +147,10 @@ export default function GuestProfileForm({ guest, setViewFeedback }: Props) {
     ) {
       return;
     }
+    // convert "" to null
+    for (const field in updatedGuest) {
+      updatedGuest[field] === "" && (updatedGuest[field] = null);
+    }
     const success = await updateGuest(updatedGuest); // placeholder
     if (!success) {
       setViewFeedback({
@@ -153,7 +160,7 @@ export default function GuestProfileForm({ guest, setViewFeedback }: Props) {
       return;
     }
     setViewFeedback({ text: "Successfully updated.", isError: false });
-    navigate({ to: ".", replace: true })
+    navigate({ to: ".", replace: true });
   }
 }
 
