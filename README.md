@@ -18,7 +18,7 @@
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a> -->
 
-<h3 align="center">apolis</h3>
+<h1 align="center">apolis</h1>
 
   <p align="center">
     Guest, service, and data management app for the Harry Tompson Center, an outreach organization for the unhoused.
@@ -124,14 +124,16 @@ The following steps are also covered in this [video](https://us06web.zoom.us/rec
     }
     ```
 3. Highlight the string value of the `IdToken` field (quotes not included), right click the selection, click "Set as variable", choose the `token` variable.
+<br />
     > ⚠️ *if you don't see the* `token` *variable, ensure you are working in the* `Staging` *environment (there's a dropdown at the top right in the Postman app to choose the environment)*
+<br />
 4. You are now authorized to send any API requests under the `/Auth` folder.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 <!-- CONTRIBUTING -->
-## Contributing
+## Looking to Contribute?
 
 See our [CONTRIBUTING.md](https://github.com/1111philo/apolis-app/blob/main/CONTRIBUTING.md).
 
