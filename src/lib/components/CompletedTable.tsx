@@ -38,29 +38,32 @@ export default function CompletedTable({ guestsCompleted }: CompletedTableProps)
               const fullName = guest.first_name + " " + guest.last_name;
               const timeCompleted = readableDateTime(guest.completed_at);
 
-              return (
-                <tr key={`${guest.guest_id}-${i}`}>
-                  <td>{timeCompleted}</td>
-                  <td>
-                    <Link to="/guests/$guestId" params={{ guestId: guest.guest_id }}>
-                      {fullName}
-                    </Link>
-                  </td>
-                  <td>{guest.slot_id}</td>
-                  <td>
-                    <Button
-                      variant="outline-primary"
-                      onClick={() =>
-                        moveToQueuedMutation(guest)
-                      }
-                    >
-                      Move to Queue
-                    </Button>
-                  </td>
-                </tr>
-              );
-            }
-          )}
+            return (
+              <tr
+                data-testid="completed-table-row"
+                key={`${guest.guest_id}-${i}`}
+              >
+                <td>{timeCompleted}</td>
+                <td>
+                  <Link
+                    to="/guests/$guestId"
+                    params={{ guestId: guest.guest_id }}
+                  >
+                    {fullName}
+                  </Link>
+                </td>
+                <td>{guest.slot_id}</td>
+                <td>
+                  <Button
+                    variant="outline-primary"
+                    onClick={() => moveToQueuedMutation(guest)}
+                  >
+                    Move to Queue
+                  </Button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </Table>
     </>

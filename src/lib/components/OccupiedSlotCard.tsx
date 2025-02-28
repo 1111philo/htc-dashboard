@@ -46,7 +46,10 @@ export default function OccupiedSlotCard({
   const slotIndicatorStyle = `bg-${slotStatusColor} rounded d-flex justify-content-center align-items-center`
 
   return (
-    <Card className={`border border-${slotStatusColor} border-2 mb-3 shadow`}>
+    <Card
+      data-testid="queue-slot-card"
+      className={`border border-${slotStatusColor} border-2 mb-3 shadow`}
+    >
       <Card.Body className="mh-100">
         <Container className="h-100">
           {guest ? (
