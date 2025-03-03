@@ -33,36 +33,22 @@ export function QueuedTableRow({
   const [slotChoice, setSlotChoice] = useState<string>(defaultSelectVal);
   const timeRequested = readableDateTime(guest.queued_at);
 
-  function updateSlotNumIntentions(e, i: number, restore: boolean = false) {
+  function updateSlotNumIntentions(value: string, i: number) {
     const updatedSlotNumIntentions = [...slotIntentions];
-    if (restore) {
-      updatedSlotNumIntentions[i] = {
-        ...updatedSlotNumIntentions[i],
-        slotNumIntention: defaultSelectVal,
-      };
-    } else {
-      updatedSlotNumIntentions[i] = {
-        ...updatedSlotNumIntentions[i],
-        slotNumIntention: e.target.value,
-      };
-    }
+    updatedSlotNumIntentions[i] = {
+      ...updatedSlotNumIntentions[i],
+      slotNumIntention: value,
+    };
     setSlotIntentions(updatedSlotNumIntentions);
   }
 
-  function updateSlotOptions(slotChoice: string, opt: "restore" | "remove") {
-    if (opt === "restore" && slotChoice !== defaultSelectVal) {
-      // only restore if number doesn't already exist in availableSlotOptions
-      if (!availableSlotOptions.some((so) => so === +slotChoice)) {
-        setAvailableSlotOptions((prevOpts) =>
-          [...prevOpts, +slotChoice].sort((a, b) => a - b)
-        );
-      }
+  function updateSlotOptions(oldSlotChoice: string, newSlotChoice: string) {
+    let newSlotOptions: number[] = [...availableSlotOptions];
+    if (oldSlotChoice !== defaultSelectVal) {
+      newSlotOptions.push(+oldSlotChoice);
     }
-    if (opt === "remove") {
-      setAvailableSlotOptions((prevOpts) =>
-        prevOpts.filter((opt) => opt !== +slotChoice)
-      );
-    }
+    newSlotOptions = newSlotOptions.filter((opt) => opt !== +newSlotChoice);
+    setAvailableSlotOptions(newSlotOptions.sort((a, b) => a - b));
   }
 
   return (
@@ -85,19 +71,19 @@ export function QueuedTableRow({
                   data-testid="queued-table-row-select"
                   aria-label="Select which slot to assign"
                   value={slotChoice}
-                  onClick={(e) => {
-                    setSlotChoice("Slot #");
-                    updateSlotOptions(e.target.value, "restore");
-                    updateSlotNumIntentions(e, i, true);
-                  }}
                   onChange={(e) => {
-                    setSlotChoice(e.target.value);
-                    updateSlotOptions(e.target.value, "remove");
-                    updateSlotNumIntentions(e, i);
+                    const oldChoice = slotChoice;
+                    const newChoice = e.target.value;
+                    setSlotChoice(newChoice);
+                    updateSlotOptions(oldChoice, e.target.value);
+                    updateSlotNumIntentions(newChoice, i);
                   }}
                   className="me-4"
                 >
                   <option>{slotChoice}</option>
+                  {slotChoice !== defaultSelectVal && (
+                    <option>{defaultSelectVal}</option>
+                  )}
                   {availableSlotOptions?.map((slotNum, i) => {
                     return <option key={`${slotNum}-${i}`}>{slotNum}</option>;
                   })}
