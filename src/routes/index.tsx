@@ -7,7 +7,7 @@ import { Route as NewVisitRoute } from "./_auth.new-visit";
 
 export const Route = createFileRoute("/")({
   component: IndexView,
-  beforeLoad: async ({}) => {
+  beforeLoad: async () => {
     const { authUser } = useAuthStore.getState();
     if (authUser) throw redirect({ to: NewVisitRoute.path, replace: true });
   },
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/")({
 
 export function IndexView() {
   const [errorMsg, setErrorMsg] = useState("");
-  const setAuthUser = useAuthStore((state) => state.setAuthUser);
+  const { setAuthUser } = useAuthStore.getState();
   const navigate = useNavigate();
 
   return (
@@ -68,9 +68,11 @@ export function IndexView() {
   async function onSubmit(e) {
     e.preventDefault();
 
-    let { target: { email, password } } = e
+    let {
+      target: { email, password },
+    } = e;
     email = email?.value.trim();
-    password = password?.value.trim()
+    password = password?.value.trim();
 
     if (!email || !password) {
       setErrorMsg("Email and password are required.");
@@ -96,17 +98,18 @@ export function IndexView() {
 
   async function resetPassword(setErrorMsg) {
     const emailInput = document.getElementById(
-      "email-input",
+      "email-input"
     ) as HTMLInputElement;
     const email = emailInput.value;
     if (!email) {
       setErrorMsg("Please enter your email address to reset your password.");
-      return
+      return;
     }
     const success = await initForgotPassword(email);
-    setErrorMsg(success
-      ? `Check your email for a password reset link from "no-reply@verificationemail.com."`
-      : "There was an issue resetting the password. Try again in a few."
-    )
+    setErrorMsg(
+      success
+        ? `Check your email for a password reset link from "no-reply@verificationemail.com."`
+        : "There was an issue resetting the password. Try again in a few."
+    );
   }
 }
