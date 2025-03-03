@@ -5,6 +5,13 @@ import { render, screen, act, waitFor } from "@testing-library/react";
 import { RouterProvider } from "@tanstack/react-router";
 import { router } from "../../router";
 import { userEvent } from "@testing-library/user-event";
+import {
+  fetchServiceByID,
+  fetchServiceGuestsCompleted,
+  fetchServiceGuestsQueued,
+  fetchServiceGuestsSlotted,
+  updateGuestServiceStatus,
+} from "../../lib/api";
 
 const quota = 5;
 
@@ -72,7 +79,7 @@ vi.mock("../../lib/api", () => {
         },
       ];
     }),
-    updateGuestServiceStatus: vi.fn(),
+    updateGuestServiceStatus: vi.fn(async () => {}),
   };
 });
 
@@ -131,6 +138,8 @@ describe("the Service route", () => {
     });
   });
 
+  const user = userEvent.setup();
+
   describe("when it has a quota and queue", () => {
     it("shows the service", async () => {
       await waitFor(() => {
@@ -172,10 +181,87 @@ describe("the Service route", () => {
         expect(completedCards[0]).toHaveTextContent(/move to queue/i);
       });
     });
-    // it("allows guests to be slotted", async () => {});
-    // it("allows guests to be moved to completed", async () => {});
-    // it("allows guests to be moved to the queue from a slot", async () => {});
-    // it("allows multiple guests to be slotted", async () => {});
-    // it("prevents slotting a guest to an occupied slot", async () => {});
+    it("allows guests to be slotted", async () => {
+      let selectElement;
+
+      await waitFor(() => {
+        selectElement = screen.getAllByTestId("queued-table-row-select")[0];
+      });
+
+      await waitFor(async () => {
+        await user.selectOptions(selectElement, "2");
+      });
+
+      await waitFor(async () => {
+        expect(selectElement.value).toBe("2");
+
+        const assignButton = screen.getByRole("button", {
+          name: "Assign Slot(s)",
+        });
+        await user.click(assignButton);
+        expect(updateGuestServiceStatus).toHaveBeenCalled();
+      });
+    });
+    it("allows multiple guests to be slotted", async () => {
+      let selectElements;
+
+      await waitFor(() => {
+        selectElements = screen.getAllByTestId("queued-table-row-select");
+      });
+
+      await waitFor(async () => {
+        await user.selectOptions(selectElements[0], "2");
+        await user.selectOptions(selectElements[1], "3");
+        await user.selectOptions(selectElements[2], "4");
+      });
+
+      await waitFor(async () => {
+        expect(selectElements[0].value).toBe("2");
+        expect(selectElements[1].value).toBe("3");
+        expect(selectElements[2].value).toBe("4");
+        const assignButton = screen.getByRole("button", {
+          name: "Assign Slot(s)",
+        });
+        await user.click(assignButton);
+        expect(updateGuestServiceStatus).toHaveBeenCalled();
+      });
+    });
+
+    it("allows guests to be moved to completed", async () => {
+      await waitFor(async () => {
+        const moveButton = screen.getByText(/move to completed/i);
+        await user.click(moveButton);
+        expect(updateGuestServiceStatus).toHaveBeenCalled();
+      });
+    });
+
+    it("allows guests to be moved to the queue from a slot", async () => {
+      await waitFor(async () => {
+        const moveButton = screen.getByText(/move to queue/i);
+        await user.click(moveButton);
+        expect(updateGuestServiceStatus).toHaveBeenCalled();
+      });
+    });
+
+    it("prevents slotting a guest to an occupied slot", async () => {
+      let selectElements;
+
+      await waitFor(() => {
+        selectElements = screen.getAllByTestId("queued-table-row-select");
+      });
+
+      await waitFor(async () => {
+        await user.selectOptions(selectElements[0], "2");
+        for (let i = 1; i < selectElements.length; i++) {
+          let selectEl = selectElements[i];
+          let options = selectEl.options;
+          for (let j = 0; j < options.length; j++) {
+            expect(options[j].value).not.toBe("2");
+            // Slot 1 starts out occupied
+            expect(options[j].value).not.toBe("1");
+          }
+        }
+      });
+    });
   });
 });

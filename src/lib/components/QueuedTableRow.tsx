@@ -44,9 +44,11 @@ export function QueuedTableRow({
 
   function updateSlotOptions(oldSlotChoice: string, newSlotChoice: string) {
     let newSlotOptions: number[] = [...availableSlotOptions];
+    // Make the previous choice available again
     if (oldSlotChoice !== defaultSelectVal) {
       newSlotOptions.push(+oldSlotChoice);
     }
+    // Remove the new choice from the available options
     newSlotOptions = newSlotOptions.filter((opt) => opt !== +newSlotChoice);
     setAvailableSlotOptions(newSlotOptions.sort((a, b) => a - b));
   }
