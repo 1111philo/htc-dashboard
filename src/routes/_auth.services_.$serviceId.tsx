@@ -47,16 +47,16 @@ function ServiceView() {
 
   const { data: guestsSlotted, isPending: isSlotsPending } = useQuery({
     queryFn: () => fetchServiceGuestsSlotted(service.service_id),
-    queryKey: ["guestsSlotted"],
+    queryKey: ["guestsSlotted", service.service_id],
     enabled: !!service.quota,
   });
   const { data: guestsQueued, isPending: isQueuedPending } = useQuery({
     queryFn: () => fetchServiceGuestsQueued(service.service_id),
-    queryKey: ["guestsQueued"],
+    queryKey: ["guestsQueued", service.service_id],
   });
   const { data: guestsCompleted, isPending: isCompletedPending } = useQuery({
     queryFn: () => fetchServiceGuestsCompleted(service.service_id),
-    queryKey: ["guestsCompleted"],
+    queryKey: ["guestsCompleted", service.service_id],
   });
 
   const { mutateAsync: moveToSlottedMutation } = useMutation({
