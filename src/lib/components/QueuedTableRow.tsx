@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { updateGuestServiceStatus } from "../api";
 import { readableDateTime } from "../utils";
 import { Button, Dropdown, Form } from "react-bootstrap";
 
@@ -16,6 +14,7 @@ interface QueuedTableRowProps {
   slotIntentions: SlotIntention[];
   setSlotIntentions: React.Dispatch<React.SetStateAction<SlotIntention[]>>;
   guestLink: JSX.Element;
+  moveToCompletedMutation: (guest: GuestResponse) => void;
   i: number;
 }
 
@@ -27,11 +26,10 @@ export function QueuedTableRow({
   slotIntentions,
   setSlotIntentions,
   guestLink,
+  moveToCompletedMutation,
   i,
 }: QueuedTableRowProps) {
-  const queryClient = useQueryClient();
   const [slotChoice, setSlotChoice] = useState<string>("Slot #");
-  const fullName = guest.first_name + " " + guest.last_name;
   const timeRequested = readableDateTime(guest.queued_at);
 
   function updateSlotNumIntentions(e, i: number, restore: boolean = false) {
@@ -65,14 +63,6 @@ export function QueuedTableRow({
       );
     }
   }
-
-  const { mutateAsync: moveToCompletedMutation } = useMutation({
-    mutationFn: (guest: GuestResponse): Promise<number> =>
-      updateGuestServiceStatus("Completed", guest, guest.slot_id),
-    onSuccess: () => {
-      queryClient.invalidateQueries();
-    },
-  });
 
   return (
     <tr data-testid="queued-table-row" className="queued-table-row">

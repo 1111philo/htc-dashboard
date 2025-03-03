@@ -87,23 +87,21 @@ function ServiceView() {
     },
   });
 
-  useEffect(() => {
-    if (!service.queueable || !service.quota || !guestsSlotted) return;
-    let possibleSlotIds = Array(service.quota)
-      .fill(0)
-      .map((_, i) => i + 1);
-    const occupiedSlots = guestsSlotted.map((g) => g.slot_id);
-    setAvailableSlots(
-      possibleSlotIds.filter((id) => !occupiedSlots.includes(id))
-    );
-  }, [
-    isQueuedPending,
-    isCompletedPending,
-    isSlotsPending,
-    guestsCompleted,
-    guestsQueued,
-    guestsSlotted,
-  ]);
+  const { mutateAsync: moveToCompletedMutation } = useMutation({
+    mutationFn: (guest: GuestResponse): Promise<number> =>
+      updateGuestServiceStatus("Completed", guest, guest.slot_id),
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+    },
+  });
+
+  const { mutateAsync: moveToQueuedMutation } = useMutation({
+    mutationFn: (guest: GuestResponse): Promise<number> =>
+      updateGuestServiceStatus("Queued", guest, null),
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+    },
+  });
 
   const deleteService = async () => {
     const proceed = confirm("Are you sure you want to delete this service?");
@@ -115,6 +113,17 @@ function ServiceView() {
       navigate({ to: "/new-visit", replace: true });
     }
   };
+
+  useEffect(() => {
+    if (!service.queueable || !service.quota || !guestsSlotted) return;
+    let possibleSlotIds = Array(service.quota)
+      .fill(0)
+      .map((_, i) => i + 1);
+    const occupiedSlots = guestsSlotted.map((g) => g.slot_id);
+    setAvailableSlots(
+      possibleSlotIds.filter((id) => !occupiedSlots.includes(id))
+    );
+  }, [guestsCompleted, guestsQueued, guestsSlotted]);
 
   return (
     <>
@@ -164,6 +173,8 @@ function ServiceView() {
                     return (
                       <OccupiedSlotCard
                         guest={guest}
+                        moveToCompletedMutation={moveToCompletedMutation}
+                        moveToQueuedMutation={moveToQueuedMutation}
                         slotNum={slotNum}
                         key={`${slotIndex}-${slotNum}`}
                       />
@@ -197,7 +208,8 @@ function ServiceView() {
           service={service}
           queueable={service.queueable}
           availableSlots={availableSlots}
-          queueGuestsMutation={moveToSlottedMutation}
+          moveToSlottedMutation={moveToSlottedMutation}
+          moveToCompletedMutation={moveToCompletedMutation}
         />
       )}
 

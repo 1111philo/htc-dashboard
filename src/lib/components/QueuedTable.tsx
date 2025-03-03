@@ -8,7 +8,8 @@ interface QueuedTableProps {
   guestsCompleted: GuestResponse[];
   service: ServiceType;
   availableSlots: number[];
-  queueGuestsMutation: (arg: SlotIntention[]) => void;
+  moveToSlottedMutation: (arg: SlotIntention[]) => void;
+  moveToCompletedMutation: (arg: GuestResponse) => void;
 }
 
 export interface SlotIntention {
@@ -21,8 +22,9 @@ export default function QueuedTable({
   guestsCompleted,
   service,
   availableSlots,
-  queueGuestsMutation,
-}: QueuedTableProps) {
+  moveToSlottedMutation,
+  moveToCompletedMutation,
+}: QueuedTableProps): JSX.Element {
   const [assignmentDisabled, setAssignmentDisabled] = useState<boolean>(true);
   const [slotIntentions, setSlotIntentions] = useState<SlotIntention[]>(
     createSlotIntentionObjects
@@ -65,7 +67,7 @@ export default function QueuedTable({
             className="me-4"
             onClick={async (e) => {
               e.preventDefault();
-              await queueGuestsMutation(slotIntentions);
+              await moveToSlottedMutation(slotIntentions);
             }}
             disabled={assignmentDisabled}
           >
@@ -100,6 +102,7 @@ export default function QueuedTable({
                 guestLink={guestLink}
                 i={i}
                 key={`${guest.guest_id}-${i}`}
+                moveToCompletedMutation={moveToCompletedMutation}
               />
             );
           })}
