@@ -29,7 +29,8 @@ export function QueuedTableRow({
   moveToCompletedMutation,
   i,
 }: QueuedTableRowProps) {
-  const [slotChoice, setSlotChoice] = useState<string>("Slot #");
+  const defaultSelectVal = "Slot #";
+  const [slotChoice, setSlotChoice] = useState<string>(defaultSelectVal);
   const timeRequested = readableDateTime(guest.queued_at);
 
   function updateSlotNumIntentions(e, i: number, restore: boolean = false) {
@@ -37,7 +38,7 @@ export function QueuedTableRow({
     if (restore) {
       updatedSlotNumIntentions[i] = {
         ...updatedSlotNumIntentions[i],
-        slotNumIntention: "Slot #",
+        slotNumIntention: defaultSelectVal,
       };
     } else {
       updatedSlotNumIntentions[i] = {
@@ -49,7 +50,7 @@ export function QueuedTableRow({
   }
 
   function updateSlotOptions(slotChoice: string, opt: "restore" | "remove") {
-    if (opt === "restore" && slotChoice !== "Slot #") {
+    if (opt === "restore" && slotChoice !== defaultSelectVal) {
       // only restore if number doesn't already exist in availableSlotOptions
       if (!availableSlotOptions.some((so) => so === +slotChoice)) {
         setAvailableSlotOptions((prevOpts) =>
@@ -81,6 +82,7 @@ export function QueuedTableRow({
             {service.quota ? (
               <div className="d-flex flex-row">
                 <Form.Select
+                  data-testid="queued-table-row-select"
                   aria-label="Select which slot to assign"
                   value={slotChoice}
                   onClick={(e) => {
