@@ -62,7 +62,7 @@ export default function QueuedTable({
     <div>
       <div className="d-flex justify-content-between">
         <h2>{service.queueable ? "Queue" : "Guests"}</h2>
-        {service.queueable && (
+        {service.queueable && service.quota ? (
           <Button
             className="me-4"
             onClick={async (e) => {
@@ -73,7 +73,7 @@ export default function QueuedTable({
           >
             Assign Slot(s)
           </Button>
-        )}
+        ) : null}
       </div>
       <Table responsive={true}>
         <thead>
