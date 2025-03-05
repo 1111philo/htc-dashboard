@@ -9,3 +9,11 @@ body {
   max-height: 75vh;
   overflow-y: auto;
 }
+
+/*
+Custom CSS for the row if there's just one element
+fixes a bug with the dropdown menu being cut off
+*/
+.queued-table-row:last-child:first-child td{
+  padding-bottom: 35px;
+}
