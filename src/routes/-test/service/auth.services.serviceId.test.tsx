@@ -1,9 +1,8 @@
 import "@testing-library/jest-dom";
-// import { useAuthStore, useServiceTypesStore } from "../../lib/utils";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, act, waitFor } from "@testing-library/react";
 import { RouterProvider } from "@tanstack/react-router";
-import { router } from "../../router";
+import { router } from "../../../router";
 import { userEvent } from "@testing-library/user-event";
 import {
   fetchServiceByID,
@@ -11,11 +10,11 @@ import {
   fetchServiceGuestsQueued,
   fetchServiceGuestsSlotted,
   updateGuestServiceStatus,
-} from "../../lib/api";
+} from "../../../lib/api";
 
 const quota = 5;
 
-vi.mock("../../lib/api", () => {
+vi.mock("../../../lib/api", () => {
   return {
     fetchServiceByID: vi.fn(async () => ({
       service_id: 1, // number
@@ -83,7 +82,7 @@ vi.mock("../../lib/api", () => {
   };
 });
 
-vi.mock("../../lib/api/auth", () => {
+vi.mock("../../../lib/api/auth", () => {
   return {
     configure: vi.fn(),
     resetPassword: vi.fn(),
@@ -94,7 +93,7 @@ vi.mock("../../lib/api/auth", () => {
   };
 });
 
-vi.mock("../../lib/utils/useGlobalStore", () => {
+vi.mock("../../../lib/utils/useGlobalStore", () => {
   return {
     useAuthStore: {
       getState: () => ({
@@ -226,7 +225,6 @@ describe("the Service route", () => {
         expect(updateGuestServiceStatus).toHaveBeenCalled();
       });
     });
-
     it("allows guests to be moved to completed", async () => {
       await waitFor(async () => {
         const moveButton = screen.getByText(/move to completed/i);
@@ -234,7 +232,6 @@ describe("the Service route", () => {
         expect(updateGuestServiceStatus).toHaveBeenCalled();
       });
     });
-
     it("allows guests to be moved to the queue from a slot", async () => {
       await waitFor(async () => {
         const moveButton = screen.getByText(/move to queue/i);
@@ -242,7 +239,6 @@ describe("the Service route", () => {
         expect(updateGuestServiceStatus).toHaveBeenCalled();
       });
     });
-
     it("prevents slotting a guest to an occupied slot", async () => {
       let selectElements;
 
